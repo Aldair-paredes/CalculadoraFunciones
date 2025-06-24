@@ -1,0 +1,34 @@
+# Archivos específicos de Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Entornos virtuales
+venv/
+env/
+.venv/
+
+# Base de datos de desarrollo
+db.sqlite3
+
+# Archivos de configuración local con secretos
+local_settings.py
+.env
+
+# Archivos de logs
+*.log
+
+# Archivos estáticos y de medios generados
+/static_collected/ # O el nombre que uses para STATIC_ROOT
+/media/            # O el nombre que uses para MEDIA_ROOT
+
+# Carpetas de pruebas
+.pytest_cache/
+
+# IDEs y sistemas operativos
+.idea/             # IntelliJ IDEA / PyCharm
+.vscode/           # VS Code (si no quieres compartir la configuración del proyecto)
+.DS_Store          # macOS
+Thumbs.db          # Windows
+*~                 # Archivos de backup de editores de texto
