@@ -9,16 +9,12 @@ def _limpiar_y_preparar_funcion_str(funcion_str):
     funcion_limpia = funcion_str.strip().replace('−', '-').replace(' ', '')
 
     # 1. Eliminar prefijos de función como "f(x)=", "g(t)=", etc.
-    # Usar una regex más genérica que capture cualquier letra seguida de un posible paréntesis
-    # y luego un signo de igual.
     funcion_limpia = re.sub(r'^[a-zA-Z](?:\([a-zA-Z]+\))?\s*=\s*', '', funcion_limpia)
     
     # 2. Reemplazar operadores de potencia comunes si no son reconocidos por SymPy
     funcion_limpia = funcion_limpia.replace('^', '**')
 
     # 3. Añadir el signo de multiplicación '*' donde sea implícito
-    # Esta es una versión más pulida que debería cubrir la mayoría de los casos sin ambigüedades.
-    
     # Inserta '*' entre un dígito y una letra o un paréntesis de apertura (ej. 3x -> 3*x, 2(x+1) -> 2*(x+1))
     funcion_con_multiplicacion = re.sub(r'(\d)([a-zA-Z(])', r'\1*\2', funcion_limpia)
     
@@ -26,7 +22,6 @@ def _limpiar_y_preparar_funcion_str(funcion_str):
     funcion_con_multiplicacion = re.sub(r'(\))([a-zA-Z(])', r'\1*\2', funcion_con_multiplicacion)
     
     # Inserta '*' entre una letra y un paréntesis que abre (ej. x(y+1) -> x*(y+1))
-    # Asegúrate de no afectar nombres de funciones como sin(x)
     funcion_con_multiplicacion = re.sub(r'([a-zA-Z])(\()', r'\1*\2', funcion_con_multiplicacion)
     
   
