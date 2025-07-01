@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Funcion Explicita</title>
+</head>
+<body>
+    <h1>Calculadora de Funciones</h1>
+    <p>Operaciones disponibles: 'derivar', 'integrar', 'evaluar', 'limite', 'simplificar', 'resolver'.</p>
+    <hr>
+
+    <form action="" method="post">
+        {% csrf_token %} 
+
+        <div>
+            <label for="functionInput">Función (ej. 'f(x)=3x-5', 'x**2', 'sin(x)'):</label>
+            <input type="text" id="functionInput" name="function_input" placeholder="Ingresa la función" required>
+        </div>
+
+        <div>
+            <label for="operationSelect">Operación:</label>
+            <select id="operationSelect" name="operation_select">
+                <option value="derivar">derivar</option>
+                <option value="evaluar">evaluar</option>
+                <option value="limite">limite</option>
+                <option value="simplificar">simplificar</option>
+                <option value="resolver">resolver</option>
+            </select>
+        </div>
+
+        <div>
+            <label for="variableInput">Variable (para derivar, integrar, límite, resolver):</label>
+            <input type="text" id="variableInput" name="variable_input" placeholder="Ej. x, y">
+        </div>
+
+        <div>
+            <label for="limitPointInput">Punto del Límite (ej. 0, 5, oo, infinito):</label>
+            <input type="text" id="limitPointInput" name="limit_point_input" placeholder="Solo para 'limite'">
+        </div>
+
+        <div>
+            <label for="evaluateValuesInput">Valores para evaluar (ej. 'x=2, y=3'):</label>
+            <input type="text" id="evaluateValuesInput" name="evaluate_values_input" placeholder="Solo para 'evaluar'">
+        </div>
+        
+        <button type="submit">Calcular</button>
+    </form>
+
+    <hr>
+
+    <div>
+        <h2>Resultado:</h2>
+        <pre id="resultOutput">
+            {% if result %}
+                Función ingresada: {{ function_input }}
+                Operación seleccionada: {{ operation_select }}
+                El resultado es: {{ result }}
+            {% elif error %}
+                Función ingresada: {{ function_input }}
+                Operación seleccionada: {{ operation_select }}
+                ¡Error!: {{ error }}
+            {% else %}
+                Esperando cálculo...
+            {% endif %}
+        </pre>
+    </div>
+
+    
+</body>
+</html>
