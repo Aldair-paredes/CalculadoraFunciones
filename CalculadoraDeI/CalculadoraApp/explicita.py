@@ -43,13 +43,6 @@ def calcular_funcion_explicita(funcion_str, operacion, **kwargs):
             var_der = symbols(variable_derivacion)
             resultado = diff(funcion_expr, var_der)
             
-        elif operacion == 'integrar':
-            variable_integracion = kwargs.get('variable_integracion')
-            if not variable_integracion:
-                raise ValueError("Para 'integrar', se requiere la variable de integración.")
-            var_int = symbols(variable_integracion)
-            resultado = integrate(funcion_expr, var_int)
-
         elif operacion == 'evaluar':
             valores_evaluacion_str = kwargs.get('valores_evaluacion_str') 
             if not valores_evaluacion_str:

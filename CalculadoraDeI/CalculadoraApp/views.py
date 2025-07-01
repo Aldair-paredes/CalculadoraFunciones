@@ -1,6 +1,18 @@
 from django.shortcuts import render
 from .explicita import calcular_funcion_explicita 
 
+
+def pagprincipal(request):
+    return render(request, 'pagprincipal.html')
+
+def temas (request):
+    return render(request, 'temas.html')
+
+def tema_funciones (request):
+    return render(request, 'tema_funciones.html')
+
+
+
 def calculadora_explicita(request):
     result = None
     error = None
@@ -17,7 +29,7 @@ def calculadora_explicita(request):
 
     
         kwargs_para_funcion = {}
-        if operation_select in ['derivar', 'integrar', 'limite', 'resolver']:
+        if operation_select in ['derivar', 'limite', 'resolver']:
             kwargs_para_funcion['variable_derivacion'] = variable_input 
             kwargs_para_funcion['variable_integracion'] = variable_input
             kwargs_para_funcion['variable_limite'] = variable_input
@@ -39,4 +51,4 @@ def calculadora_explicita(request):
         'result': result,
         'error': error,
     }
-    return render(request, 'explicita.html', context)
+    return render(request, 'funcion_explicita.html', context)

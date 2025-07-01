@@ -1,0 +1,118 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Pagina principal</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f4f9ff;
+        }
+        .hero {
+            padding: 60px 0;
+        }
+        .search-box {
+            background: white;
+            border-radius: 30px;
+            padding: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        .search-icon {
+            background-color: #071952;
+            border-radius: 50%;
+            padding: 10px;
+            color: white;
+            margin-left: 10px;
+        }
+        .highlight {
+            color: #071952;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-white px-5 shadow-sm">
+        <a class="navbar-brand fw-bold fs-4" href="#">Calculadora <span class="text-primary">●</span></a>
+        <div class="collapse navbar-collapse">
+            <ul class="navbar-nav ms-auto me-3">
+                <li class="nav-item"><a class="nav-link active" href="#">Inicio
+                </a></li>
+                <li class="nav-item"><a class="nav-link" href="{% url 'temas' %}">Temas</a></li>
+                <li class="nav-item"><a class="nav-link" href="#">Mentor</a></li>
+                <li class="nav-item"><a class="nav-link" href="#">Group</a></li>
+                <li class="nav-item"><a class="nav-link" href="#">Testimonial</a></li>
+                <li class="nav-item"><a class="nav-link" href="#">Docs</a></li>
+            </ul>
+            <a href="#" class="btn btn-primary me-2">Sign In</a>
+            <a href="#" class="btn btn-light border">Sign Up</a>
+        </div>
+    </nav>
+
+    <section class="hero container">
+        <div class="row align-items-center">
+            <div class="col-md-6">
+                <p class="text-success fw-bold">✅ UNID</p>
+                <h1 class="fw-bold display-5">Calculadora Calculo Diferencial e integral</h1>
+                <p class="text-muted">Build skills with our courses and mentor from world-class companies.</p>
+
+                <div class="d-flex align-items-center search-box mt-4">
+                    <input type="text" class="form-control border-0" placeholder="busca el tema...">
+                    <div class="search-icon">
+                        🔍
+                    </div>
+                </div>
+
+            <div class="d-flex gap-4 mt-4">
+    <a href="{% url 'tema_funciones' %}" class="btn custom-btn-outline">
+        Funciones
+    </a>
+
+    <a href="" class="btn custom-btn-outline">
+         Límites
+    </a>
+    
+    <a href="" class="btn custom-btn-outline">
+         Continuidad
+    </a>
+</div>
+
+<style>
+    .custom-btn-primary {
+        background-color: #8c8c9c;
+        border: none;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 8px;
+        transition: all 0.3s;
+    }
+    
+    .custom-btn-primary:hover {
+        background-color: #7a7a8a;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    
+    .custom-btn-outline {
+        border: 2px solid #8c8c9c;
+        color: #8c8c9c;
+        background: transparent;
+        padding: 10px 20px;
+        border-radius: 8px;
+        transition: all 0.3s;
+    }
+    
+    .custom-btn-outline:hover {
+        background-color: #8c8c9c;
+        color: white;
+        transform: translateY(-2px);
+    }
+</style>
+            </div>
+
+            <div class="col-md-6 text-center">
+                <img src="{% static 'core/images/student.png' %}" class="img-fluid" alt="student">
+
+        </div>
+    </section>
+</body>
+</html>
