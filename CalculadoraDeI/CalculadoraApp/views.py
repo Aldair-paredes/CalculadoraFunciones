@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from .explicita import calcular_funcion_explicita 
+from CalculadoraApp.funcion.implicita import FuncionImplicita
 
 
 def pagprincipal(request):
@@ -52,3 +53,42 @@ def calculadora_explicita(request):
         'error': error,
     }
     return render(request, 'funcion_explicita.html', context)
+
+
+
+def calculadora_implicita(request):
+    resultado = None
+    error = None
+    expresion_input = ""
+
+    if request.method == 'POST':
+        expresion_input = request.POST.get('expresion', '').strip()
+        operacion = request.POST.get('operacion', '').strip()
+        valor_x = request.POST.get('valor_x', '')
+        valor_y = request.POST.get('valor_y', '')
+
+        try:
+            f = FuncionImplicita(expresion_input)
+
+            if operacion == 'evaluar':
+                resultado = f.evaluar(float(valor_x), float(valor_y))
+            elif operacion == 'simplificar':
+                resultado = str(f.simplificar().expresion)
+            elif operacion == 'resolver':
+                resultado = f.resolver('y', float(valor_x))
+            elif operacion == 'graficar':
+                f.graficar()
+                resultado = "Gráfica generada con éxito"
+            else:
+                error = "Operación no válida"
+
+        except Exception as e:
+            error = str(e)
+
+    context = {
+        'expresion_input': expresion_input,
+        'resultado': resultado,
+        'error': error
+    }
+    return render(request, 'funcion_implicita.html', context)
+

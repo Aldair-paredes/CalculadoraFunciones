@@ -9,9 +9,10 @@ urlpatterns = [
 
 path('', views.pagprincipal, name='pagprincipal'),
     path('calculadora_explicita/', views.calculadora_explicita, name='calculadora_explicita'),
+    path('calculadora_implicita/', views.calculadora_implicita, name='calculadora_implicita'),
     path('temas/', views.temas, name='temas'),
     path('tema_funciones/', views.tema_funciones, name='tema_funciones'),
-
+    
 
 
 
