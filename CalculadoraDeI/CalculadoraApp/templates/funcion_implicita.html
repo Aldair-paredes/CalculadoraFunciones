@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Calculadora de Funciones Implícitas</title>
+</head>
+<body>
+
+<h2>Calculadora de Funciones Implícitas</h2>
+
+<form method="post">
+    {% csrf_token %}
+
+    <label>Expresión:</label><br>
+    <input type="text" name="expresion" value="{{ expresion_input }}"><br><br>
+
+    <label>Operación:</label><br>
+    <select name="operacion">
+        <option value="evaluar">Evaluar</option>
+        <option value="simplificar">Simplificar</option>
+        <option value="resolver">Resolver respecto a y (sustituyendo x)</option>
+        <option value="derivada_x">Derivada respecto a x</option>
+        <option value="derivada_y">Derivada respecto a y</option>
+        <option value="limite_x">Límite cuando x → punto</option>
+        <option value="limite_y">Límite cuando y → punto</option>
+        <option value="graficar">Graficar</option>
+    </select><br><br>
+
+    <label>Valor de x:</label><br>
+    <input type="text" name="valor_x"><br><br>
+
+    <label>Valor de y:</label><br>
+    <input type="text" name="valor_y"><br><br>
+
+    <input type="submit" value="Calcular">
+</form>
+
+<br>
+
+{% if resultado %}
+    <p><strong>Resultado:</strong> {{ resultado }}</p>
+{% endif %}
+
+{% if error %}
+    <p><strong>Error:</strong> {{ error }}</p>
+{% endif %}
+
+</body>
+</html>
