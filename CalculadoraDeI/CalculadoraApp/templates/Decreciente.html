@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analizador de Función Decreciente</title>
+</head>
+<body>
+    <h1>Analizador de Función Decreciente</h1>
+    <p>Ingresa una función, intervalo y punto para analizar si es decreciente.</p>
+    <hr>
+
+    <form action="" method="post">
+        {% csrf_token %}
+
+        <div>
+            <label for="funcion">Función (en x):</label>
+            <input type="text" id="funcion" name="funcion" placeholder="Ej: -2*x + 3" required>
+        </div>
+
+        <div>
+            <label for="intervalo_min">Límite inferior del intervalo:</label>
+            <input type="number" step="any" id="intervalo_min" name="intervalo_min" placeholder="Ej: -5" required>
+        </div>
+
+        <div>
+            <label for="intervalo_max">Límite superior del intervalo:</label>
+            <input type="number" step="any" id="intervalo_max" name="intervalo_max" placeholder="Ej: 5" required>
+        </div>
+
+        <div>
+            <label for="punto_limite">Punto para calcular el límite:</label>
+            <input type="number" step="any" id="punto_limite" name="punto_limite" placeholder="Ej: 0" required>
+        </div>
+
+        <div>
+            <label for="graficar">¿Deseas graficar?</label>
+            <select id="graficar" name="graficar">
+                <option value="n">No</option>
+                <option value="s">Sí</option>
+            </select>
+        </div>
+
+        <button type="submit">Analizar Función</button>
+    </form>
+
+    <hr>
+
+    <div>
+        <h2>Resultado:</h2>
+        <pre id="resultOutput">
+            {% if resultado %}
+                Función ingresada: {{ request.POST.funcion }}
+                Límite inferior: {{ request.POST.intervalo_min }}
+                Límite superior: {{ request.POST.intervalo_max }}
+                Punto del límite: {{ request.POST.punto_limite }}
+                {{ resultado }}
+            {% elif error %}
+                ¡Error!: {{ error }}
+            {% else %}
+                Esperando análisis...
+            {% endif %}
+        </pre>
+    </div>
+
+    {% if grafico_url %}
+        <div style="text-align:center; margin-top:20px;">
+            <h3>Gráfica generada:</h3>
+            <img src="{{ grafico_url }}" alt="Gráfica de la función y su derivada" style="max-width:100%; border:1px solid #ccc;">
+        </div>
+    {% endif %}
+</body>
+</html>
