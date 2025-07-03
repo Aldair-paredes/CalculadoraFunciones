@@ -1,33 +1,29 @@
 from sympy import symbols, sympify, diff, integrate, limit, series, solve, exp, sin, cos, tan, log, Abs, oo
 import re 
-
+from sympy.printing import pretty 
 
 x, y, z, t = symbols('x y z t') 
 
 def _limpiar_y_preparar_funcion_str(funcion_str):
-
-    # Normalizar guiones largos a cortos y eliminar espacios
     funcion_limpia = funcion_str.strip().replace('−', '-').replace(' ', '')
 
-    # 1. Eliminar prefijos de función como "f(x)=", "g(t)=", etc.
     funcion_limpia = re.sub(r'^[a-zA-Z](?:\([a-zA-Z]+\))?\s*=\s*', '', funcion_limpia)
-    
-    # 2. Reemplazar operadores de potencia comunes si no son reconocidos por SymPy
     funcion_limpia = funcion_limpia.replace('^', '**')
     funcion_limpia = re.sub(r'([a-zA-Z])(\d+)', r'\1**\2', funcion_limpia)
+    funcion_limpia = re.sub(r'(\d)([a-zA-Z(])', r'\1*\2', funcion_limpia)
+    funcion_limpia = re.sub(r'(\))([a-zA-Z(])', r'\1*\2', funcion_limpia)
+    funcion_limpia = re.sub(r'([a-zA-Z])(\()', r'\1*\2', funcion_limpia)
 
-    # 3. Añadir el signo de multiplicación '*' donde sea implícito
-    funcion_con_multiplicacion = re.sub(r'(\d)([a-zA-Z(])', r'\1*\2', funcion_limpia)
-    funcion_con_multiplicacion = re.sub(r'(\))([a-zA-Z(])', r'\1*\2', funcion_con_multiplicacion)
-    
-    # Inserta '*' entre una letra y un paréntesis que abre (ej. x(y+1) -> x*(y+1))
-    funcion_con_multiplicacion = re.sub(r'([a-zA-Z])(\()', r'\1*\2', funcion_con_multiplicacion)
-    
-    return funcion_con_multiplicacion
+    if '=' in funcion_limpia:
+        partes = funcion_limpia.split('=')
+        izquierda = partes[0]
+        derecha = partes[1] if len(partes) > 1 else '0'
+        funcion_limpia = f"({izquierda}) - ({derecha})"
+
+    return funcion_limpia
 
 
 def calcular_funcion_explicita(funcion_str, operacion, **kwargs):
-
     resultado = None
     error_message = None
     
@@ -41,8 +37,10 @@ def calcular_funcion_explicita(funcion_str, operacion, **kwargs):
             if not variable_derivacion:
                 raise ValueError("Para 'derivar', se requiere la variable de derivación.")
             var_der = symbols(variable_derivacion)
-            resultado = diff(funcion_expr, var_der)
-            
+            derivada = diff(funcion_expr, var_der)
+            resultado = str(derivada).replace('**', '^').replace('*', '') 
+
+
         elif operacion == 'evaluar':
             valores_evaluacion_str = kwargs.get('valores_evaluacion_str') 
             if not valores_evaluacion_str:
@@ -87,9 +85,12 @@ def calcular_funcion_explicita(funcion_str, operacion, **kwargs):
                     raise ValueError("El punto del límite debe ser un número, 'infinito' o 'oo'.")
 
             resultado = limit(funcion_expr, var_lim, punto_limite_sympy)
+            if not isinstance(resultado, (float, int)):
+                resultado = str(resultado).replace('**', '^').replace('*', '')
 
         elif operacion == 'simplificar':
-            resultado = funcion_expr.simplify()
+            simplificado = funcion_expr.simplify()
+            resultado = str(simplificado).replace('**', '^').replace('*', '')
             
         elif operacion == 'resolver':
             variable_resolver = kwargs.get('variable_resolver')
@@ -97,7 +98,8 @@ def calcular_funcion_explicita(funcion_str, operacion, **kwargs):
                 raise ValueError("Para 'resolver', se requiere la variable a resolver.")
             
             var_res = symbols(variable_resolver)
-            resultado = solve(funcion_expr, var_res)
+            soluciones = solve(funcion_expr, var_res)
+            resultado = ", ".join([str(s).replace('**', '^').replace('*', '') for s in soluciones])
             
         else:
             error_message = "Operación no soportada. Las operaciones válidas son: 'derivar', 'integrar', 'evaluar', 'limite', 'simplificar', 'resolver'."
