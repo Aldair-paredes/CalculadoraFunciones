@@ -1,49 +1,73 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Calculadora de Funciones Implícitas</title>
+    <link rel="stylesheet" href="{% static 'css/f_impli.css' %}">
+    <title>Calculadora de Función Implícita</title>
+
 </head>
 <body>
 
-<h2>Calculadora de Funciones Implícitas</h2>
+    <h2>Calculadora de Función Implícita</h2>
 
-<form method="post">
-    {% csrf_token %}
+    <form method="post">
+        {% csrf_token %}
+        
+        <label>Expresión (por ejemplo: x**2 + y**2 - 1)</label>
+        <input type="text" name="expresion" required>
 
-    <label>Expresión:</label><br>
-    <input type="text" name="expresion" value="{{ expresion_input }}"><br><br>
+        <h3>Evaluación de la función</h3>
+        <label>Valor de x:</label>
+        <input type="text" name="x_val">
+        <label>Valor de y:</label>
+        <input type="text" name="y_val">
 
-    <label>Operación:</label><br>
-    <select name="operacion">
-        <option value="evaluar">Evaluar</option>
-        <option value="simplificar">Simplificar</option>
-        <option value="resolver">Resolver respecto a y (sustituyendo x)</option>
-        <option value="derivada_x">Derivada respecto a x</option>
-        <option value="derivada_y">Derivada respecto a y</option>
-        <option value="limite_x">Límite cuando x → punto</option>
-        <option value="limite_y">Límite cuando y → punto</option>
-        <option value="graficar">Graficar</option>
-    </select><br><br>
+        <h3>Derivada</h3>
+        <label>Variable (x o y):</label>
+        <input type="text" name="derivar_var">
+        <label>Orden:</label>
+        <input type="number" name="derivar_orden" min="1">
 
-    <label>Valor de x:</label><br>
-    <input type="text" name="valor_x"><br><br>
+        <h3>Límite</h3>
+        <label>Variable (x o y):</label>
+        <input type="text" name="limite_var">
+        <label>Punto al que tiende:</label>
+        <input type="text" name="limite_punto">
+        <label>Dirección (+ o -):</label>
+        <input type="text" name="limite_dir">
 
-    <label>Valor de y:</label><br>
-    <input type="text" name="valor_y"><br><br>
+        <h3>Resolver ecuación</h3>
+        <label>Variable a despejar (x o y):</label>
+        <input type="text" name="resolver_var">
+        <label>Valor para la otra variable (opcional):</label>
+        <input type="text" name="resolver_val">
 
-    <input type="submit" value="Calcular">
-</form>
+        <button type="submit">Calcular</button>
+    </form>
 
-<br>
-
-{% if resultado %}
-    <p><strong>Resultado:</strong> {{ resultado }}</p>
+  {% if resultado %}
+    <div class="resultado">
+        <h3>Resultado:</h3>
+        <ul>
+            {% for clave, valor in resultado.items %}
+                <li><strong>{{ clave|title }}:</strong>
+                    {% if valor|length > 1 and valor.0 %}
+                        <ul>
+                        {% for item in valor %}
+                            <li>{{ item }}</li>
+                        {% endfor %}
+                        </ul>
+                    {% else %}
+                        {{ valor }}
+                    {% endif %}
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
 {% endif %}
 
-{% if error %}
-    <p><strong>Error:</strong> {{ error }}</p>
-{% endif %}
 
 </body>
 </html>
+

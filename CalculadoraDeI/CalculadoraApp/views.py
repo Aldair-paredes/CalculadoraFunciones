@@ -1,6 +1,9 @@
 from django.shortcuts import render
 from .explicita import calcular_funcion_explicita 
-from CalculadoraApp.funcion.implicita import FuncionImplicita
+from .funcion.implicita import FuncionImplicita
+import sympy as sp
+from collections.abc import Iterable
+
 
 
 def pagprincipal(request):
@@ -56,39 +59,49 @@ def calculadora_explicita(request):
 
 
 
-def calculadora_implicita(request):
-    resultado = None
-    error = None
-    expresion_input = ""
-
+def funcion_implicita_view(request):
+    resultado = {}
+    
     if request.method == 'POST':
-        expresion_input = request.POST.get('expresion', '').strip()
-        operacion = request.POST.get('operacion', '').strip()
-        valor_x = request.POST.get('valor_x', '')
-        valor_y = request.POST.get('valor_y', '')
+        expresion = request.POST.get('expresion', '')
+        x_val = request.POST.get('x_val')
+        y_val = request.POST.get('y_val')
+        derivar_var = request.POST.get('derivar_var')
+        derivar_orden = request.POST.get('derivar_orden')
+        limite_var = request.POST.get('limite_var')
+        limite_punto = request.POST.get('limite_punto')
+        limite_dir = request.POST.get('limite_dir', '+')
+        resolver_var = request.POST.get('resolver_var')
+        resolver_val = request.POST.get('resolver_val')
 
         try:
-            f = FuncionImplicita(expresion_input)
+            f = FuncionImplicita(expresion)
 
-            if operacion == 'evaluar':
-                resultado = f.evaluar(float(valor_x), float(valor_y))
-            elif operacion == 'simplificar':
-                resultado = str(f.simplificar().expresion)
-            elif operacion == 'resolver':
-                resultado = f.resolver('y', float(valor_x))
-            elif operacion == 'graficar':
-                f.graficar()
-                resultado = "Gráfica generada con éxito"
-            else:
-                error = "Operación no válida"
+            if x_val and y_val:
+                resultado['evaluacion'] = f.evaluar(float(x_val), float(y_val))
+
+            if derivar_var:
+                orden = int(derivar_orden) if derivar_orden else 1
+                derivada = f.derivada(derivar_var, orden)
+                resultado['derivada'] = str(derivada.expresion)
+
+            if limite_var and limite_punto:
+                resultado['limite'] = f.limite(limite_var, float(limite_punto), limite_dir)
+
+            resultado['simplificada'] = str(f.simplificar().expresion)
+
+            if resolver_var:
+                sustituto = float(resolver_val) if resolver_val else None
+                resultado['resolver'] = f.resolver(resolver_var, sustituto)
 
         except Exception as e:
-            error = str(e)
+            resultado['error'] = f"Error procesando la expresión: {str(e)}"
+    
+    resultado_procesado = {}
+    for clave, valor in resultado.items():
+        if isinstance(valor, Iterable) and not isinstance(valor, (str, bytes)):
+            resultado_procesado[clave] = list(valor)
+        else:
+            resultado_procesado[clave] = valor
 
-    context = {
-        'expresion_input': expresion_input,
-        'resultado': resultado,
-        'error': error
-    }
-    return render(request, 'funcion_implicita.html', context)
-
+    return render(request, 'funcion_implicita.html', {'resultado': resultado_procesado})
