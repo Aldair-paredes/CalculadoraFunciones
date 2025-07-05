@@ -1,12 +1,9 @@
-
 :root {
-
     --calc-color-dark-font: #343a40; 
-    --calc-color-light-bg: #f8f9fa; 
+    --calc-color-light-bg: #ffffff; 
     --calc-color-mantle: #6c757d; 
     --calc-color-manatee: #5f7a95; 
     --calc-color-white: #ffffff; 
-
 
     --calc-card-bg: var(--calc-color-white);
     --calc-input-bg: #e9ecef; 
@@ -19,7 +16,6 @@
     --calc-primary-btn-shadow: rgba(0, 0, 0, 0.15);
     --calc-primary-btn-hover-shadow: rgba(0, 0, 0, 0.3);
 
- 
     --calc-terminal-header-bg: #212529; 
     --calc-terminal-header-text: var(--calc-color-white);
     --calc-terminal-control-red: #ff6b6b;
@@ -37,7 +33,6 @@
     --calc-card-hover-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
 }
 
-
 body {
     background-color: var(--calc-color-light-bg); 
     font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
@@ -47,7 +42,6 @@ body {
     line-height: 1.6;
 }
 
-
 .app-container {
     display: flex;
     min-height: 100vh;
@@ -56,7 +50,6 @@ body {
 
 .main-content {
     flex: 1; 
-    margin-left: 280px; 
     padding: 3rem;
     background-color: var(--calc-color-light-bg); 
     min-height: 100vh;
@@ -65,8 +58,8 @@ body {
     justify-content: center;
     align-items: flex-start;
     overflow-y: auto;
+    transition: margin-left 0.3s ease-in-out; 
 }
-
 
 .centered-calculator {
     max-width: 1000px;
@@ -75,7 +68,6 @@ body {
     flex-direction: column;
     gap: 2.5rem;
 }
-
 
 .calculator-card, .result-card {
     background-color: var(--calc-card-bg);
@@ -90,7 +82,6 @@ body {
     transform: translateY(-7px);
     box-shadow: var(--calc-card-hover-shadow);
 }
-
 
 .calculator-header {
     text-align: center;
@@ -126,7 +117,6 @@ body {
     opacity: 0.95;
 }
 
-/* Formulario */
 .calculator-form {
     display: flex;
     flex-direction: column;
@@ -377,7 +367,6 @@ select {
     opacity: 0.8;
 }
 
-
 .result-content::-webkit-scrollbar {
     width: 10px;
     height: 10px;
@@ -395,12 +384,10 @@ select {
     background-color: #78909c;
 }
 
-
-@media (max-width: 992px) {
+@media (max-width: 991.98px) {
     .main-content {
-        margin-left: 0; 
         padding: 2.5rem 1.5rem;
-        padding-top: 5rem; 
+        padding-top: 70px; 
     }
     
     .centered-calculator {
@@ -475,7 +462,7 @@ select {
 @media (max-width: 768px) {
     .main-content {
         padding: 2rem 1rem;
-        padding-top: 4.5rem;
+        padding-top: 60px;
     }
 
     .centered-calculator {
@@ -576,7 +563,7 @@ select {
 @media (max-width: 480px) {
     .main-content {
         padding: 1.5rem 0.8rem;
-        padding-top: 3.8rem;
+        padding-top: 50px; /* Ajuste para móviles muy pequeños */
     }
     .calculator-card, .result-card {
         padding: 1.5rem 1rem;

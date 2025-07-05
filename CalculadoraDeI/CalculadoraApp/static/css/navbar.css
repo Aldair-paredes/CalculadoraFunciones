@@ -22,6 +22,12 @@
     border-top-right-radius: 25px;
     border-bottom-right-radius: 25px;
     z-index: 1000;
+    transition: transform 0.3s ease-in-out;
+    transform: translateX(-100%); 
+}
+
+.sidebar.active {
+    transform: translateX(0);
 }
 
 .sidebar .navbar-brand { 
@@ -124,31 +130,82 @@
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
 }
 
+.hamburger-menu {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    background-color: var(--shark);
+    color: var(--white);
+    border: none;
+    padding: 10px 15px;
+    cursor: pointer;
+    z-index: 1060;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    transition: background-color 0.3s ease, transform 0.2s ease, opacity 0.3s ease;
+}
+
+.hamburger-menu:hover {
+    background-color: #343a40;
+    transform: scale(1.05);
+}
+
+.hamburger-menu i {
+    font-size: 1.5rem;
+}
+
+.close-sidebar-btn {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: none;
+    border: none;
+    color: var(--white);
+    cursor: pointer;
+    font-size: 1.5rem;
+    z-index: 1010;
+    transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.close-sidebar-btn:hover {
+    color: var(--nomad);
+    transform: rotate(90deg);
+}
+
+@media (min-width: 992px) {
+    .hamburger-menu {
+        display: block; 
+    }
+}
+
+@media (max-width: 991.98px) {
+    .sidebar {
+        width: 220px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
+        border-radius: 0 25px 25px 0;
+    }
+}
+
 @media (max-width: 768px) {
     .sidebar {
-        width: 100%;
-        height: auto;
-        position: relative;
-        top: auto;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
-        padding-bottom: 10px;
-        border-radius: 0;
-        margin-left: 0;
+         width: 200px;
     }
     .sidebar .navbar-brand {
         margin-bottom: 20px;
+        font-size: 2rem !important;
     }
-    .sidebar .navbar-nav {
-        display: none;
+    .sidebar .navbar-brand img { 
+        height: 1.4em;
     }
     .sidebar .btn-group {
-        flex-direction: row;
-        justify-content: center;
-        gap: 10px;
+        flex-direction: column;
+        gap: 8px;
         margin-top: 20px;
     }
     .sidebar .btn-primary,
     .sidebar .btn-light {
-        width: auto;
+        width: 100%;
+        padding: 10px 15px;
+        font-size: 0.9rem;
     }
 }
