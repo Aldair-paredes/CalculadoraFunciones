@@ -7,4 +7,6 @@ urlpatterns = [
     path('funcion_implicita/', views.funcion_implicita_view, name='funcion_implicita'),
     path('temas/', views.temas, name='temas'),
     path('tema_funciones/', views.tema_funciones, name='tema_funciones'),
+    path('calculadora-transcendente/', views.calculadora_transcendente, name='calculadora_transcendente'),
+
 ]
