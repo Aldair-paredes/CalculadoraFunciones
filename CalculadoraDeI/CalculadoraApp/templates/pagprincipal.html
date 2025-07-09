@@ -148,12 +148,10 @@
                 }
             }
 
-            // Función para alternar el sidebar
             function toggleSidebar() {
                 setSidebarState(!sidebar.classList.contains('active'));
             }
 
-            // Event listeners
             hamburgerBtn.addEventListener('click', toggleSidebar);
             if (closeSidebarBtn) {
                 closeSidebarBtn.addEventListener('click', toggleSidebar);
