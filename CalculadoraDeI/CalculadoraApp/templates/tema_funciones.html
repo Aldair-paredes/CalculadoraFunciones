@@ -6,15 +6,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tipos de Funciones</title>
     
-    <link href="{% static 'css/navbar.css' %}" rel="stylesheet" />
     <link href="{% static 'css/tema_funciones.css' %}" rel="stylesheet" />
+    <link href="{% static 'css/navbar.css' %}" rel="stylesheet" />
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"rel="stylesheet"/>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"rel="stylesheet"/>
 </head>
 
 <body>
     <div class="app-container">
-        <nav class="sidebar">
+        <button class="hamburger-menu" type="button" aria-label="Toggle navigation">
+            <i class="bi bi-list"></i>
+        </button>
+
+        <nav class="sidebar" id="sidebarNav">
+            <button class="close-sidebar-btn" type="button" aria-label="Cerrar menú">
+                <i class="bi bi-x-lg"></i>
+            </button>
             <a class="navbar-brand" href="#">
                 <img src="{% static 'img/WOLF.png' %}" alt="Logo UNID" />
                 <span>UNID</span>
@@ -58,12 +65,12 @@
                     <a href="{% url 'calculadora_explicita' %}" class="tema-btn">Explícita</a>
                     <a href="#" class="tema-btn">Algebraica</a>
                     
-                    <a href="#" class="tema-btn">Transcendente</a>
+                    <a href="{% url 'calculadora_transcendente' %}" class="tema-btn">Transcendente</a>
                     <a href="#" class="tema-btn">Creciente</a>
                     <a href="#" class="tema-btn">Decreciente</a>
                     
                     <a href="#" class="tema-btn">Inyectiva</a>
-                    <a href="#" class="tema-btn">Biyectiva</a>
+                    <a href="{% url 'calculadora_biyectiva' %}" class="tema-btn">Biyectiva</a>
                     <a href="#" class="tema-btn">Suprayectiva</a>
                 </div>
             </div>
@@ -71,5 +78,53 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const hamburgerBtn = document.querySelector('.hamburger-menu');
+            const closeSidebarBtn = document.querySelector('.close-sidebar-btn');
+            const sidebar = document.getElementById('sidebarNav');
+            const mainContent = document.querySelector('.main-content');
+
+            if (!sidebar || !mainContent || !hamburgerBtn) {
+                console.error("Error: No se encontraron todos los elementos necesarios para el navbar.");
+                console.error("Sidebar:", sidebar, "Main Content:", mainContent, "Hamburger Button:", hamburgerBtn);
+                return; 
+            }
+
+            function setSidebarState(isOpen) {
+                if (isOpen) {
+                    sidebar.classList.add('active');
+                    hamburgerBtn.style.display = 'none'; 
+                    if (closeSidebarBtn) {
+                        closeSidebarBtn.style.display = 'block'; 
+                    }
+                    mainContent.style.marginLeft = '260px'; 
+                } else {
+                    sidebar.classList.remove('active');
+                    hamburgerBtn.style.display = 'block'; 
+                    if (closeSidebarBtn) {
+                        closeSidebarBtn.style.display = 'none'; 
+                    }
+                    mainContent.style.marginLeft = '0'; 
+                }
+            }
+
+            function toggleSidebar() {
+                setSidebarState(!sidebar.classList.contains('active'));
+            }
+
+            hamburgerBtn.addEventListener('click', toggleSidebar);
+            if (closeSidebarBtn) {
+                closeSidebarBtn.addEventListener('click', toggleSidebar);
+            }
+
+            function handleResizeAndInitialLoad() {
+                setSidebarState(false); 
+            }
+
+            handleResizeAndInitialLoad();
+            window.addEventListener('resize', handleResizeAndInitialLoad);
+        });
+    </script>
 </body>
 </html>
