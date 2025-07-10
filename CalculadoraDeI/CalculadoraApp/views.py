@@ -144,3 +144,51 @@ def analizarfuncionview(request):
             })
 
     return render(request, 'Decreciente.html')
+
+#Inyectiva Agustin
+
+from django.shortcuts import render
+import sympy as sp
+import matplotlib.pyplot as plt
+import numpy as np
+import os
+from django.conf import settings
+
+def funcion_inyectiva(request):
+    resultado = {}
+    
+    if request.method == 'POST':
+        expresion = request.POST.get('funcion')
+        operacion = request.POST.get('operacion')
+        valor_x = request.POST.get('valor_x')
+
+        x = sp.Symbol('x')
+        try:
+            funcion = sp.sympify(expresion)
+        except:
+            resultado = {'expresion': expresion, 'operacion': operacion, 'valor': 'Error: función inválida'}
+            return render(request, 'inyectiva.html', {'resultado': resultado})
+
+        valor = None
+
+        try:
+            if operacion == 'derivar':
+                valor = sp.diff(funcion, x)
+            elif operacion == 'evaluar':
+                valor = funcion.subs(x, float(valor_x))
+            elif operacion == 'limite':
+                valor = sp.limit(funcion, x, float(valor_x))
+            elif operacion == 'simplificar':
+                valor = sp.simplify(funcion)
+            elif operacion == 'resolver':
+                valor = sp.solve(funcion, x)
+        except Exception as e:
+            valor = f'Error al calcular: {str(e)}'
+
+        resultado = {
+            'expresion': expresion,
+            'operacion': operacion,
+            'valor': valor
+        }
+
+    return render(request, 'inyectiva.html', {'resultado': resultado})

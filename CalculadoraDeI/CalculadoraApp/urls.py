@@ -12,6 +12,7 @@ path('', views.pagprincipal, name='pagprincipal'),
     path('decreciente/', views.analizarfuncionview, name='decreciente'),
     path('temas/', views.temas, name='temas'),
     path('tema_funciones/', views.tema_funciones, name='tema_funciones'),
+    path('inyectiva/', views.funcion_inyectiva, name='inyectiva'),
 
 
 
