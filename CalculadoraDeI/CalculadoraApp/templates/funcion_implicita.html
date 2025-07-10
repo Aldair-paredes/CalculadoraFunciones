@@ -1,0 +1,73 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="{% static 'css/f_impli.css' %}">
+    <title>Calculadora de Función Implícita</title>
+
+</head>
+<body>
+
+    <h2>Calculadora de Función Implícita</h2>
+
+    <form method="post">
+        {% csrf_token %}
+        
+        <label>Expresión (por ejemplo: x**2 + y**2 - 1)</label>
+        <input type="text" name="expresion" required>
+
+        <h3>Evaluación de la función</h3>
+        <label>Valor de x:</label>
+        <input type="text" name="x_val">
+        <label>Valor de y:</label>
+        <input type="text" name="y_val">
+
+        <h3>Derivada</h3>
+        <label>Variable (x o y):</label>
+        <input type="text" name="derivar_var">
+        <label>Orden:</label>
+        <input type="number" name="derivar_orden" min="1">
+
+        <h3>Límite</h3>
+        <label>Variable (x o y):</label>
+        <input type="text" name="limite_var">
+        <label>Punto al que tiende:</label>
+        <input type="text" name="limite_punto">
+        <label>Dirección (+ o -):</label>
+        <input type="text" name="limite_dir">
+
+        <h3>Resolver ecuación</h3>
+        <label>Variable a despejar (x o y):</label>
+        <input type="text" name="resolver_var">
+        <label>Valor para la otra variable (opcional):</label>
+        <input type="text" name="resolver_val">
+
+        <button type="submit">Calcular</button>
+    </form>
+
+  {% if resultado %}
+    <div class="resultado">
+        <h3>Resultado:</h3>
+        <ul>
+            {% for clave, valor in resultado.items %}
+                <li><strong>{{ clave|title }}:</strong>
+                    {% if valor|length > 1 and valor.0 %}
+                        <ul>
+                        {% for item in valor %}
+                            <li>{{ item }}</li>
+                        {% endfor %}
+                        </ul>
+                    {% else %}
+                        {{ valor }}
+                    {% endif %}
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+{% endif %}
+
+
+</body>
+</html>
+
