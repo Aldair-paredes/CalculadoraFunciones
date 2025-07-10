@@ -4,7 +4,6 @@ def analizar_funcion():
     print("Analisis de funciones decreciente")
     x = sp.symbols('x')
     expresion= input("ingresa la funcion x (por ejempli: -2*x + 3): ")
-
     try:
         f = sp.sympify(expresion)
     derivada = sp.diff(f,x)
@@ -17,7 +16,7 @@ def analizar_funcion():
     puntos = sp.linspace(intervalos_minimo, intervalos_maximo, 5)
     decreciente = True
     for punto in puntos:
-        valor = derivda.subs (x, punto)
+        valor = derivada.subs (x, punto)
         print(f"f'({puntos}) = {valor}")
         if valor > 0:
             decreciente = False
@@ -28,7 +27,7 @@ def analizar_funcion():
             else: 
                 print ("la duncion no es completamen en el intervalo")
                 except:
-        print(" Error al interpretar la función. Asegúrate de escribirla correctamente.") }
+        print(" Error al interpretar la función. Asegúrate de escribirla correctamente.") 
 
         analizar_funcion()
                 
