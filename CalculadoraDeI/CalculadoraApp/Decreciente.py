@@ -2,14 +2,22 @@ import sympy as sp
 import matplotlib.pyplot as plt
 import numpy as np
 
+# Aqui para ingresar la funcion y analizar si es decreciente
+
 def analizar_funcion():
     print("Análisis de funciones decrecientes")
     x = sp.symbols('x')
+<<<<<<< HEAD
     expresion = input("Ingresa la función en x (por ejemplo: -2*x + 3): ")
 
+=======
+    expresion= input("ingresa la funcion x (por ejempli: -2*x + 3): ")
+# aqui lo que hace el codigo es tomar la funcion y si es posible calcular la derivada
+>>>>>>> 54a7487 (agregar comentario de lo que hace cada parte de mi codigo)
     try:
         # Interpretar la función
         f = sp.sympify(expresion)
+<<<<<<< HEAD
         print(f"\nFunción original: f(x) = {f}")
 
         # Derivar la función
@@ -23,6 +31,30 @@ def analizar_funcion():
         # Resolver la ecuación f(x) = 0
         soluciones = sp.solve(f, x)
         print(f"Soluciones a f(x)=0: {soluciones if soluciones else 'No hay soluciones reales encontradas.'}")
+=======
+    derivada = sp.diff(f,x)
+    print(f"f(x) = {f}")
+    print(f"f'(x) = {derivada}")
+# aqui vamos a ingresar los intervalos que queremos analizar
+    intervalos_minimo = float(input("limite inferior del intervalo:"))
+    intervalos_maximo = float(input("limite superior del intervalo:"))
+
+    puntos = sp.linspace(intervalos_minimo, intervalos_maximo, 5)
+    decreciente = True
+    for punto in puntos:
+        valor = derivda.subs (x, punto)
+        print(f"f'({puntos}) = {valor}")
+        if valor > 0:
+            decreciente = False
+# aqui es donde dara el resultado si la funcion es decreciente o no 
+            if decreciente:
+                print (" la funcion es decreciente en el intervalo")
+               
+            else: 
+                print ("la duncion no es completamen en el intervalo")
+                except:
+        print(" Error al interpretar la función. Asegúrate de escribirla correctamente.") }
+>>>>>>> 54a7487 (agregar comentario de lo que hace cada parte de mi codigo)
 
         # Calcular límite en un punto (pide el punto al usuario)
         punto_limite = float(input("\nIngresa el punto donde calcular el límite: "))
