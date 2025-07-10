@@ -1,22 +1,13 @@
-"""
-URL configuration for CalculadoraDeI project.
-
-The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/5.1/topics/http/urls/
-Examples:
-Function views
-    1. Add an import:  from my_app import views
-    2. Add a URL to urlpatterns:  path('', views.home, name='home')
-Class-based views
-    1. Add an import:  from other_app.views import Home
-    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
-Including another URLconf
-    1. Import the include() function: from django.urls import include, path
-    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
-"""
 from django.contrib import admin
 from django.urls import path
+from CalculadoraApp import views 
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('', views.pagprincipal, name='pagprincipal'),
+    path('calculadora_explicita/', views.calculadora_explicita, name='calculadora_explicita'),
+    path('temas/', views.temas, name='temas'),
+    path('tema_funciones/', views.tema_funciones, name='tema_funciones'),
+    path('calculadora-transcendente/', views.calculadora_transcendente, name='calculadora_transcendente'),
+    path('calculadora-biyectiva/', views.calculadora_biyectiva, name='calculadora_biyectiva'),
 ]
