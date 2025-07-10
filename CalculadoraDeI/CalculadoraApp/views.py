@@ -1,6 +1,5 @@
 from django.shortcuts import render
 from .explicita import calcular_funcion_explicita 
-<<<<<<< HEAD
 from .funcion.implicita import FuncionImplicita
 import sympy as sp
 from collections.abc import Iterable
@@ -17,13 +16,11 @@ from sympy import symbols, Eq, sympify, sqrt, simplify, solve
 # Variables globales para SymPy
 x, y, z = symbols('x y z')
 from .biyectiva import calcular_funcion_biyectiva
-=======
 import io, base64
 import sympy as sp
 import matplotlib.pyplot as plt
 import numpy as np
 
->>>>>>> Agustin
 
 
 def pagprincipal(request):
@@ -77,7 +74,6 @@ def calculadora_explicita(request):
         'error': error,
     }
     return render(request, 'funcion_explicita.html', context)
-<<<<<<< HEAD
 
 
 
@@ -354,7 +350,6 @@ def calculadora_biyectiva(request):
         'error': error,
     }
     return render(request, 'biyectiva.html', context)
-=======
 #Decreciente Agustin
 
 def analizarfuncionview(request):
@@ -489,4 +484,3 @@ def funcion_inyectiva(request):
         }
 
     return render(request, 'inyectiva.html', {'resultado': resultado})
->>>>>>> Agustin
