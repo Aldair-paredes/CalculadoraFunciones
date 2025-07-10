@@ -1,0 +1,323 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Calculadora de Funciones Algebraicas</title>
+    <link href="{% static 'css/navbar.css' %}" rel="stylesheet" />
+    <link href="{% static 'css/explicita.css' %}" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" />
+    <style>
+        .function-fields {
+            display: none;
+        }
+        .function-fields.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <button class="hamburger-menu" type="button" aria-label="Toggle navigation">
+            <i class="bi bi-list"></i>
+        </button>
+
+        <nav class="sidebar" id="sidebarNav">
+            <button class="close-sidebar-btn" type="button" aria-label="Cerrar menú">
+                <i class="bi bi-x-lg"></i>
+            </button>
+            <a class="navbar-brand" href="#">
+                <img src="{% static 'img/WOLF.png' %}" alt="Logo UNID" />
+                <span>UNID</span>
+            </a>
+            <ul class="navbar-nav w-100">
+                <li class="nav-item"><a class="nav-link" href="{% url 'pagprincipal' %}"><i class="bi bi-house-door-fill me-2"></i>Inicio</a></li>
+                <li class="nav-item"><a class="nav-link active" href="{% url 'temas' %}"><i class="bi bi-journal-text me-2"></i>Temas</a></li>
+                <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-person-lines-fill me-2"></i>Cuestionario</a></li>
+                <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-people-fill me-2"></i>Grupo</a></li>
+                <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-chat-dots-fill me-2"></i>Testimonios</a></li>
+                <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-file-earmark-text-fill me-2"></i>Documentos</a></li>
+            </ul>
+            <div class="btn-group mt-auto w-100">
+                <a href="#" class="btn btn-primary d-flex align-items-center justify-content-center"><i class="bi bi-box-arrow-in-right me-2"></i>Iniciar sesión</a>
+                <a href="#" class="btn btn-light d-flex align-items-center justify-content-center"><i class="bi bi-person-plus-fill me-2"></i>Registrarse</a>
+            </div>
+        </nav>
+
+        <main class="main-content">
+            <div class="centered-calculator">
+                <div class="calculator-card">
+                    <div class="calculator-header">
+                        <h1>Calculadora de Funciones Algebraicas</h1>
+                        <p class="subtitle">Tipos disponibles: lineal, cuadrática, polinómica, racional, radical.</p>
+                    </div>
+
+                    <form action="{% url 'calculadora_algebraica' %}" method="post" class="calculator-form" id="calcForm">
+                        {% csrf_token %}
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="function_type"><i class="bi bi-function"></i> Tipo de Función</label>
+                                <select id="function_type" name="function_type" class="form-control" required>
+                                    <option value="" {% if not function_type %}selected{% endif %}>Selecciona un tipo</option>
+                                    <option value="linear" {% if function_type == "linear" %}selected{% endif %}>Lineal (f(x) = mx + b)</option>
+                                    <option value="quadratic" {% if function_type == "quadratic" %}selected{% endif %}>Cuadrática (f(x) = ax² + bx + c)</option>
+                                    <option value="polynomial" {% if function_type == "polynomial" %}selected{% endif %}>Polinómica</option>
+                                    <option value="rational" {% if function_type == "rational" %}selected{% endif %}>Racional (p(x)/q(x))</option>
+                                    <option value="radical" {% if function_type == "radical" %}selected{% endif %}>Radical (√g(x))</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Campos para función lineal -->
+                        <div id="linear-fields" class="function-fields {% if function_type == 'linear' %}active{% endif %}">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="m"><i class="bi bi-slash-lg"></i> Pendiente (m)</label>
+                                    <input type="text" id="m" name="m" class="form-control" 
+                                        value="{{ input_data.m|default_if_none:'' }}" placeholder="Ej: 2, 1/2, 0.5">
+                                </div>
+                                <div class="form-group">
+                                    <label for="b"><i class="bi bi-arrow-up-right"></i> Intersección (b)</label>
+                                    <input type="text" id="b" name="b" class="form-control" 
+                                        value="{{ input_data.b|default_if_none:'' }}" placeholder="Ej: 3, -1, 0.25">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Campos para función cuadrática -->
+                        <div id="quadratic-fields" class="function-fields {% if function_type == 'quadratic' %}active{% endif %}">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="a"><i class="bi bi-2-square"></i> Coeficiente a</label>
+                                    <input type="text" id="a" name="a" class="form-control" 
+                                        value="{{ input_data.a|default_if_none:'' }}" placeholder="Ej: 1, -2, 0.5">
+                                </div>
+                                <div class="form-group">
+                                    <label for="b"><i class="bi bi-x"></i> Coeficiente b</label>
+                                    <input type="text" id="b" name="b" class="form-control" 
+                                        value="{{ input_data.b|default_if_none:'' }}" placeholder="Ej: 0, -3, 1.5">
+                                </div>
+                                <div class="form-group">
+                                    <label for="c"><i class="bi bi-1-square"></i> Coeficiente c</label>
+                                    <input type="text" id="c" name="c" class="form-control" 
+                                        value="{{ input_data.c|default_if_none:'' }}" placeholder="Ej: 4, -1, 0.25">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Campos para función polinómica -->
+                        <div id="polynomial-fields" class="function-fields {% if function_type == 'polynomial' %}active{% endif %}">
+                            <div class="form-group full-width">
+                                <label for="poly"><i class="bi bi-x-diamond"></i> Expresión polinómica</label>
+                                <input type="text" id="poly" name="poly" class="form-control" 
+                                    value="{{ input_data.poly|default_if_none:'' }}" placeholder="Ej: x**3 - 2*x**2 + x - 5">
+                            </div>
+                        </div>
+
+                        <!-- Campos para función racional -->
+                        <div id="rational-fields" class="function-fields {% if function_type == 'rational' %}active{% endif %}">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="num"><i class="bi bi-divide"></i> Numerador p(x)</label>
+                                    <input type="text" id="num" name="num" class="form-control" 
+                                        value="{{ input_data.num|default_if_none:'' }}" placeholder="Ej: x**2 + 1">
+                                </div>
+                                <div class="form-group">
+                                    <label for="den"><i class="bi bi-slash-circle"></i> Denominador q(x)</label>
+                                    <input type="text" id="den" name="den" class="form-control" 
+                                        value="{{ input_data.den|default_if_none:'' }}" placeholder="Ej: x - 3">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Campos para función radical -->
+                        <div id="radical-fields" class="function-fields {% if function_type == 'radical' %}active{% endif %}">
+                            <div class="form-group full-width">
+                                <label for="g_x"><i class="bi bi-square-root"></i> Expresión bajo la raíz</label>
+                                <input type="text" id="g_x" name="g_x" class="form-control" 
+                                    value="{{ input_data.g_x|default_if_none:'' }}" placeholder="Ej: x + 2">
+                            </div>
+                        </div>
+
+                        <!-- Campos comunes para todas las funciones -->
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="val_x"><i class="bi bi-123"></i> Evaluar en x = (opcional)</label>
+                                <input type="text" id="val_x" name="val_x" class="form-control" 
+                                    value="{{ input_data.val_x|default_if_none:'' }}" placeholder="Ej: 2, 0.5, -3">
+                            </div>
+                            <div class="form-group">
+                                <label for="solve_val"><i class="bi bi-question-circle"></i> Resolver f(x) = (opcional)</label>
+                                <input type="text" id="solve_val" name="solve_val" class="form-control" 
+                                    value="{{ input_data.solve_val|default_if_none:'' }}" placeholder="Ej: 0, 5, y">
+                            </div>
+                        </div>
+
+                        <button type="submit" class="calculate-btn"><i class="bi bi-calculator"></i> Calcular</button>
+                        <button type="button" id="clearBtn" class="btn btn-secondary ms-2">Borrar todo</button>
+                    </form>
+                </div>
+
+                {% if result or error %}
+                <div class="result-card" id="resultCard" style="display: block;">
+                    <div class="result-header">
+                        <div class="terminal-controls">
+                            <span class="control-dot red"></span>
+                            <span class="control-dot yellow"></span>
+                            <span class="control-dot green"></span>
+                        </div>
+                        <h3>Resultado</h3>
+                        <button class="copy-btn" title="Copiar resultado"><i class="bi bi-clipboard"></i></button>
+                    </div>
+                    <div class="result-content">
+                        <pre id="resultOutput">
+                            {% if result %}
+                                <div class="result-line"><span class="result-label">Tipo:</span><span class="result-value">{{ function_type|title }}</span></div>
+                                <div class="result-line"><span class="result-label">Función:</span><span class="result-value">{{ result.function }}</span></div>
+                                
+                                {% if result.evaluation %}
+                                    <div class="result-line"><span class="result-label">Evaluación:</span><span class="result-value success">{{ result.evaluation }}</span></div>
+                                {% endif %}
+                                
+                                {% if result.solution %}
+                                    <div class="result-line"><span class="result-label">Solución:</span><span class="result-value success">{{ result.solution }}</span></div>
+                                {% endif %}
+                                
+                                {% if result.roots %}
+                                    <div class="result-line"><span class="result-label">Raíces:</span><span class="result-value success">{{ result.roots }}</span></div>
+                                {% endif %}
+                                
+                                {% if result.vertex %}
+                                    <div class="result-line"><span class="result-label">Vértice:</span><span class="result-value success">{{ result.vertex }}</span></div>
+                                {% endif %}
+                                
+                                {% if result.factored %}
+                                    <div class="result-line"><span class="result-label">Factorizada:</span><span class="result-value success">{{ result.factored }}</span></div>
+                                {% endif %}
+                                
+                                {% if result.simplified %}
+                                    <div class="result-line"><span class="result-label">Simplificada:</span><span class="result-value success">{{ result.simplified }}</span></div>
+                                {% endif %}
+                                
+                                {% if result.asymptotes %}
+                                    <div class="result-line"><span class="result-label">Asíntotas:</span><span class="result-value success">{{ result.asymptotes }}</span></div>
+                                {% endif %}
+                                
+                                {% if result.domain %}
+                                    <div class="result-line"><span class="result-label">Dominio:</span><span class="result-value success">{{ result.domain }}</span></div>
+                                {% endif %}
+                                
+                            {% elif error %}
+                                <div class="result-line"><span class="result-label">Error:</span><span class="result-value error">{{ error }}</span></div>
+                            {% endif %}
+                        </pre>
+                    </div>
+                </div>
+                {% else %}
+                <div class="result-card" id="resultCard" style="display: none;"></div>
+                {% endif %}
+            </div>
+        </main>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Mostrar/ocultar campos según el tipo de función
+            function actualizarCamposSegunTipo() {
+                const tipoFuncion = document.getElementById('function_type').value;
+                document.querySelectorAll('.function-fields').forEach(el => {
+                    el.classList.remove('active');
+                });
+                
+                if (tipoFuncion) {
+                    document.getElementById(tipoFuncion + '-fields').classList.add('active');
+                }
+            }
+
+            document.getElementById('function_type').addEventListener('change', actualizarCamposSegunTipo);
+            actualizarCamposSegunTipo();
+
+            // Manejo del resultado
+            const resultCard = document.getElementById('resultCard');
+            const hasResultOrError = "{{ result|yesno:'true,false' }}" === "true" || "{{ error|yesno:'true,false' }}" === "true";
+            
+            if (resultCard && hasResultOrError) {
+                setTimeout(() => {
+                    resultCard.style.display = 'block';
+                    resultCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }, 100);
+            }
+
+            // Botón de copiar
+            const copyBtn = document.querySelector('.copy-btn');
+            if (copyBtn) {
+                copyBtn.addEventListener('click', function () {
+                    const resultText = document.getElementById('resultOutput').textContent;
+                    navigator.clipboard.writeText(resultText).then(() => {
+                        const originalIcon = this.innerHTML;
+                        this.innerHTML = '<i class="bi bi-check"></i>';
+                        setTimeout(() => {
+                            this.innerHTML = originalIcon;
+                        }, 2000);
+                    });
+                });
+            }
+
+            // Botón de limpiar
+            const clearBtn = document.getElementById('clearBtn');
+            if (clearBtn) {
+                clearBtn.addEventListener('click', () => {
+                    document.getElementById('calcForm').reset();
+                    if (resultCard) {
+                        resultCard.style.display = 'none';
+                    }
+                });
+            }
+
+            // Manejo del sidebar (igual que en tu original)
+            const hamburgerBtn = document.querySelector('.hamburger-menu');
+            const closeSidebarBtn = document.querySelector('.close-sidebar-btn');
+            const sidebar = document.getElementById('sidebarNav');
+            const mainContent = document.querySelector('.main-content');
+
+            if (!sidebar || !mainContent || !hamburgerBtn) {
+                console.error("Error: No se encontraron todos los elementos necesarios para el navbar.");
+                return;
+            }
+
+            function setSidebarState(isOpen) {
+                if (isOpen) {
+                    sidebar.classList.add('active');
+                    hamburgerBtn.style.display = 'none';
+                    if (closeSidebarBtn) closeSidebarBtn.style.display = 'block';
+                    mainContent.style.marginLeft = '260px';
+                } else {
+                    sidebar.classList.remove('active');
+                    hamburgerBtn.style.display = 'block';
+                    if (closeSidebarBtn) closeSidebarBtn.style.display = 'none';
+                    mainContent.style.marginLeft = '0';
+                }
+            }
+
+            function toggleSidebar() {
+                setSidebarState(!sidebar.classList.contains('active'));
+            }
+
+            hamburgerBtn.addEventListener('click', toggleSidebar);
+            if (closeSidebarBtn) {
+                closeSidebarBtn.addEventListener('click', toggleSidebar);
+            }
+
+            function handleResizeAndInitialLoad() {
+                setSidebarState(false);
+            }
+
+            handleResizeAndInitialLoad();
+            window.addEventListener('resize', handleResizeAndInitialLoad);
+        });
+    </script>
+</body>
+</html>
