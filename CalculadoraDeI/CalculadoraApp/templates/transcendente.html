@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Calculadora de Funciones Explícitas</title>
+    <title>Calculadora de Funciones Transcendentes</title>
     <link href="{% static 'css/navbar.css' %}" rel="stylesheet" />
     <link href="{% static 'css/explicita.css' %}" rel="stylesheet" />
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
@@ -49,8 +49,8 @@
             <div class="centered-calculator">
                 <div class="calculator-card">
                     <div class="calculator-header">
-                        <h1>Calculadora de Funciones Explícitas</h1>
-                        <p class="subtitle">Operaciones disponibles: derivar, integrar, evaluar, límite, simplificar, resolver.</p>
+                        <h1>Calculadora de Funciones Transcendentes</h1>
+                        <p class="subtitle">Operaciones disponibles: derivar, evaluar, límite, simplificar, resolver.</p>
                     </div>
 
                     <form action="" method="post" class="calculator-form" id="calcForm">
@@ -58,7 +58,7 @@
                         <div class="form-row">
                             <div class="form-group">
                                 <label for="functionInput"><i class="bi bi-function"></i> Función</label>
-                                <input type="text" id="functionInput" name="function_input" placeholder="Escribe tu función" required
+                                <input type="text" id="functionInput" name="function_input" placeholder="Ej: sin(x), exp(x), log(x)" required
                                     value="{{ function_input|default_if_none:'' }}">
                             </div>
                             <div class="form-group operation-variable">
@@ -238,7 +238,6 @@
             }
 
             function handleResizeAndInitialLoad() {
-                // Para la calculadora, el navbar debe estar oculto por defecto en todas las pantallas.
                 setSidebarState(false); 
             }
 

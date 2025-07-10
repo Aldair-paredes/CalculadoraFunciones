@@ -17,12 +17,12 @@ body {
 
 .app-container {
     display: flex;
-    margin-left: 260px; 
 }
 
 .main-content {
     flex-grow: 1;
     padding: 40px;
+    transition: margin-left 0.3s ease; 
 }
 
 .hero {
@@ -89,11 +89,7 @@ body {
     height: 200px;
 }
 
-@media (max-width: 768px) {
-    .app-container {
-        flex-direction: column;
-        margin-left: 0;
-    }
+@media (max-width: 991.98px) {
     .main-content {
         padding: 20px;
     }
@@ -105,8 +101,9 @@ body {
         font-size: 2.5rem;
     }
 }
+
 .custom-btn-outline {
-    background-color: var(--white)!important;        
+    background-color: var(--white)!important;         
     border: 2px solid var(--mantle)!important;     
     color: var(--mantle)!important;               
     padding: 12px 25px!important;
@@ -119,5 +116,5 @@ body {
 .custom-btn-outline:hover {
     background-color: var(--mantle)!important;     
     color: var(--white)!important;                 
-    transform: scale(1.05)!important;              
+    transform: scale(1.05)!important;               
 }

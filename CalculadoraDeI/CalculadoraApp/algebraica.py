@@ -262,7 +262,3 @@ def run_algebra_calculator():
             break
         else:
             print("Opción inválida. Por favor, intente de nuevo.")
-
-# --- 5. Punto de Entrada del Script ---
-if __name__ == "__main__":
-    run_algebra_calculator()
