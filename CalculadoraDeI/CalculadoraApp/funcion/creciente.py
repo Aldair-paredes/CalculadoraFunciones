@@ -104,7 +104,6 @@ class FuncionCreciente:
             
                 fig, (ax1, ax2) = mpp.subplots(2, 1, figsize=(10, 8))
             
-            # Gráfica de la función
                 ax1.plot(x_vals, y_vals, label=f'f(x) = {self.expresion_str}')
                 ax1.set_title('Función')
                 ax1.set_xlabel('x')
@@ -112,7 +111,6 @@ class FuncionCreciente:
                 ax1.grid(True)
                 ax1.legend()
             
-            # Gráfica de la derivada
                 ax2.plot(x_vals, dy_vals, label=f"f'(x) = {derivada.expresion_str}", color='orange')
                 ax2.axhline(0, color='red', linestyle='--', linewidth=0.5)
                 ax2.set_title('Derivada')
