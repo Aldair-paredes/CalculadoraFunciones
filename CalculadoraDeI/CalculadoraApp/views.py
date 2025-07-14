@@ -5,6 +5,10 @@ from .explicita import calcular_funcion_explicita
 from .funcion.implicita import FuncionImplicita
 from .transcendente import calcular_funcion_transcendente 
 from .funcion.creciente import FuncionCreciente
+import matplotlib.pyplot as plt
+import base64
+import io
+import sympy as sp
 
 def pagprincipal(request):
     return render(request, 'pagprincipal.html')
@@ -262,3 +266,134 @@ def calculadora_transcendente(request):
     return render(request, 'transcendente.html', context)
 
 
+def creciente_view(request):
+    expresion_input = None
+    operation_select = None
+    x_eval_input = None
+    derivar_orden_input = None
+    rango_x_min_input = None
+    rango_x_max_input = None
+    puntos_input = None
+
+    resultado = None
+    error = None
+    grafica_base64 = None
+
+    if request.method == 'POST':
+        expresion_input = request.POST.get('expresion')
+        operation_select = request.POST.get('operation_select')
+
+        try:
+            f = FuncionCreciente(expresion_input)
+
+            if operation_select == 'evaluar':
+                x_eval_str = request.POST.get('x_eval')
+                if not x_eval_str:
+                    raise ValueError("El valor de 'x' es requerido para evaluar.")
+                x_eval_input = float(x_eval_str)
+                eval_result = f.evaluar(x_eval_input)
+                resultado = {
+                    "Función": f.expresion_str,
+                    "Variable de Evaluación": f.x,
+                    "Valor de x": x_eval_input,
+                    "Resultado de Evaluación": str(eval_result)
+                }
+
+            elif operation_select == 'derivar':
+                derivar_orden_str = request.POST.get('derivar_orden', '1')
+                derivar_orden_input = int(derivar_orden_str)
+                derivada_obj = f.derivada(derivar_orden_input)
+                if derivada_obj:
+                    resultado = {
+                        "Función Original": f.expresion_str,
+                        f"Derivada (Orden {derivar_orden_input})": str(derivada_obj.expresion)
+                    }
+                else:
+                    raise Exception("No se pudo calcular la derivada.")
+
+            elif operation_select == 'encontrar_crecimiento':
+                intervalos = f.encontrar_intervalos_crecientes()
+                if intervalos is not None:
+                    formatted_intervals = []
+                    for a, b in intervalos:
+                        start = "-\u221E" if a == -sp.oo else str(a)
+                        end = "\u221E" if b == sp.oo else str(b)
+                        formatted_intervals.append(f"({start}, {end})")
+
+                    resultado = {
+                        "Función": f.expresion_str,
+                        "Intervalos Crecientes": ", ".join(formatted_intervals) if formatted_intervals else "No se encontraron intervalos crecientes."
+                    }
+                else:
+                    raise Exception("No se pudieron encontrar los intervalos de crecimiento.")
+
+            elif operation_select == 'graficar':
+                rango_x_min_str = request.POST.get('rango_x_min', '-5')
+                rango_x_max_str = request.POST.get('rango_x_max', '5')
+                puntos_str = request.POST.get('puntos', '500')
+
+                rango_x_min_input = float(rango_x_min_str)
+                rango_x_max_input = float(rango_x_max_str)
+                puntos_input = int(puntos_str)
+
+                x_vals, y_vals, dy_vals, func_str, deriv_str = f.graficar(
+                    (rango_x_min_input, rango_x_max_input), puntos_input
+                )
+
+                if x_vals is not None:
+                    buffer = io.BytesIO()
+                    
+                    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 8))
+                    
+                    ax1.plot(x_vals, y_vals, label=f'f(x) = {func_str}')
+                    ax1.set_title('Función')
+                    ax1.set_xlabel('x')
+                    ax1.set_ylabel('f(x)')
+                    ax1.grid(True)
+                    ax1.legend()
+                    
+                    ax2.plot(x_vals, dy_vals, label=f"f'(x) = {deriv_str}", color='orange')
+                    ax2.axhline(0, color='red', linestyle='--', linewidth=0.5)
+                    ax2.set_title('Derivada')
+                    ax2.set_xlabel('x')
+                    ax2.set_ylabel("f'(x)")
+                    ax2.grid(True)
+                    ax2.legend()
+                    
+                    plt.tight_layout()
+                    
+                    plt.savefig(buffer, format='png')
+                    plt.close(fig)
+                    
+                    buffer.seek(0)
+                    grafica_base64 = base64.b64encode(buffer.getvalue()).decode('utf-8')
+                else:
+                    raise Exception("No se pudieron generar los datos para graficar.")
+
+            else:
+                error = "Operación no reconocida."
+
+        except ValueError as e:
+            error = f"Error de entrada: {e}"
+        except Exception as e:
+            error = f"Error en el cálculo: {e}"
+            
+    if operation_select:
+       operation_display = operation_select.replace("_", " ").title()
+    else:
+        operation_display = None
+
+    context = {
+        'expresion_input': expresion_input,
+        'operation_select': operation_select,
+        'operation_display': operation_display,
+        'x_eval_input': x_eval_input,
+        'derivar_orden_input': derivar_orden_input,
+        'rango_x_min_input': rango_x_min_input,
+        'rango_x_max_input': rango_x_max_input,
+        'puntos_input': puntos_input,
+        'resultado': resultado,
+        'error': error,
+        'grafica_base64': grafica_base64,
+    }
+    return render(request, 'funcion_creciente.html', context)
