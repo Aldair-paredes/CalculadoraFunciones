@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 import base64
 import io
 import sympy as sp
+from .funcion.continuidad import verificar_continuidad_en_punto, graficar_funcion_continuidad
 
 def pagprincipal(request):
     return render(request, 'pagprincipal.html')
@@ -397,3 +398,49 @@ def creciente_view(request):
         'grafica_base64': grafica_base64,
     }
     return render(request, 'funcion_creciente.html', context)
+
+
+def calculadora_continuidad(request):
+    function_input = ""
+    punto_continuidad_input = ""
+    rango_x_min_input = ""
+    rango_x_max_input = ""
+    
+    resultado_continuidad = None
+    grafica_base64 = None
+    error = None
+
+    if request.method == 'POST':
+        function_input = request.POST.get('function_input', '').strip()
+        punto_continuidad_input = request.POST.get('punto_continuidad_input', '').strip()
+        rango_x_min_input = request.POST.get('rango_x_min_continuidad', '').strip()
+        rango_x_max_input = request.POST.get('rango_x_max_continuidad', '').strip()
+
+        if not function_input or not punto_continuidad_input:
+            error = "La expresión de la función y el punto de continuidad son requeridos."
+        else:
+            es_continua, mensaje = verificar_continuidad_en_punto(function_input, punto_continuidad_input)
+            resultado_continuidad = {
+                "Estado de Continuidad": "Sí" if es_continua else "No",
+                "Detalles": mensaje
+            }
+
+            grafica_base64, grafica_error = graficar_funcion_continuidad(
+                function_input,
+                punto_continuidad_input,
+                rango_x_min_input,
+                rango_x_max_input
+            )
+            if grafica_error:
+                error = f"{error}\nError al generar la gráfica: {grafica_error}" if error else f"Error al generar la gráfica: {grafica_error}"
+
+    context = {
+        'function_input': function_input,
+        'punto_continuidad_input': punto_continuidad_input,
+        'rango_x_min_input': rango_x_min_input,
+        'rango_x_max_input': rango_x_max_input,
+        'resultado_continuidad': resultado_continuidad,
+        'grafica_base64': grafica_base64,
+        'error': error,
+    }
+    return render(request, 'continuidad.html', context)

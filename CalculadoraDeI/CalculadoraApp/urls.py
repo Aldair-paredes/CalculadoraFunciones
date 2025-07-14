@@ -9,4 +9,5 @@ urlpatterns = [
     path('tema_funciones/', views.tema_funciones, name='tema_funciones'),
     path('calculadora-transcendente/', views.calculadora_transcendente, name='calculadora_transcendente'),
     path('funcion_creciente',views.creciente_view, name='funcion_creciente'),
+    path('continuidad/', views.calculadora_continuidad, name='continuidad'),
 ]
