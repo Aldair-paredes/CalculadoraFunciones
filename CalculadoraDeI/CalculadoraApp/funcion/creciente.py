@@ -1,6 +1,6 @@
 import sympy as sp
 import numpy as np
-import matplotlib.pyplot as mpp
+import matplotlib.pyplot as plt
 from sympy.utilities.lambdify import lambdify
 
 class FuncionCreciente:
@@ -10,7 +10,6 @@ class FuncionCreciente:
         try:
             self.expresion = sp.sympify(expresion_str)
             self.expresion_str = expresion_str
-            self.historial = []
             self._crear_funcion()
         except sp.SympifyError as e:
             raise ValueError(F'Expresión invalida: {expresion_str}') from e
@@ -22,7 +21,6 @@ class FuncionCreciente:
 
         try:
             resultado = self.funcion_numerica(x_val)
-            self.historial.append(('evaluar', x_val, resultado))
             return resultado
         except Exception as e:
             print(f'Error al evaluar: {e}')
@@ -32,62 +30,65 @@ class FuncionCreciente:
 
         try:
             expr_derivada = sp.diff(self.expresion, self.x, orden)      
-            nueva_expre = f'd^{orden}f/dx^{orden} ={str(expr_derivada)}'
             nueva_funcion = FuncionCreciente(str(expr_derivada))
-            self.historial.append(('derivada', orden, nueva_expre))
             return nueva_funcion
         except Exception as e:
             print(f'Error al calcular derivada: {e}')
             return None
         
-    def _creciente(self, intervalo=(-sp.oo, sp.oo)):
+    def es_creciente_en_intervalo(self, intervalo=(-sp.oo, sp.oo)):
             
         try:
             derivada = self.derivada(1)
             a, b = intervalo
-            soluciones = sp.solve(derivada.expresion < 0, self.x)
-            if not soluciones:
+
+            if a != -sp.oo and b != sp.oo:
+                punto_prueba = (a + b) / 2
+            elif a == -sp.oo and b != sp.oo:
+                punto_prueba = b - 1
+            elif a != -sp.oo and b == sp.oo:
+                punto_prueba = a + 1
+            else:
+                punto_prueba = 0
+
+            valor_derivada = derivada.evaluar(punto_prueba)
+
+            if valor_derivada is not None and valor_derivada > 0:
                 return True
-            for sol in soluciones:
-                if sol > a and sol < b:
-                    return False
-            if derivada.evaluar(a) < 0 or derivada.evaluar(b) < 0:
+            else:
                 return False
-                
-            return True
         except Exception as e:
-            print(f'Error al determinar crecimiento: {e}')
+            print(f'Error al determinar crecimiento en intervalo: {e}')
             return None
         
-    def encontrar (self):
+        
+    def encontrar_intervalos_crecientes(self):
 
         try:
             derivada = self.derivada(1)
             puntos_criticos = sp.solve(derivada.expresion, self.x)
-            puntos_criticos = sorted({float(p.evalf()) for p in puntos_criticos if p.is_real})
-
-            puntos_criticos = [-sp.oo] + puntos_criticos + [sp.Oo]
+            puntos_criticos = sorted({float(p.evalf()) for p in puntos_criticos if p.is_real and p.is_finite})
+            puntos_criticos_extendidos = [-sp.oo] + puntos_criticos + [sp.oo]
             intervalos_crecientes = []
 
-            for i in range(len(puntos_criticos)-1):
-                a = puntos_criticos[i]
-                b = puntos_criticos[i+1]
+            for i in range(len(puntos_criticos_extendidos)-1):
+                a = puntos_criticos_extendidos[i]
+                b = puntos_criticos_extendidos[i+1]
 
                 if a == -sp.oo and b == sp.oo:
                     punto_prueba = 0
                 elif a == -sp.oo:
-                    punto_prueba = b - 1
+                    punto_prueba = b - 1 if b != sp.oo else 0
                 elif b== sp.oo:
-                    punto_prueba = a + 1
+                    punto_prueba = a + 1 if b != sp.oo else 0
                 else:
                     punto_prueba = (a + b )/2
 
                 valor_derivada = derivada.evaluar(punto_prueba)
 
-                if valor_derivada > 0:
+                if valor_derivada is not None and valor_derivada > 0:
                     intervalos_crecientes.append((a,b))
                 
-            self.historial.append(('encontrar_crecimiento', intervalos_crecientes))
             return intervalos_crecientes
         except Exception as e:
             print(f'Eror al encontrar intervalos de crecimiento: {e}')
@@ -102,32 +103,11 @@ class FuncionCreciente:
                 derivada = self.derivada(1)
                 dy_vals = derivada.funcion_numerica(x_vals)
             
-                fig, (ax1, ax2) = mpp.subplots(2, 1, figsize=(10, 8))
-            
-            # Gráfica de la función
-                ax1.plot(x_vals, y_vals, label=f'f(x) = {self.expresion_str}')
-                ax1.set_title('Función')
-                ax1.set_xlabel('x')
-                ax1.set_ylabel('f(x)')
-                ax1.grid(True)
-                ax1.legend()
-            
-            # Gráfica de la derivada
-                ax2.plot(x_vals, dy_vals, label=f"f'(x) = {derivada.expresion_str}", color='orange')
-                ax2.axhline(0, color='red', linestyle='--', linewidth=0.5)
-                ax2.set_title('Derivada')
-                ax2.set_xlabel('x')
-                ax2.set_ylabel("f'(x)")
-                ax2.grid(True)
-                ax2.legend()
-            
-                mpp.tight_layout()
-                mpp.show()
-            
-                self.historial.append(('graficar', rango_x))
+                return x_vals, y_vals, dy_vals, self.expresion_str, derivada.expresion_str
             except Exception as e:
-                print(f'Error al graficar: {e}')
-    
+                print(f'Error al generar datos para graficar: {e}')
+                return None, None, None, None, None
+            
     def __str__(self):
         return f"f({self.x}) = {self.expresion_str}"
 
@@ -144,7 +124,7 @@ def main():
             print(f"f({x_eval}) = {f.evaluar(x_eval)}")
         
             print("\nAnalizando crecimiento de la función")
-            intervalos = f.encontrar_crecimiento()
+            intervalos = f.encontrar_intervalos_crecientes()
         
             if intervalos:
                 print("\nLa función es creciente en los siguientes intervalos:")
@@ -154,11 +134,32 @@ def main():
             else:
                 print("\nNo se encontraron intervalos donde la función sea creciente.")
         
-            graficar = input("\n¿Deseas graficar la función y su derivada? (s/n): ").lower()
-            if graficar == 's':
+            graficar_resp = input("\n¿Deseas graficar la función y su derivada? (s/n): ").lower()
+            if graficar_resp == 's':
                x_min = float(input("Límite inferior de x para graficar: "))
                x_max = float(input("Límite superior de x para graficar: "))
-               f.graficar((x_min, x_max))
+               x_vals, y_vals, dy_vals, func_str, deriv_str = f.graficar((x_min, x_max))
+            
+            if x_vals is not None:
+                fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 8))
+                
+                ax1.plot(x_vals, y_vals, label=f'f(x) = {func_str}')
+                ax1.set_title('Función')
+                ax1.set_xlabel('x')
+                ax1.set_ylabel('f(x)')
+                ax1.grid(True)
+                ax1.legend()
+                
+                ax2.plot(x_vals, dy_vals, label=f"f'(x) = {deriv_str}", color='orange')
+                ax2.axhline(0, color='red', linestyle='--', linewidth=0.5)
+                ax2.set_title('Derivada')
+                ax2.set_xlabel('x')
+                ax2.set_ylabel("f'(x)")
+                ax2.grid(True)
+                ax2.legend()
+                
+                plt.tight_layout()
+                plt.show()
     
         except Exception as e:
             print(f"\nError: {e}")
