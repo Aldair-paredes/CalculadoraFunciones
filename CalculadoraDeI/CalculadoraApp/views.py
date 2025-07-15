@@ -4,7 +4,6 @@ from collections.abc import Iterable
 from .explicita import calcular_funcion_explicita 
 from .funcion.implicita import FuncionImplicita
 from .transcendente import calcular_funcion_transcendente 
-<<<<<<< HEAD
 from .algebraica import (
     calculate_linear_function,
     calculate_quadratic_function,
@@ -23,14 +22,12 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-=======
 from .funcion.creciente import FuncionCreciente
 import matplotlib.pyplot as plt
 import base64
 import io
 import sympy as sp
 from .funcion.continuidad import verificar_continuidad_en_punto, graficar_funcion_continuidad
->>>>>>> Joely
 
 def pagprincipal(request):
     return render(request, 'pagprincipal.html')
@@ -288,7 +285,6 @@ def calculadora_transcendente(request):
     }
     return render(request, 'transcendente.html', context)
 
-<<<<<<< HEAD
 def calculadora_algebraica(request):
     result = None
     error = None
@@ -441,7 +437,6 @@ def calculadora_biyectiva(request):
     limit_point_input = ""
     evaluate_values_input = ""
     result = None
-=======
 
 def creciente_view(request):
     expresion_input = None
@@ -584,12 +579,10 @@ def calculadora_continuidad(request):
     
     resultado_continuidad = None
     grafica_base64 = None
->>>>>>> Joely
     error = None
 
     if request.method == 'POST':
         function_input = request.POST.get('function_input', '').strip()
-<<<<<<< HEAD
         operation_select = request.POST.get('operation_select', '').strip()
         variable_input = request.POST.get('variable_input', '').strip()
         limit_point_input = request.POST.get('limit_point_input', '').strip()
@@ -759,7 +752,18 @@ def funcion_inyectiva(request):
 
 def teorias(request):
     return render(request, 'teorias.html')
-=======
+
+def continuidad(request):
+    error = None
+    resultado_continuidad = None
+    grafica_base64 = None
+    function_input = ''
+    punto_continuidad_input = ''
+    rango_x_min_input = ''
+    rango_x_max_input = ''
+
+    if request.method == "POST":
+        function_input = request.POST.get('function_input', '').strip()
         punto_continuidad_input = request.POST.get('punto_continuidad_input', '').strip()
         rango_x_min_input = request.POST.get('rango_x_min_continuidad', '').strip()
         rango_x_max_input = request.POST.get('rango_x_max_continuidad', '').strip()
@@ -792,4 +796,3 @@ def teorias(request):
         'error': error,
     }
     return render(request, 'continuidad.html', context)
->>>>>>> Joely
