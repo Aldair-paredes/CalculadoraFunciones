@@ -37,7 +37,7 @@
                 <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-person-lines-fill me-2"></i>Cuestionario</a></li>
                 <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-people-fill me-2"></i>Grupo</a></li>
                 <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-chat-dots-fill me-2"></i>Testimonios</a></li>
-                <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-file-earmark-text-fill me-2"></i>Documentos</a></li>
+                <li class="nav-item"><a class="nav-link" href="{% url 'teorias' %}"><i class="bi bi-book-fill me-2"></i>Teorías</a></li>
             </ul>
             <div class="btn-group mt-auto w-100">
                 <a href="#" class="btn btn-primary d-flex align-items-center justify-content-center"><i class="bi bi-box-arrow-in-right me-2"></i>Iniciar sesión</a>
@@ -58,7 +58,7 @@
                         <div class="form-row">
                             <div class="form-group">
                                 <label for="functionInput"><i class="bi bi-function"></i> Función</label>
-                                <input type="text" id="functionInput" name="function_input" placeholder="Escribe tu función" required
+                                <input type="text" id="functionInput" name="function_input" placeholder="Ej: sin(x), exp(x), log(x)" required
                                     value="{{ function_input|default_if_none:'' }}">
                             </div>
                             <div class="form-group operation-variable">
@@ -238,7 +238,11 @@
             }
 
             function handleResizeAndInitialLoad() {
-                setSidebarState(false); 
+                if (window.innerWidth > 991.98) {
+                    setSidebarState(true); 
+                } else {
+                    setSidebarState(false); 
+                }
             }
 
             handleResizeAndInitialLoad();

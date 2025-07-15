@@ -12,4 +12,5 @@ urlpatterns = [
     path('calculadora-algebraica/', views.calculadora_algebraica, name='calculadora_algebraica'),
     path('decreciente/', views.analizarfuncionview, name='decreciente'),
     path('inyectiva/', views.funcion_inyectiva, name='inyectiva'),
+    path('teorias/', views.teorias, name='teorias'),
 ]

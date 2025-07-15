@@ -43,7 +43,7 @@
                     <a class="nav-link" href="#"><i class="bi bi-chat-dots-fill me-2"></i>Testimonios</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#"><i class="bi bi-file-earmark-text-fill me-2"></i>Documentos</a>
+                    <a class="nav-link" href="{% url 'teorias' %}"><i class="bi bi-book-fill me-2"></i>Teorías</a>
                 </li>
             </ul>
             <div class="btn-group mt-auto w-100">
@@ -81,50 +81,55 @@
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const hamburgerBtn = document.querySelector('.hamburger-menu');
-            const closeSidebarBtn = document.querySelector('.close-sidebar-btn');
-            const sidebar = document.getElementById('sidebarNav');
-            const mainContent = document.querySelector('.main-content');
+    const closeSidebarBtn = document.querySelector('.close-sidebar-btn');
+    const sidebar = document.getElementById('sidebarNav');
+    const mainContent = document.querySelector('.main-content');
 
-            if (!sidebar || !mainContent || !hamburgerBtn) {
-                console.error("Error: No se encontraron todos los elementos necesarios para el navbar.");
-                console.error("Sidebar:", sidebar, "Main Content:", mainContent, "Hamburger Button:", hamburgerBtn);
-                return; 
-            }
+    if (!sidebar || !mainContent || !hamburgerBtn) {
+        console.error("Error: No se encontraron todos los elementos necesarios para el navbar.");
+        console.error("Sidebar:", sidebar, "Main Content:", mainContent, "Hamburger Button:", hamburgerBtn);
+        return;
+    }
 
-            function setSidebarState(isOpen) {
-                if (isOpen) {
-                    sidebar.classList.add('active');
-                    hamburgerBtn.style.display = 'none'; 
-                    if (closeSidebarBtn) {
-                        closeSidebarBtn.style.display = 'block'; 
-                    }
-                    mainContent.style.marginLeft = '260px'; 
-                } else {
-                    sidebar.classList.remove('active');
-                    hamburgerBtn.style.display = 'block'; 
-                    if (closeSidebarBtn) {
-                        closeSidebarBtn.style.display = 'none'; 
-                    }
-                    mainContent.style.marginLeft = '0'; 
-                }
-            }
-
-            function toggleSidebar() {
-                setSidebarState(!sidebar.classList.contains('active'));
-            }
-
-            hamburgerBtn.addEventListener('click', toggleSidebar);
+    function setSidebarState(isOpen) {
+        if (isOpen) {
+            sidebar.classList.add('active');
+            hamburgerBtn.style.display = 'none';
             if (closeSidebarBtn) {
-                closeSidebarBtn.addEventListener('click', toggleSidebar);
+                closeSidebarBtn.style.display = 'block';
             }
-
-            function handleResizeAndInitialLoad() {
-                setSidebarState(false); 
+            mainContent.style.marginLeft = '260px';
+        } else {
+            sidebar.classList.remove('active');
+            hamburgerBtn.style.display = 'block';
+            if (closeSidebarBtn) {
+                closeSidebarBtn.style.display = 'none';
             }
+            mainContent.style.marginLeft = '0';
+        }
+    }
 
-            handleResizeAndInitialLoad();
-            window.addEventListener('resize', handleResizeAndInitialLoad);
-        });
+    function toggleSidebar() {
+        setSidebarState(!sidebar.classList.contains('active'));
+    }
+
+    hamburgerBtn.addEventListener('click', toggleSidebar);
+    if (closeSidebarBtn) {
+        closeSidebarBtn.addEventListener('click', toggleSidebar);
+    }
+
+    function handleInitialAndResizeLoad() {
+        if (window.innerWidth > 991.98) {
+            setSidebarState(true);
+        } else {
+            setSidebarState(false);
+        }
+    }
+
+    handleInitialAndResizeLoad();
+
+    window.addEventListener('resize', handleInitialAndResizeLoad);
+});
     </script>
 </body>
 </html>

@@ -4,15 +4,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Temas</title>
+    <title>Teorías de Cálculo</title>
     
-    <link href="{% static 'css/tema_funciones.css' %}" rel="stylesheet" />
+    <link href="{% static 'css/teorias.css' %}" rel="stylesheet" />
     <link href="{% static 'css/navbar.css' %}" rel="stylesheet" />
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"rel="stylesheet"/>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"rel="stylesheet"/>
 </head>
-<body>
 
+<body>
     <div class="app-container">
         <button class="hamburger-menu" type="button" aria-label="Toggle navigation">
             <i class="bi bi-list"></i>
@@ -31,7 +31,7 @@
                     <a class="nav-link" href="{% url 'pagprincipal' %}"><i class="bi bi-house-door-fill me-2"></i>Inicio</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link active" href="{% url 'temas' %}"><i class="bi bi-journal-text me-2"></i>Temas</a>
+                    <a class="nav-link" href="{% url 'temas' %}"><i class="bi bi-journal-text me-2"></i>Temas</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="#"><i class="bi bi-person-lines-fill me-2"></i>Cuestionario</a>
@@ -43,7 +43,7 @@
                     <a class="nav-link" href="#"><i class="bi bi-chat-dots-fill me-2"></i>Testimonios</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{% url 'teorias' %}"><i class="bi bi-book-fill me-2"></i>Teorías</a>
+                    <a class="nav-link active" href="{% url 'teorias' %}"><i class="bi bi-book-fill me-2"></i>Teorías</a>
                 </li>
             </ul>
             <div class="btn-group mt-auto w-100">
@@ -58,9 +58,24 @@
 
         <main class="main-content">
             <div class="temas-container">
-                <h1>Temas</h1>
+                <h1>Teorías de Funciones y Continuidad</h1>
+                <p class="explanation-text">
+                    Esta sección está dedicada a proporcionar una base teórica sólida sobre los conceptos fundamentales del cálculo diferencial e integral. Aquí encontrarás explicaciones detalladas, definiciones y ejemplos para cada tipo de función y concepto clave, ayudándote a comprender mejor los principios matemáticos detrás de las operaciones que realizas en nuestra calculadora. 
+                </p>
+                
                 <div class="temas-grid">
-                    <a href="{% url 'tema_funciones' %}" class="tema-btn">Funciones</a>
+                    <a href="#" class="tema-btn">Implícita</a>
+                    <a href="#" class="tema-btn">Explícita</a>
+                    <a href="#" class="tema-btn">Algebraica</a>
+                    
+                    <a href="#" class="tema-btn">Trascendente</a>
+                    <a href="#" class="tema-btn">Creciente</a>
+                    <a href="#" class="tema-btn">Decreciente</a>
+                    
+                    <a href="#" class="tema-btn">Inyectiva</a>
+                    <a href="#" class="tema-btn">Biyectiva</a>
+                    <a href="#" class="tema-btn">Suprayectiva</a>
+
                     <a href="#" class="tema-btn">Continuidad</a>
                 </div>
             </div>
@@ -69,8 +84,8 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-         document.addEventListener('DOMContentLoaded', function () {
-            const hamburgerBtn = document.querySelector('.hamburger-menu');
+        document.addEventListener('DOMContentLoaded', function () {
+    const hamburgerBtn = document.querySelector('.hamburger-menu');
     const closeSidebarBtn = document.querySelector('.close-sidebar-btn');
     const sidebar = document.getElementById('sidebarNav');
     const mainContent = document.querySelector('.main-content');
@@ -120,6 +135,7 @@
 
     window.addEventListener('resize', handleInitialAndResizeLoad);
 });
+
     </script>
 </body>
 </html>

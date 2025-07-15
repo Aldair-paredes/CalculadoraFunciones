@@ -484,3 +484,6 @@ def funcion_inyectiva(request):
         }
 
     return render(request, 'inyectiva.html', {'resultado': resultado})
+
+def teorias(request):
+    return render(request, 'teorias.html')
