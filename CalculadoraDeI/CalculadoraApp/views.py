@@ -796,3 +796,46 @@ def continuidad(request):
         'error': error,
     }
     return render(request, 'continuidad.html', context)
+
+#funcionamente de inicar sesion y registro
+
+from django.shortcuts import render, redirect
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.models import User
+from django.contrib import messages
+
+def login_view(request):
+    if request.method == 'POST':
+        username = request.POST['username']
+        password = request.POST['password']
+        user = authenticate(request, username=username, password=password)
+
+        if user is not None:
+            login(request, user)
+            return redirect('pagina_principal')  # Cambia al nombre de tu vista principal
+        else:
+            messages.error(request, 'Credenciales incorrectas')
+
+    return render(request, 'login.html')
+
+
+def registro_view(request):
+    if request.method == 'POST':
+        username = request.POST['username']
+        password = request.POST['password']
+        confirm = request.POST['confirm_password']
+
+        if password != confirm:
+            messages.error(request, 'Las contraseñas no coinciden')
+        elif User.objects.filter(username=username).exists():
+            messages.error(request, 'El usuario ya existe')
+        else:
+            User.objects.create_user(username=username, password=password)
+            return redirect('login')
+
+    return render(request, 'registro.html')
+
+
+def logout_view(request):
+    logout(request)
+    return redirect('login')
