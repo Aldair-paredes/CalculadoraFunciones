@@ -803,6 +803,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.contrib import messages
+from .models import Perfil
 
 def login_view(request):
     if request.method == 'POST':
@@ -812,30 +813,43 @@ def login_view(request):
 
         if user is not None:
             login(request, user)
-            return redirect('pagina_principal')  # Cambia al nombre de tu vista principal
+            perfil = Perfil.objects.get(user=user)
+
+            if perfil.rol == 'alumno':
+                return redirect('vista_alumno')
+            elif perfil.rol == 'maestro':
+                return redirect('vista_maestro')
         else:
             messages.error(request, 'Credenciales incorrectas')
-
     return render(request, 'login.html')
-
 
 def registro_view(request):
     if request.method == 'POST':
         username = request.POST['username']
         password = request.POST['password']
         confirm = request.POST['confirm_password']
+        rol = request.POST['rol']
 
         if password != confirm:
             messages.error(request, 'Las contraseñas no coinciden')
         elif User.objects.filter(username=username).exists():
             messages.error(request, 'El usuario ya existe')
         else:
-            User.objects.create_user(username=username, password=password)
+            user = User.objects.create_user(username=username, password=password)
+            Perfil.objects.create(user=user, rol=rol)
             return redirect('login')
 
     return render(request, 'registro.html')
 
-
 def logout_view(request):
     logout(request)
     return redirect('login')
+
+def vista_alumno(request):
+    return render(request, 'vista_alumno.html')
+
+def vista_maestro(request):
+    return render(request, 'vista_maestro.html')
+
+def pagina_principal(request):
+    return render(request, 'pagprincipal.html')
