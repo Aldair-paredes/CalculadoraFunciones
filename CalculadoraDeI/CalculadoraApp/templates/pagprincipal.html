@@ -26,6 +26,13 @@
                 <img src="{% static 'img/WOLF.png' %}" alt="Logo UNID" />
                 <span>UNID</span>
             </a>
+{% if user.is_authenticated %}
+    <div class="px-3 py-2 text-white fw-semibold">
+        Bienvenido, {{ user.username|title }}<br>
+        Rol: {{ perfil.rol|title }}
+    </div>
+{% endif %}
+
             <ul class="navbar-nav w-100">
                 <li class="nav-item">
                     <a class="nav-link active" href="{% url 'pagprincipal' %}"><i class="bi bi-house-door-fill me-2"></i>Inicio</a>

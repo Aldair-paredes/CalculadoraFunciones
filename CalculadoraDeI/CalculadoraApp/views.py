@@ -617,90 +617,87 @@ def calculadora_continuidad(request):
     return render(request, 'biyectiva.html', context)
 #Decreciente Agustin
 
-def analizarfuncionview(request):
+import sympy as sp
+import numpy as np
+import matplotlib.pyplot as plt
+from django.shortcuts import render
+from django.conf import settings
+import os
+import uuid
+
+def decreciente(request):
     if request.method == 'POST':
         try:
-            # Recoger los datos del formulario
-            funcion = request.POST.get('funcion')
+            funcion_str = request.POST.get('funcion')
             intervalo_min = float(request.POST.get('intervalo_min'))
             intervalo_max = float(request.POST.get('intervalo_max'))
             punto_limite = float(request.POST.get('punto_limite'))
             graficar = request.POST.get('graficar') == 's'
 
             x = sp.symbols('x')
-            f = sp.sympify(funcion)
-
-            resultado = f"\nFunción original: f(x) = {f}\n"
-
-            # Derivar
+            f = sp.sympify(funcion_str)
             derivada = sp.diff(f, x)
-            resultado += f"Derivada: f'(x) = {derivada}\n"
 
-            # Simplificar
-            simplificada = sp.simplify(f)
-            resultado += f"Función simplificada: {simplificada}\n"
-
-            # Resolver f(x)=0
-            soluciones = sp.solve(f, x)
-            resultado += f"Soluciones a f(x)=0: {soluciones if soluciones else 'No hay soluciones reales encontradas.'}\n"
-
-            # Calcular límite
             limite = sp.limit(f, x, punto_limite)
-            resultado += f"Límite de f(x) cuando x → {punto_limite}: {limite}\n"
 
-            # Analizar si es decreciente
             puntos = np.linspace(intervalo_min, intervalo_max, 100)
             derivadas_numericas = [float(derivada.subs(x, punto)) for punto in puntos]
-            decreciente = all(valor <= 0 for valor in derivadas_numericas)
+            es_decreciente = all(valor <= 0 for valor in derivadas_numericas)
 
-            if decreciente:
-                resultado += "\nConclusión: La función es decreciente en todo el intervalo."
-            else:
-                resultado += "\nConclusión: La función no es completamente decreciente en el intervalo."
+            resultado = (
+                f"Límite de f(x) cuando x → {punto_limite}: {limite}\n"
+                f"Derivada: f'(x) = {derivada}\n"
+                f"Conclusión: {'La función es decreciente en todo el intervalo.' if es_decreciente else 'La función no es completamente decreciente en el intervalo.'}"
+            )
 
             grafico_url = None
-
-            # Graficar si el usuario lo pidió
             if graficar:
                 f_lambd = sp.lambdify(x, f, modules=['numpy'])
                 deriv_lambd = sp.lambdify(x, derivada, modules=['numpy'])
+
                 y_f = f_lambd(puntos)
                 y_df = deriv_lambd(puntos)
 
                 if np.isscalar(y_f):
-                    y_f = np.full_like(puntos, y_f)
-                if np.isscalar(y_df):
-                    y_df = np.full_like(puntos, y_df)
+                    y_f = np.full_like(puntos, y_f, dtype=float)
+                else:
+                    y_f = np.array(y_f, dtype=float)
 
-                plt.figure(figsize=(10,6))
+                if np.isscalar(y_df):
+                    y_df = np.full_like(puntos, y_df, dtype=float)
+                else:
+                    y_df = np.array(y_df, dtype=float)
+
+                plt.figure(figsize=(10, 6))
                 plt.plot(puntos, y_f, label='f(x)', color='blue')
                 plt.plot(puntos, y_df, label="f'(x)", color='red', linestyle='--')
                 plt.axhline(0, color='black', linewidth=0.5)
-                plt.legend()
                 plt.title('Función y su derivada')
                 plt.xlabel('x')
                 plt.ylabel('Valor')
+                plt.legend()
                 plt.grid(True)
 
-                buffer = io.BytesIO()
-                plt.savefig(buffer, format='png')
-                buffer.seek(0)
-                image_png = buffer.getvalue()
-                grafico_base64 = base64.b64encode(image_png).decode('utf-8')
-                grafico_url = f"data:image/png;base64,{grafico_base64}"
+                filename = f"grafico_{uuid.uuid4().hex}.png"
+                filepath = os.path.join(settings.MEDIA_ROOT, filename)
+                plt.savefig(filepath)
                 plt.close()
+
+                grafico_url = settings.MEDIA_URL + filename
 
             return render(request, 'Decreciente.html', {
                 'resultado': resultado,
-                'grafico_url': grafico_url
+                'grafico_url': grafico_url,
             })
 
         except Exception as e:
             return render(request, 'Decreciente.html', {
-                'error': f"Error al analizar la función: {str(e)}"
+                'error': f"Error: {str(e)}",
             })
 
     return render(request, 'Decreciente.html')
+
+
 
 #Inyectiva Agustin
 
@@ -853,3 +850,18 @@ def vista_maestro(request):
 
 def pagina_principal(request):
     return render(request, 'pagprincipal.html')
+
+from django.contrib.auth.decorators import login_required
+
+@login_required(login_url='login')
+def pagina_principal(request):
+    return render(request, 'pagprincipal.html')  # o el nombre que uses
+
+
+from .models import Perfil
+
+def pagprincipal(request):
+    perfil = None
+    if request.user.is_authenticated:
+        perfil = Perfil.objects.get(user=request.user)
+    return render(request, 'pagprincipal.html', {'perfil': perfil})

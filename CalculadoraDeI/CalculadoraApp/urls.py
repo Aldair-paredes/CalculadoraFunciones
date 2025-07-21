@@ -10,7 +10,6 @@ urlpatterns = [
     path('calculadora-transcendente/', views.calculadora_transcendente, name='calculadora_transcendente'),
     path('calculadora-biyectiva/', views.calculadora_biyectiva, name='calculadora_biyectiva'),
     path('calculadora-algebraica/', views.calculadora_algebraica, name='calculadora_algebraica'),
-    path('decreciente/', views.analizarfuncionview, name='decreciente'),
     path('inyectiva/', views.funcion_inyectiva, name='inyectiva'),
     path('teorias/', views.teorias, name='teorias'),
     path('funcion_creciente',views.creciente_view, name='funcion_creciente'),
@@ -18,4 +17,7 @@ urlpatterns = [
         path('login/', views.login_view, name='login'),
     path('registro/', views.registro_view, name='registro'),
     path('logout/', views.logout_view, name='logout'),
+    path('alumno/', views.vista_alumno, name='vista_alumno'),
+path('maestro/', views.vista_maestro, name='vista_maestro'),
+    path('decreciente/', views.decreciente, name='decreciente')
 ]
