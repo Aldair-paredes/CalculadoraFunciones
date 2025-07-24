@@ -1,7 +1,6 @@
 from django.shortcuts import render
 from django.http import HttpRequest
 from collections.abc import Iterable
-from .explicita import calcular_funcion_explicita 
 from .funcion.implicita import FuncionImplicita
 from .transcendente import calcular_funcion_transcendente 
 from .algebraica import (
@@ -12,6 +11,7 @@ from .algebraica import (
     calculate_radical_function
 )
 from sympy import symbols, Eq, sympify, sqrt, simplify, solve
+
 
 # Variables globales para SymPy
 x, y, z = symbols('x y z')
@@ -38,16 +38,43 @@ def temas (request):
 def tema_funciones (request):
     return render(request, 'tema_funciones.html')
 
+from django.shortcuts import render
 
+from .explicita import _limpiar_y_preparar_funcion_str, calcular_funcion_explicita
+
+from sympy import symbols, sympify, pi, E, Abs, sqrt, exp, log, sin, cos, tan, cot, sec, csc, \
+                    asin, acos, atan, acot, asec, acsc, \
+                    sinh, cosh, tanh, coth, sech, csch, \
+                    asinh, acosh, atanh, acoth, asech, acsch, \
+                    Add, Mul, Pow, S, Integer, Float 
+try:
+    from sympy import log10
+except ImportError:
+    def log10(x):
+        return log(x, 10)
+
+from sympy.parsing.sympy_parser import parse_expr 
+
+ALLOWED_SYMPY_FUNCTIONS = {
+    'sin': sin, 'cos': cos, 'tan': tan, 'cot': cot, 'sec': sec, 'csc': csc,
+    'asin': asin, 'acos': acos, 'atan': atan, 'acot': acot, 'asec': asec, 'acsc': acsc,
+    'sinh': sinh, 'cosh': cosh, 'tanh': tanh, 'coth': coth, 'sech': sech, 'csch': csch,
+    'asinh': asinh, 'acosh': acosh, 'atanh': atanh, 'acoth': acoth, 'asech': asech, 'acsch': acsch,
+    'log': log, 'log10': log10, 'exp': exp, 'sqrt': sqrt, 'abs': Abs,
+}
+ALLOWED_SYMPY_CONSTANTS = {
+    'pi': pi, 'E': E
+}
 
 def calculadora_explicita(request):
-
     result = None
     error = None
     function_input = ""
     operation_select = ""
-
-   
+    variable_input = ""
+    limit_point_input = ""
+    evaluate_values_input = ""
+    
     if request.method == 'POST':
         function_input = request.POST.get('function_input', '').strip()
         operation_select = request.POST.get('operation_select', '').strip()
@@ -55,36 +82,101 @@ def calculadora_explicita(request):
         limit_point_input = request.POST.get('limit_point_input', '').strip()
         evaluate_values_input = request.POST.get('evaluate_values_input', '').strip()
 
-    
-        kwargs_para_funcion = {}
-        if operation_select in ['derivar', 'limite', 'resolver']:
-            kwargs_para_funcion['variable_derivacion'] = variable_input 
-            kwargs_para_funcion['variable_integracion'] = variable_input
-            kwargs_para_funcion['variable_limite'] = variable_input
-            kwargs_para_funcion['variable_resolver'] = variable_input
-        
-        if operation_select == 'limite':
-            kwargs_para_funcion['punto_limite'] = limit_point_input
-        
-        if operation_select == 'evaluar':
-            kwargs_para_funcion['valores_evaluacion_str'] = evaluate_values_input
+        if not function_input:
+            error = "La función no puede estar vacía."
+        elif not operation_select:
+            error = "Por favor, selecciona una operación."
+        else:
+            try:
+                funcion_para_parsear = _limpiar_y_preparar_funcion_str(function_input)
 
-        
-        result, error = calcular_funcion_explicita(function_input, operation_select, **kwargs_para_funcion)
+                safe_local_dict = {**ALLOWED_SYMPY_FUNCTIONS, **ALLOWED_SYMPY_CONSTANTS}
+                
+                for sym_name in ['x', 'y', 'z', 't']:
+                    safe_local_dict[sym_name] = symbols(sym_name)
 
-    
+                safe_local_dict['Add'] = Add
+                safe_local_dict['Mul'] = Mul
+                safe_local_dict['Pow'] = Pow
+                safe_local_dict['Sub'] = type(symbols('a') - symbols('b'))
+                safe_local_dict['Div'] = type(symbols('a') / symbols('b'))
+                safe_local_dict['Integer'] = Integer
+                safe_local_dict['Float'] = Float
+                safe_local_dict['S'] = S
+
+                if variable_input:
+                    vars_in_input = [v.strip() for v in variable_input.split(',') if v.strip()]
+                    for var_name in vars_in_input:
+                        safe_local_dict[var_name] = symbols(var_name)
+
+                funcion_expr = parse_expr(funcion_para_parsear, local_dict=safe_local_dict, global_dict={}, evaluate=False)
+
+                parsed_free_symbols = funcion_expr.free_symbols
+                explicitly_allowed_symbols_objects = set(safe_local_dict.values())
+                
+                unexpected_symbols = [
+                    s for s in parsed_free_symbols 
+                    if s not in explicitly_allowed_symbols_objects and s not in (pi, E)
+                ]
+
+                if unexpected_symbols:
+                    error = f"La función contiene símbolos no reconocidos o no permitidos: {', '.join(str(s) for s in unexpected_symbols)}. " \
+                            f"Revisa tu guía de uso para las variables y funciones soportadas."
+                
+                requires_variable = ['derivar', 'integrar', 'limite', 'resolver']
+                if operation_select in requires_variable and not variable_input:
+                    error = "La variable es requerida para la operación seleccionada."
+                elif operation_select in requires_variable and variable_input:
+                    var_sym = symbols(variable_input)
+                    if operation_select != 'resolver' and var_sym not in funcion_expr.free_symbols:
+                        if not any(v in funcion_para_parsear.replace('**', '').replace(' ', '') for v in [str(var_sym)]):
+                            error = f"La variable '{variable_input}' no se encuentra en la función. Revisa tu guía de uso."
+                
+                if operation_select == 'limite' and not limit_point_input:
+                    error = "El punto del límite es requerido para la operación de límite."
+                
+                if operation_select == 'evaluar':
+                    if not evaluate_values_input:
+                        error = "Los valores para evaluar son requeridos para la operación de evaluación (ej: x=2, y=3)."
+                    else:
+                        parts = evaluate_values_input.split(',')
+                        for part in parts:
+                            if '=' not in part or len(part.split('=')) != 2:
+                                error = "Formato de valores para evaluar incorrecto. Usa 'variable=valor' separado por comas."
+                                break
+                            var_name = part.split('=')[0].strip()
+                            if not var_name.isalnum():
+                                error = "Nombres de variables inválidos en los valores para evaluar. Usa solo letras y números."
+                                break
+                
+                if not error:
+                    kwargs_para_funcion = {
+                        'variable_derivacion': variable_input,
+                        'variable_integracion': variable_input,
+                        'variable_limite': limit_point_input,
+                        'variable_resolver': variable_input,
+                        'punto_limite': limit_point_input,
+                        'valores_evaluacion_str': evaluate_values_input
+                    }
+                    result, error = calcular_funcion_explicita(funcion_expr, operation_select, **kwargs_para_funcion)
+
+            except (SyntaxError, TypeError, ValueError, NameError) as e:
+                error = f"La función no cumple con las consideraciones de la guía de uso. Detalles: {e}. " \
+                        f"Asegúrate de usar solo operadores (*, **, +, -, /), funciones y constantes permitidas."
+            except Exception as e:
+                error = f"Ocurrió un error inesperado: {e}. Por favor, verifica tu entrada."
+
     context = {
         'function_input': function_input,
         'operation_select': operation_select,
+        'variable_input': variable_input,
+        'limit_point_input': limit_point_input,
+        'evaluate_values_input': evaluate_values_input,
         'result': result,
         'error': error,
     }
     return render(request, 'funcion_explicita.html', context)
 
-
-
-
-    return render(request, 'funcion_implicita.html', context)
 
 
 
@@ -329,7 +421,6 @@ def calculadora_algebraica(request):
     }
     return render(request, 'algebraica.html', context)
 
-# Las demás funciones auxiliares (handle_linear_function, etc.) permanecen igual
 def handle_linear_function(data):
     m = sympify(data['m']) if data['m'] else 0
     b = sympify(data['b']) if data['b'] else 0
@@ -430,13 +521,44 @@ def handle_radical_function(data):
     return result
 
 def calculadora_biyectiva(request):
-
     function_input = ""
     operation_select = ""
     variable_input = ""
     limit_point_input = ""
     evaluate_values_input = ""
     result = None
+    error_message = None 
+
+    if request.method == 'POST':
+        function_input = request.POST.get('function_input', '')
+        operation_select = request.POST.get('operation_select', '')
+        variable_input = request.POST.get('variable_input', '')
+        limit_point_input = request.POST.get('limit_point_input', '')
+        evaluate_values_input = request.POST.get('evaluate_values_input', '')
+
+        if operation_select == 'derivar':
+            result, error_message = calcular_funcion_biyectiva(function_input, 'derivar', variable_derivacion=variable_input)
+        elif operation_select == 'evaluar':
+            result, error_message = calcular_funcion_biyectiva(function_input, 'evaluar', valores_evaluacion_str=evaluate_values_input)
+        elif operation_select == 'limite':
+            result, error_message = calcular_funcion_biyectiva(function_input, 'limite', variable_limite=variable_input,punto_limite=limit_point_input)
+        elif operation_select == 'simplificar':
+            result, error_message = calcular_funcion_biyectiva(function_input, 'simplificar')
+        elif operation_select == 'resolver':
+            result, error_message = calcular_funcion_biyectiva(function_input, 'resolver', variable_resolver=variable_input)
+        else:
+            error_message = "Operación no válida seleccionada."
+
+    return render(request, 'biyectiva.html', {
+        'function_input': function_input,
+        'operation_select': operation_select,
+        'variable_input': variable_input,
+        'limit_point_input': limit_point_input,
+        'evaluate_values_input': evaluate_values_input,
+        'result': result,
+        'error_message': error_message,
+    })
+
 
 def creciente_view(request):
     expresion_input = None
@@ -660,7 +782,6 @@ def analizarfuncionview(request):
 
             grafico_url = None
 
-            # Graficar si el usuario lo pidió
             if graficar:
                 f_lambd = sp.lambdify(x, f, modules=['numpy'])
                 deriv_lambd = sp.lambdify(x, derivada, modules=['numpy'])

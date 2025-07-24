@@ -85,19 +85,38 @@ body {
     color: var(--calc-color-dark-font);
     line-height: 1.6;
     margin-bottom: 20px;
-    transition: all 0.3s ease;
-    overflow: hidden;
+    overflow-y: auto; 
+    transition: all 0.5s ease-in-out;
+    position: relative;
+    height: auto;
 }
 
 .calculator-instructions.hidden {
-    flex: 0 0 0;
-    padding: 0;
-    margin: 0;
-    border: none;
-    box-shadow: none;
+    flex: 0 0 0px;
+    padding-left: 0;
+    padding-right: 0;
+    width: 0px;
+    min-width: 0px;
+    max-width: 0px;
+    overflow: hidden;
     opacity: 0;
     visibility: hidden;
-    pointer-events: none;
+    margin-left: -10px;
+}
+
+.calculator-instructions.hidden .instructions-content {
+    display: none;
+    opacity: 0;
+    visibility: hidden;
+}
+
+.instructions-content {
+    display: block;
+    opacity: 1;
+    visibility: visible;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+    padding-right: 20px;
+    box-sizing: border-box;
 }
 
 .calculator-card, .result-card {
@@ -107,6 +126,7 @@ body {
     box-shadow: var(--calc-card-shadow);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
     box-sizing: border-box;
+    position: relative;
 }
 
 .calculator-card:hover, .result-card:hover {
@@ -221,14 +241,23 @@ select {
     padding-right: 3rem;
 }
 
-.calculate-btn {
+.calculator-main-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 2rem;
+    width: 100%;
+}
+
+.calculate-btn, .clear-btn {
     background: var(--calc-primary-btn-bg);
     color: var(--calc-color-white);
     border: none;
-    padding: 1.1rem 2.2rem;
+    padding: 1.2rem 2.5rem;
     border-radius: 12px;
     font-weight: 600;
-    font-size: 1.2rem;
+    font-size: 1.3rem;
     cursor: pointer;
     transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
     display: flex;
@@ -237,23 +266,71 @@ select {
     gap: 0.8rem;
     width: 100%;
     max-width: 380px;
-    margin: 2rem auto 0;
     box-shadow: 0 6px 20px var(--calc-primary-btn-shadow);
 }
 
-.calculate-btn:hover {
+.calculate-btn:hover, .clear-btn:hover {
     background: var(--calc-primary-btn-hover-bg);
     transform: translateY(-5px);
     box-shadow: 0 10px 30px var(--calc-primary-btn-hover-shadow);
 }
 
-.calculate-btn:active {
+.calculate-btn:active, .clear-btn:active {
     transform: translateY(0);
     box-shadow: 0 3px 15px var(--calc-primary-btn-shadow);
 }
 
-.calculate-btn i {
-    font-size: 1.35rem;
+.calculate-btn i, .clear-btn i {
+    font-size: 1.5rem;
+}
+
+.clear-btn {
+    background: #6c757d;
+    box-shadow: 0 6px 20px rgba(108, 117, 125, 0.15);
+}
+
+.clear-btn:hover {
+    background: #5a6268;
+    box-shadow: 0 10px 30px rgba(108, 117, 125, 0.3);
+}
+
+.toggle-instructions-btn {
+    background-color: rgba(95, 122, 149, 0.1);
+    border: none;
+    color: var(--calc-color-manatee);
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 600;
+    padding: 0.8rem 1.2rem;
+    border-radius: 10px;
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    transition: color 0.2s ease, transform 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    white-space: nowrap;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    min-width: 150px;
+}
+
+.toggle-instructions-btn i {
+    font-size: 1.25rem;
+}
+
+.toggle-instructions-btn:hover {
+    background-color: rgba(95, 122, 149, 0.2);
+    color: var(--calc-color-dark-font);
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.toggle-instructions-btn:active {
+    transform: translateY(1px);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.1);
 }
 
 .result-card {
@@ -452,6 +529,10 @@ select {
     padding-left: 25px;
     margin-bottom: 8px;
     font-size: 0.95rem;
+    box-sizing: border-box;
+    width: 100%;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
 }
 
 .calculator-instructions ul li::before {
@@ -473,29 +554,6 @@ select {
 .calculator-instructions ul ul li {
     font-size: 0.9rem;
     color: var(--calc-color-mantle);
-}
-
-.toggle-instructions-btn {
-    background: none;
-    border: none;
-    color: var(--calc-color-manatee);
-    cursor: pointer;
-    font-size: 1.5rem;
-    padding: 0.5rem;
-    position: absolute;
-    top: 15px;
-    right: 15px;
-    transition: color 0.2s ease, transform 0.2s ease;
-    z-index: 10;
-}
-
-.toggle-instructions-btn:hover {
-    color: var(--calc-color-dark-font);
-    transform: scale(1.1);
-}
-
-.toggle-instructions-btn:active {
-    transform: scale(0.95);
 }
 
 @media (max-width: 991.98px) {
@@ -537,13 +595,26 @@ select {
     select {
         background-position: right 1rem center;
         background-size: 1.25rem;
+        padding-right: 3rem;
     }
-    .calculate-btn {
+    
+    .calculator-main-actions {
+        flex-direction: column;
+        gap: 0.8rem;
+    }
+    .calculate-btn, .clear-btn {
         padding: 1rem 2rem;
         font-size: 1.1rem;
-        border-radius: 10px;
         max-width: 320px;
-        margin-top: 1.5rem;
+    }
+
+    .toggle-instructions-btn {
+        font-size: 0.95rem;
+        padding: 0.7rem 1rem;
+        top: 15px;
+        right: 15px;
+        min-width: unset;
+        max-width: unset;
     }
 
     .result-header {
@@ -553,6 +624,14 @@ select {
     }
     .result-header h3 {
         font-size: 1.1rem;
+    }
+    .terminal-controls .control-dot {
+        width: 12px;
+        height: 12px;
+    }
+    .copy-btn {
+        font-size: 1.1rem;
+        padding: 0.5rem;
     }
     .result-content {
         padding: 2rem 2.5rem;
@@ -592,28 +671,21 @@ select {
     }
 
     .calculator-instructions.hidden {
-        max-height: 50px;
-        padding: 10px 25px;
-        opacity: 1;
-        visibility: visible;
-        pointer-events: auto;
-        flex: 0 0 auto;
+        height: 0px;
+        padding-top: 0;
+        padding-bottom: 0;
+        margin-top: 0;
+        margin-bottom: 0;
+        opacity: 0;
+        visibility: hidden;
+        flex: 0 0 0px;
+        width: 0px;
+        min-width: 0px;
+        max-width: 0px;
     }
-    .calculator-instructions.hidden .instructions-content {
-        display: none;
-    }
-
-    .calculator-instructions h2 {
-        font-size: 1.8rem;
-    }
-    .calculator-instructions h3 {
-        font-size: 1.2rem;
-    }
-    .calculator-instructions ul li {
-        font-size: 0.9rem;
-    }
-    .calculator-instructions ul ul li {
-        font-size: 0.85rem;
+    .calculator-instructions {
+        min-width: unset;
+        width: 100%;
     }
 }
 
@@ -672,16 +744,22 @@ select {
         background-size: 1.15rem;
         padding-right: 2.5rem;
     }
-    .calculate-btn {
+    
+    .calculator-main-actions {
+        flex-direction: column;
+        gap: 0.8rem;
+    }
+    .calculate-btn, .clear-btn {
         padding: 0.9rem 1.8rem;
         font-size: 1.05rem;
-        border-radius: 8px;
         max-width: 280px;
-        margin-top: 1.2rem;
-        gap: 0.7rem;
     }
-    .calculate-btn i {
+    .calculate-btn i, .clear-btn i {
         font-size: 1.2rem;
+    }
+    .toggle-instructions-btn {
+        font-size: 0.9rem;
+        padding: 0.6rem 0.9rem;
     }
 
     .result-header {
@@ -690,7 +768,7 @@ select {
         border-top-right-radius: 12px;
     }
     .result-header h3 {
-        font-size: 1rem;
+        font-size: 1.1rem;
     }
     .terminal-controls .control-dot {
         width: 12px;
@@ -711,8 +789,17 @@ select {
     .result-line {
         margin-bottom: 0.8rem;
     }
-    .result-label, .result-value {
-        font-size: 1rem;
+    .result-label {
+        margin-right: 0;
+        margin-bottom: 0.2rem;
+        font-size: 0.9rem;
+    }
+    .result-value {
+        font-size: 0.9rem;
+    }
+    .placeholder {
+        font-size: 0.9rem;
+        padding: 20px 0;
     }
 }
 
@@ -740,7 +827,7 @@ select {
         font-size: 0.85rem;
         border-radius: 6px;
     }
-    .calculate-btn {
+    .calculate-btn, .clear-btn {
         padding: 0.8rem 1.5rem;
         font-size: 0.95rem;
         border-radius: 6px;
