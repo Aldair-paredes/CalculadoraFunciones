@@ -794,74 +794,58 @@ def continuidad(request):
     }
     return render(request, 'continuidad.html', context)
 
-#funcionamente de inicar sesion y registro
-
+#inicio de sesion
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.contrib import messages
 from .models import Perfil
+from .forms import RegistroForm, LoginForm
 
-def login_view(request):
-    if request.method == 'POST':
-        username = request.POST['username']
-        password = request.POST['password']
-        user = authenticate(request, username=username, password=password)
-
-        if user is not None:
-            login(request, user)
-            perfil = Perfil.objects.get(user=user)
-
-            if perfil.rol == 'alumno':
-                return redirect('vista_alumno')
-            elif perfil.rol == 'maestro':
-                return redirect('vista_maestro')
-        else:
-            messages.error(request, 'Credenciales incorrectas')
-    return render(request, 'login.html')
-
+# --- REGISTRO ---
 def registro_view(request):
     if request.method == 'POST':
-        username = request.POST['username']
-        password = request.POST['password']
-        confirm = request.POST['confirm_password']
-        rol = request.POST['rol']
-
-        if password != confirm:
-            messages.error(request, 'Las contraseñas no coinciden')
-        elif User.objects.filter(username=username).exists():
-            messages.error(request, 'El usuario ya existe')
-        else:
-            user = User.objects.create_user(username=username, password=password)
-            Perfil.objects.create(user=user, rol=rol)
+        form = RegistroForm(request.POST)
+        if form.is_valid():
+            user = form.save(commit=False)
+            user.set_password(form.cleaned_data['password'])
+            user.save()
+            Perfil.objects.create(user=user, rol=form.cleaned_data['rol'])
+            messages.success(request, 'Cuenta creada exitosamente. Ahora puedes iniciar sesión.')
             return redirect('login')
+    else:
+        form = RegistroForm()
+    return render(request, 'registro.html', {'form': form})
 
-    return render(request, 'registro.html')
+# --- LOGIN ---
+def login_view(request):
+    if request.method == 'POST':
+        form = LoginForm(request.POST)
+        if form.is_valid():
+            user = authenticate(
+                username=form.cleaned_data['username'],
+                password=form.cleaned_data['password']
+            )
+            if user:
+                login(request, user)
+                return redirect('pagprincipal')  # Redirige a la página principal
+            else:
+                form.add_error(None, "Usuario o contraseña incorrectos")
+    else:
+        form = LoginForm()
+    return render(request, 'login.html', {'form': form})
 
+# --- LOGOUT ---
 def logout_view(request):
     logout(request)
     return redirect('login')
 
-def vista_alumno(request):
-    return render(request, 'vista_alumno.html')
-
-def vista_maestro(request):
-    return render(request, 'vista_maestro.html')
-
-def pagina_principal(request):
-    return render(request, 'pagprincipal.html')
-
-from django.contrib.auth.decorators import login_required
-
-@login_required(login_url='login')
-def pagina_principal(request):
-    return render(request, 'pagprincipal.html')  # o el nombre que uses
-
-
-from .models import Perfil
-
+# --- PÁGINA PRINCIPAL CON ROLES ---
+@login_required
 def pagprincipal(request):
-    perfil = None
-    if request.user.is_authenticated:
+    try:
         perfil = Perfil.objects.get(user=request.user)
+    except Perfil.DoesNotExist:
+        perfil = None
     return render(request, 'pagprincipal.html', {'perfil': perfil})
