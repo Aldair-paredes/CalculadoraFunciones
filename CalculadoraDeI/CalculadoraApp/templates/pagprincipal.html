@@ -27,9 +27,9 @@
                 <span>UNID</span>
             </a>
 {% if user.is_authenticated %}
-    Bienvenido, {{ user.username|title }}
-    Rol: {{ perfil.rol|title }}
+  <p>Bienvenido, {{ user.username }} ({{ user.perfil.rol }})</p>
 {% endif %}
+
 
 
             <ul class="navbar-nav w-100">

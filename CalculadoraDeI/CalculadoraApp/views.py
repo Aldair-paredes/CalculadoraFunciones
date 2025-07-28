@@ -794,58 +794,49 @@ def continuidad(request):
     }
     return render(request, 'continuidad.html', context)
 
-#inicio de sesion
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
-from django.contrib import messages
-from .models import Perfil
 from .forms import RegistroForm, LoginForm
+from .models import Perfil
 
-# --- REGISTRO ---
+# Página principal
+def pagprincipal(request):
+    contexto = {}
+    if request.user.is_authenticated:
+        perfil = Perfil.objects.get(user=request.user)
+        contexto['usuario'] = request.user.username
+        contexto['rol'] = perfil.rol
+    return render(request, 'pagprincipal.html', contexto)
+
+# Vista de registro
 def registro_view(request):
     if request.method == 'POST':
         form = RegistroForm(request.POST)
         if form.is_valid():
-            user = form.save(commit=False)
-            user.set_password(form.cleaned_data['password'])
-            user.save()
-            Perfil.objects.create(user=user, rol=form.cleaned_data['rol'])
-            messages.success(request, 'Cuenta creada exitosamente. Ahora puedes iniciar sesión.')
-            return redirect('login')
+            usuario = form.save()
+            rol = form.cleaned_data['rol']
+            Perfil.objects.create(user=usuario, rol=rol)
+            login(request, usuario)
+            return redirect('pagprincipal')
     else:
         form = RegistroForm()
     return render(request, 'registro.html', {'form': form})
 
-# --- LOGIN ---
+# Vista de inicio de sesión
 def login_view(request):
     if request.method == 'POST':
         form = LoginForm(request.POST)
         if form.is_valid():
-            user = authenticate(
-                username=form.cleaned_data['username'],
-                password=form.cleaned_data['password']
-            )
-            if user:
-                login(request, user)
-                return redirect('pagprincipal')  # Redirige a la página principal
-            else:
-                form.add_error(None, "Usuario o contraseña incorrectos")
+            usuario = authenticate(username=form.cleaned_data['username'], password=form.cleaned_data['password'])
+            if usuario is not None:
+                login(request, usuario)
+                return redirect('pagprincipal')
     else:
         form = LoginForm()
     return render(request, 'login.html', {'form': form})
 
-# --- LOGOUT ---
+# Vista de cierre de sesión
 def logout_view(request):
     logout(request)
-    return redirect('login')
-
-# --- PÁGINA PRINCIPAL CON ROLES ---
-@login_required
-def pagprincipal(request):
-    try:
-        perfil = Perfil.objects.get(user=request.user)
-    except Perfil.DoesNotExist:
-        perfil = None
-    return render(request, 'pagprincipal.html', {'perfil': perfil})
+    return redirect('pagprincipal')
