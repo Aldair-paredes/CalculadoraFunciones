@@ -17,7 +17,7 @@ urlpatterns = [
     path('continuidad/', views.calculadora_continuidad, name='continuidad'),
     path('decreciente/', views.decreciente, name='decreciente'),
 
-    # AUTENTICACIÓN
+    path('accounts/login/', views.login_view, name='accounts_login'),
     path('registro/', registro_view, name='registro'),
     path('login/', login_view, name='login'),
     path('logout/', logout_view, name='logout'),
