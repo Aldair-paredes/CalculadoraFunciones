@@ -2,6 +2,7 @@ from django.urls import path
 from CalculadoraApp import views
 from .views import registro_view, login_view, logout_view
 from django.contrib import admin
+from . import views
 
 urlpatterns = [
     path('', views.pagprincipal, name='pagprincipal'),
@@ -27,5 +28,6 @@ urlpatterns = [
     path('login/', views.login_view, name='login'),
     path('logout/', views.logout_view, name='logout'),
     path('registro/', views.registro_view, name='registro'),
+    path('profile/update/', views.profile_update_view, name='profile_update'),
 ]
 

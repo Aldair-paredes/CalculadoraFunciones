@@ -48,6 +48,32 @@
     margin-right: 0.3em;
 }
 
+.user-info-sidebar {
+    padding: 15px 20px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #ffffff;
+    font-size: 1.1rem;
+    font-weight: 600;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    margin-left: 15px;
+    margin-right: 15px;
+    opacity: 1;
+}
+
+.user-info-sidebar i {
+    font-size: 1.4rem;
+    color: #ffffff;
+}
+
+.sidebar-user-text {
+    color: #ffffff !important;
+    font-weight: 700 !important;
+    text-shadow: 0 0 5px rgba(0,0,0,0.3);
+}
+
 .sidebar .navbar-nav { 
     flex-direction: column;
     width: 100%;
@@ -188,7 +214,7 @@
 
 @media (max-width: 768px) {
     .sidebar {
-         width: 200px;
+        width: 200px;
     }
     .sidebar .navbar-brand {
         margin-bottom: 20px;

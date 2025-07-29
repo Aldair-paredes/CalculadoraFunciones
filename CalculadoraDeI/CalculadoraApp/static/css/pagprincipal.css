@@ -118,3 +118,13 @@ body {
     color: var(--white)!important;                 
     transform: scale(1.05)!important;               
 }
+
+
+.main-content a {
+    color: #000000 !important; 
+    text-decoration: none; 
+}
+
+.main-content a:hover {
+    text-decoration: underline; 
+}

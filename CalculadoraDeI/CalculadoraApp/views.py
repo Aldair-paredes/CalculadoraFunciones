@@ -1115,32 +1115,34 @@ def pagprincipal(request):
         contexto['rol'] = perfil.rol
     return render(request, 'pagprincipal.html', contexto)
 
+# Vista de inicio de sesión
+def login_view(request):
+    if request.method == 'POST':
+        form = LoginForm(request, data=request.POST) # Pasa el objeto request al LoginForm
+        if form.is_valid():
+            username = form.cleaned_data['username']
+            password = form.cleaned_data['password']
+            usuario = authenticate(request, username=username, password=password) # Pasa el objeto request a authenticate
+            if usuario is not None:
+                login(request, usuario)
+                return redirect('pagprincipal')
+            else:
+                form.add_error(None, "Nombre de usuario o contraseña incorrectos. Tenga en cuenta que ambos campos pueden distinguir entre mayúsculas y minúsculas.")
+    else:
+        form = LoginForm()
+    return render(request, 'login.html', {'form': form})
+
 # Vista de registro
 def registro_view(request):
     if request.method == 'POST':
         form = RegistroForm(request.POST)
         if form.is_valid():
-            usuario = form.save()
-            rol = form.cleaned_data['rol']
-            Perfil.objects.create(user=usuario, rol=rol)
-            login(request, usuario)
+            user = form.save()
+            login(request, user)
             return redirect('pagprincipal')
     else:
         form = RegistroForm()
     return render(request, 'registro.html', {'form': form})
-
-# Vista de inicio de sesión
-def login_view(request):
-    if request.method == 'POST':
-        form = LoginForm(request.POST)
-        if form.is_valid():
-            usuario = authenticate(username=form.cleaned_data['username'], password=form.cleaned_data['password'])
-            if usuario is not None:
-                login(request, usuario)
-                return redirect('pagprincipal')
-    else:
-        form = LoginForm()
-    return render(request, 'login.html', {'form': form})
 
 # Vista de cierre de sesión
 def logout_view(request):
@@ -1183,3 +1185,18 @@ def calculadora_view(request):
             return render(request, 'tu_template.html', context)
 
     return render(request, 'tu_template.html')
+
+from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
+from .forms import UserUpdateForm
+@login_required
+def profile_update_view(request):
+    if request.method == 'POST':
+        form = UserUpdateForm(request.POST, instance=request.user)
+        if form.is_valid():
+            form.save()
+            return redirect('pagprincipal') # O a la página de perfil si la creas
+    else:
+        form = UserUpdateForm(instance=request.user)
+    
+    return render(request, 'profile_update.html', {'form': form})
