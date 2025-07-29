@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resultado del Quiz</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; text-align: center; }
+        .resultado { margin-top: 50px; padding: 30px; border: 2px solid #28a745; border-radius: 10px; display: inline-block; background-color: #e6ffe6; }
+        h1 { color: #28a745; }
+        p { font-size: 1.2em; }
+        a { display: inline-block; margin-top: 20px; padding: 10px 20px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px; }
+        a:hover { background-color: #0056b3; }
+    </style>
+</head>
+<body>
+    <div class="resultado">
+        <h1>¡Quiz Terminado!</h1>
+        <p>Has obtenido una puntuación de **{{ puntuacion }}** de **{{ total_preguntas }}** preguntas.</p>
+        <a href="{% url 'preguntas:quiz_view' %}">Volver a Intentar</a>
+    </div>
+</body>
+</html>

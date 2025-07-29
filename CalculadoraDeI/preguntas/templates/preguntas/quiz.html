@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Quiz</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .pregunta { margin-bottom: 20px; padding: 15px; border: 1px solid #ddd; border-radius: 5px; background-color: #f9f9f9; }
+        .pregunta p { font-weight: bold; margin-bottom: 10px; }
+        .opcion-vf label { margin-right: 15px; }
+        .opcion-om label { display: block; margin-bottom: 5px; }
+        button { padding: 10px 20px; background-color: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        button:hover { background-color: #0056b3; }
+    </style>
+</head>
+<body>
+    <h1>¡Bienvenido al Quiz!</h1>
+    <form method="post">
+        {% csrf_token %}
+        {% for pregunta in preguntas %}
+            <div class="pregunta">
+                <p>{{ forloop.counter }}. {{ pregunta.texto_pregunta }}</p>
+                {% if pregunta.tipo_pregunta == 'VF' %}
+                    <div class="opcion-vf">
+                        <input type="radio" id="pregunta_{{ pregunta.id }}_true" name="pregunta_{{ pregunta.id }}" value="true" required>
+                        <label for="pregunta_{{ pregunta.id }}_true">Verdadero</label>
+                        <input type="radio" id="pregunta_{{ pregunta.id }}_false" name="pregunta_{{ pregunta.id }}" value="false">
+                        <label for="pregunta_{{ pregunta.id }}_false">Falso</label>
+                    </div>
+                {% elif pregunta.tipo_pregunta == 'OM' %}
+                    <div class="opcion-om">
+                        {% for opcion in pregunta.opciones.all %}
+                            <input type="radio" id="opcion_{{ opcion.id }}" name="pregunta_{{ pregunta.id }}" value="{{ opcion.id }}" required>
+                            <label for="opcion_{{ opcion.id }}">{{ opcion.texto_opcion }}</label><br>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+        {% endfor %}
+        <button type="submit">Terminar Quiz</button>
+    </form>
+</body>
+</html>

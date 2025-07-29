@@ -1,9 +1,10 @@
 from django.contrib import admin
-from django.urls import path
+from django.urls import include, path
 from CalculadoraApp import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('quiz/', include('preguntas.urls', namespace='preguntas')),
 
 
 
