@@ -1,0 +1,162 @@
+{% extends 'base.html' %} 
+{% load static %}
+{% load mathfilters %}
+{% block title %}Quiz de Preguntas{% endblock title %}
+
+{% block extra_css %}
+{# Aquí puedes poner CSS específico para el quiz, si quieres #}
+<style>
+    .quiz-container {
+        margin: 20px auto;
+        padding: 30px;
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        max-width: 700px; /* Ancho máximo para el contenido del quiz */
+        text-align: left; /* Alineación de texto por defecto */
+    }
+    .quiz-header {
+        text-align: center;
+        margin-bottom: 25px;
+        color: #333;
+    }
+    .quiz-header h1 {
+        font-size: 2.2em;
+        margin-bottom: 10px;
+    }
+    .pregunta {
+        margin-bottom: 25px;
+        padding: 20px;
+        border: 1px solid #e0e0e0;
+        border-radius: 6px;
+        background-color: #fcfcfc;
+    }
+    .pregunta p {
+        font-weight: bold;
+        font-size: 1.15em;
+        margin-bottom: 15px;
+        line-height: 1.5;
+    }
+    .opcion-vf label, .opcion-om label {
+        display: block;
+        margin-bottom: 12px;
+        font-size: 1em;
+        cursor: pointer;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        transition: background-color 0.3s ease;
+    }
+    .opcion-vf label:hover, .opcion-om label:hover {
+        background-color: #e6f7ff;
+    }
+    .opcion-vf input[type="radio"], .opcion-om input[type="radio"] {
+        margin-right: 10px;
+        vertical-align: middle;
+    }
+    .quiz-controls {
+        text-align: center;
+        margin-top: 30px;
+    }
+    .quiz-controls button {
+        padding: 12px 25px;
+        font-size: 1.1em;
+        margin: 0 10px;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+    .quiz-controls button[type="submit"] {
+        background-color: #28a745;
+        color: white;
+        border: none;
+    }
+    .quiz-controls button[type="submit"]:hover {
+        background-color: #218838;
+    }
+    .quiz-controls button[name="siguiente_pregunta"] {
+        background-color: #007bff;
+        color: white;
+        border: none;
+    }
+    .quiz-controls button[name="siguiente_pregunta"]:hover {
+        background-color: #0056b3;
+    }
+    .progreso {
+        text-align: center;
+        margin-bottom: 20px;
+        font-size: 1.1em;
+        color: #555;
+    }
+</style>
+{% endblock extra_css %}
+
+{% block content %}
+<div class="centered-calculator"> {# Reutiliza la clase para el centrado general #}
+    <div class="calculator-card quiz-container"> {# Usa calculator-card y quiz-container para estilos #}
+        <div class="quiz-header">
+            <h1>¡Bienvenido al Quiz!</h1>
+            <p class="progreso">Pregunta {{ pregunta_actual_idx|add:1 }} de {{ total_preguntas }}</p>
+        </div>
+
+        <form method="post" id="quizForm">
+            {% csrf_token %}
+            {# Campo oculto para llevar el índice de la pregunta actual #}
+            <input type="hidden" name="pregunta_actual_idx" value="{{ pregunta_actual_idx }}">
+            {# Campo oculto para llevar las respuestas ya contestadas #}
+            {% for id, resp in respuestas_contestadas.items %}
+                <input type="hidden" name="respuesta_{{ id }}" value="{{ resp }}">
+            {% endfor %}
+
+            {% if pregunta %} {# Solo muestra la pregunta si existe #}
+                <div class="pregunta">
+                    <p>{{ pregunta_actual_idx|add:1 }}. {{ pregunta.texto_pregunta }}</p>
+                    {% if pregunta.tipo_pregunta == 'VF' %}
+                        <div class="opcion-vf">
+                            <input type="radio" id="pregunta_{{ pregunta.id }}_true" name="respuesta_pregunta_{{ pregunta.id }}" value="true" required>
+                            <label for="pregunta_{{ pregunta.id }}_true">Verdadero</label>
+                            <input type="radio" id="pregunta_{{ pregunta.id }}_false" name="respuesta_pregunta_{{ pregunta.id }}" value="false">
+                            <label for="pregunta_{{ pregunta.id }}_false">Falso</label>
+                        </div>
+                    {% elif pregunta.tipo_pregunta == 'OM' %}
+                        <div class="opcion-om">
+                            {% for opcion in pregunta.opciones.all %}
+                                <input type="radio" id="opcion_{{ opcion.id }}" name="respuesta_pregunta_{{ pregunta.id }}" value="{{ opcion.id }}" required>
+                                <label for="opcion_{{ opcion.id }}">{{ opcion.texto_opcion }}</label><br>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            {% else %}
+                <p>No hay preguntas disponibles.</p>
+            {% endif %}
+
+            <div class="quiz-controls">
+                {% if pregunta_actual_idx < total_preguntas|sub:1 %} {# Si no es la última pregunta #}
+                    <button type="submit" name="siguiente_pregunta">Siguiente Pregunta</button>
+                {% else %} {# Es la última pregunta #}
+                    <button type="submit" name="terminar_quiz">Terminar Quiz</button>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock content %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        
+        const quizForm = document.getElementById('quizForm');
+        if (quizForm) {
+            quizForm.addEventListener('submit', function(event) {
+                const radios = this.querySelectorAll('input[type="radio"]:checked');
+                if (radios.length === 0) {
+                    alert('Por favor, selecciona una opción antes de continuar.');
+                    event.preventDefault(); 
+                }
+            });
+        }
+    });
+</script>
+{% endblock extra_js %}

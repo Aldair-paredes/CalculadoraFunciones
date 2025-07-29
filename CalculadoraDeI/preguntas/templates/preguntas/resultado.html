@@ -1,0 +1,24 @@
+{% extends 'base.html' %} {# ¡Extiende tu plantilla base! #}
+
+{% block title %}Resultado del Quiz{% endblock title %}
+
+{% block extra_css %}
+<style>
+    body { font-family: Arial, sans-serif; margin: 20px; text-align: center; }
+    .resultado { margin-top: 50px; padding: 30px; border: 2px solid #28a745; border-radius: 10px; display: inline-block; background-color: #e6ffe6; }
+    h1 { color: #28a745; }
+    p { font-size: 1.2em; }
+    a { display: inline-block; margin-top: 20px; padding: 10px 20px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px; }
+    a:hover { background-color: #0056b3; }
+</style>
+{% endblock extra_css %}
+
+{% block content %}
+<div class="centered-calculator">
+    <div class="calculator-card result-card">
+        <h1>¡Quiz Terminado!</h1>
+        <p>Has obtenido una puntuación de **{{ puntuacion }}** de **{{ total_preguntas }}** preguntas.</p>
+        <a href="{% url 'preguntas:quiz_view' %}?reiniciar=true">Volver a Intentar</a> 
+    </div>
+</div>
+{% endblock content %}
