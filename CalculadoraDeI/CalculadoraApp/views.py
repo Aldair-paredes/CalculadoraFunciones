@@ -907,23 +907,29 @@ def analizar_funcion_view(request):
                 else:
                     derivada = sp.diff(f, x)
 
-            limite = sp.limit(f, x, punto_limite)
+                    resultado += f"Función: f(x) = {f}\n"
+                    resultado += f"Derivada: f'(x) = {derivada}\n"
 
-            puntos = np.linspace(intervalo_min, intervalo_max, 100)
-            derivadas_numericas = [float(derivada.subs(x, punto)) for punto in puntos]
-            es_decreciente = all(valor <= 0 for valor in derivadas_numericas)
+                    # Soluciones
+                    soluciones = sp.solve(f, x)
+                    if soluciones:
+                        resultado += f"Soluciones f(x) = 0: {soluciones}\n"
+                    else:
+                        resultado += "No se encontraron soluciones reales para f(x) = 0.\n"
 
-            resultado = (
-                f"Límite de f(x) cuando x → {punto_limite}: {limite}\n"
-                f"Derivada: f'(x) = {derivada}\n"
-                f"Conclusión: {'La función es decreciente en todo el intervalo.' if es_decreciente else 'La función no es completamente decreciente en el intervalo.'}"
-            )
+                    # Límite
+                    try:
+                        punto_lim = float(limit_point_input)
+                        lim = sp.limit(f, x, punto_lim)
+                        resultado += f"Límite cuando x→{punto_lim}: {lim}\n"
+                    except Exception as e:
+                        resultado += "No se pudo calcular el límite.\n"
 
-            grafico_url = None
+                    # Análisis decreciente
+                    puntos = np.linspace(a, b, 300)
 
-            if graficar:
-                f_lambd = sp.lambdify(x, f, modules=['numpy'])
-                deriv_lambd = sp.lambdify(x, derivada, modules=['numpy'])
+                    f_lamb = sp.lambdify(x, f, 'numpy')
+                    df_lamb = sp.lambdify(x, derivada, 'numpy')
 
                     y_f = f_lamb(puntos)
                     y_df = df_lamb(puntos)
@@ -1140,6 +1146,11 @@ def login_view(request):
 def logout_view(request):
     logout(request)
     return redirect('pagprincipal')
+
+from django.shortcuts import render
+
+def teorias(request):
+    return render(request, 'teorias.html')  # Asegúrate que el archivo esté en la carpeta templates/
 
 # En tu archivo views.py
 
