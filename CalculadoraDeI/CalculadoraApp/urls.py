@@ -1,5 +1,8 @@
 from django.urls import path
 from CalculadoraApp import views
+from .views import registro_view, login_view, logout_view
+from django.contrib import admin
+
 
 urlpatterns = [
     path('', views.pagprincipal, name='pagprincipal'),
@@ -12,12 +15,16 @@ urlpatterns = [
     path('calculadora-algebraica/', views.calculadora_algebraica, name='calculadora_algebraica'),
     path('inyectiva/', views.funcion_inyectiva, name='inyectiva'),
     path('teorias/', views.teorias, name='teorias'),
-    path('funcion_creciente',views.creciente_view, name='funcion_creciente'),
+    path('funcion_creciente', views.creciente_view, name='funcion_creciente'),
     path('continuidad/', views.calculadora_continuidad, name='continuidad'),
-        path('login/', views.login_view, name='login'),
-    path('registro/', views.registro_view, name='registro'),
+    path('decreciente/', views.decreciente, name='decreciente'),
+    path('admin/', admin.site.urls),
+    path('accounts/login/', views.login_view, name='accounts_login'),
+    path('login/', views.login_view, name='login'),
     path('logout/', views.logout_view, name='logout'),
-    path('alumno/', views.vista_alumno, name='vista_alumno'),
-path('maestro/', views.vista_maestro, name='vista_maestro'),
-    path('decreciente/', views.decreciente, name='decreciente')
+    path('registro/', views.registro_view, name='registro'),
+
+    # Esto evita el error de /accounts/login
+    path('accounts/login/', views.login_view, name='accounts_login'),
+
 ]
