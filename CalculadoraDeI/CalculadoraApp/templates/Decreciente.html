@@ -4,236 +4,352 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Analizador de Función Decreciente</title>
+    <title>Analizador de Función Decreciente </title>
+    
     <link href="{% static 'css/navbar.css' %}" rel="stylesheet" />
     <link href="{% static 'css/explicita.css' %}" rel="stylesheet" />
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" />
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0KOVEMeaYGTAnRtwePcSGEZa94Tpg4ad+2GoCo+YDQ+hEP3O7MlbS" crossorigin="anonymous">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" integrity="sha384-+VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4+/RRE05" crossorigin="anonymous"
+        onload="renderMathInElement(document.body);"></script>
+
     <style>
-        /* Este estilo es un remanente del script, no afecta a este formulario pero se mantiene por consistencia */
-        .operation-variable, .operation-limit, .operation-evaluar { display: none; }
+        /* Estilos para la imagen de la gráfica (existentes) */
+        .graph-card {
+            background-color: #2c3e50;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+        }
+        .graph-img { max-width: 100%; height: auto; border-radius: 8px; margin-top: 10px; }
+
+        /* --- NUEVOS ESTILOS PARA LA GUÍA DERECHA --- */
+        .guide-sidebar {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 320px;
+            height: 100vh;
+            background-color: #2c3e50;
+            padding: 20px;
+            box-shadow: -5px 0 15px rgba(0,0,0,0.5);
+            transform: translateX(100%);
+            transition: transform 0.4s ease-in-out;
+            z-index: 1040;
+            overflow-y: auto;
+            color: #ecf0f1;
+        }
+        .guide-sidebar.active {
+            transform: translateX(0);
+        }
+        .guide-sidebar h3 {
+            color: #1abc9c;
+            border-bottom: 2px solid #1abc9c;
+            padding-bottom: 10px;
+        }
+        .guide-sidebar .step {
+            margin-bottom: 1.2rem;
+        }
+        .guide-sidebar .step h4 {
+            font-size: 1.1rem;
+            color: #bdc3c7;
+        }
+        .toggle-guide-btn {
+            position: fixed;
+            top: 15px;
+            right: 15px;
+            z-index: 1050;
+            background-color: #1abc9c;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            cursor: pointer;
+        }
+        .close-guide-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            position: absolute;
+            top: 10px;
+            right: 15px;
+        }
     </style>
 </head>
 <body>
+    <button class="toggle-guide-btn" id="toggleGuideBtn" title="Mostrar guía paso a paso">
+        <i class="bi bi-question-lg"></i>
+    </button>
+    
     <div class="app-container">
         <button class="hamburger-menu" type="button" aria-label="Toggle navigation">
-            <i class="bi bi-list"></i>
+             <i class="bi bi-list"></i>
         </button>
-
+        
         <nav class="sidebar" id="sidebarNav">
-            <button class="close-sidebar-btn" type="button" aria-label="Cerrar menú">
-                <i class="bi bi-x-lg"></i>
-            </button>
-            <a class="navbar-brand" href="#">
-                <img src="{% static 'img/WOLF.png' %}" alt="Logo UNID" />
-                <span>UNID</span>
-            </a>
-            <ul class="navbar-nav w-100">
-                <li class="nav-item"><a class="nav-link" href="{% url 'pagprincipal' %}"><i class="bi bi-house-door-fill me-2"></i>Inicio</a></li>
-                <li class="nav-item"><a class="nav-link active" href="{% url 'temas' %}"><i class="bi bi-journal-text me-2"></i>Temas</a></li>
-                <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-person-lines-fill me-2"></i>Cuestionario</a></li>
-                <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-people-fill me-2"></i>Grupo</a></li>
-                <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-chat-dots-fill me-2"></i>Testimonios</a></li>
-                <li class="nav-item"><a class="nav-link" href="{% url 'teorias' %}"><i class="bi bi-book-fill me-2"></i>Teorías</a></li>
-            </ul>
-            <div class="btn-group mt-auto w-100">
-                <a href="{% url 'login' %}" class="btn btn-primary d-flex align-items-center justify-content-center">
-                    <i class="bi bi-box-arrow-in-right me-2"></i>Iniciar sesión
-                </a>
-                <a href="{% url 'registro' %}" class="btn btn-light d-flex align-items-center justify-content-center">
-                    <i class="bi bi-person-plus-fill me-2"></i>Registrarse
-                </a>
-            </div>
+             <button class="close-sidebar-btn" type="button" aria-label="Cerrar menú">
+                 <i class="bi bi-x-lg"></i>
+             </button>
+             <a class="navbar-brand" href="#">
+                 <img src="{% static 'img/WOLF.png' %}" alt="Logo UNID" />
+                 <span>UNID</span>
+             </a>
+             <ul class="navbar-nav w-100">
+                 <li class="nav-item">
+                     <a class="nav-link" href="{% url 'pagprincipal' %}"><i class="bi bi-house-door-fill me-2"></i>Inicio</a>
+                 </li>
+                 <li class="nav-item">
+                     <a class="nav-link active" href="{% url 'temas' %}"><i class="bi bi-journal-text me-2"></i>Temas</a>
+                 </li>
+                 <li class="nav-item">
+                     <a class="nav-link" href="#"><i class="bi bi-person-lines-fill me-2"></i>Cuestionario</a>
+                 </li>
+                 <li class="nav-item">
+                     <a class="nav-link" href="#"><i class="bi bi-people-fill me-2"></i>Grupo</a>
+                 </li>
+                 <li class="nav-item">
+                     <a class="nav-link" href="#"><i class="bi bi-chat-dots-fill me-2"></i>Testimonios</a>
+                 </li>
+                 <li class="nav-item">
+                     <a class="nav-link" href="{% url 'teorias' %}"><i class="bi bi-book-fill me-2"></i>Teorías</a>
+                 </li>
+             </ul>
+             <div class="btn-group mt-auto w-100">
+                 <a href="{% url 'login' %}" class="btn btn-primary d-flex align-items-center justify-content-center">
+                     <i class="bi bi-box-arrow-in-right me-2"></i>Iniciar sesión
+                 </a>
+                 <a href="{% url 'registro' %}" class="btn btn-light d-flex align-items-center justify-content-center">
+                     <i class="bi bi-person-plus-fill me-2"></i>Registrarse
+                 </a>
+             </div>
         </nav>
 
         <main class="main-content">
             <div class="centered-calculator">
                 <div class="calculator-card">
-                    <div class="calculator-header">
-                        <h1>Analizador de Función Decreciente</h1>
-                        <p class="subtitle">Ingresa la función, intervalo y punto para analizar.</p>
-                    </div>
-
-                    <form action="" method="post" class="calculator-form" id="calcForm">
-                        {% csrf_token %}
-                        <div class="form-group full-width">
-                            <label for="functionInput"><i class="bi bi-function"></i> Función (en x)</label>
-                            <input type="text" id="functionInput" name="function_input" placeholder="Ej: -2*x + 3" required
-                                value="{{ function_input|default_if_none:'' }}">
-                        </div>
-
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="intervalMinInput"><i class="bi bi-arrow-down-right-circle"></i> Límite inferior</label>
-                                <input type="number" step="any" id="intervalMinInput" name="interval_min_input" placeholder="Ej: -5" required
-                                    value="{{ interval_min_input|default_if_none:'' }}">
-                            </div>
-                            <div class="form-group">
-                                <label for="intervalMaxInput"><i class="bi bi-arrow-up-right-circle"></i> Límite superior</label>
-                                <input type="number" step="any" id="intervalMaxInput" name="interval_max_input" placeholder="Ej: 5" required
-                                    value="{{ interval_max_input|default_if_none:'' }}">
-                            </div>
-                        </div>
-
-                        <div class="form-row">
+                     <div class="calculator-header">
+                         <h1>Analizador de Función Decreciente</h1>
+                         <p class="subtitle">Introduce una función y un intervalo para analizar su comportamiento.</p>
+                     </div>
+                     <form action="{% url 'decreciente' %}" method="post" class="calculator-form" id="calcForm">
+                         {% csrf_token %}
+                         <div class="form-group full-width">
+                             <label for="functionInput"><i class="bi bi-function"></i> Función (en variable x)</label>
+                             <input type="text" id="functionInput" name="function_input" placeholder="Ej: -2*x + 3" required value="{{ function_input|default_if_none:'' }}">
+                         </div>
+                         <div class="form-row">
                              <div class="form-group">
-                                <label for="limitPointInput"><i class="bi bi-infinity"></i> Punto del Límite</label>
-                                <input type="number" step="any" id="limitPointInput" name="limit_point_input" placeholder="Ej: 2" required
-                                    value="{{ limit_point_input|default_if_none:'' }}">
-                            </div>
-                            <div class="form-group">
-                                <label for="graficarInput"><i class="bi bi-image"></i> ¿Graficar?</label>
-                                <select id="graficarInput" name="graficar_input" required>
-                                    <option value="n" {% if graficar_input != 's' %}selected{% endif %}>No</option>
-                                    <option value="s" {% if graficar_input == 's' %}selected{% endif %}>Sí</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <button type="submit" class="calculate-btn"><i class="bi bi-calculator"></i> Analizar Función</button>
-                        <button type="button" id="clearBtn" class="btn btn-secondary ms-2">Borrar</button>
-                    </form>
+                                 <label for="intervalMinInput"><i class="bi bi-arrow-down-right-circle"></i> Límite inferior</label>
+                                 <input type="number" step="any" id="intervalMinInput" name="interval_min_input" placeholder="Ej: -5" required value="{{ interval_min_input|default_if_none:'' }}">
+                             </div>
+                             <div class="form-group">
+                                 <label for="intervalMaxInput"><i class="bi bi-arrow-up-right-circle"></i> Límite superior</label>
+                                 <input type="number" step="any" id="intervalMaxInput" name="interval_max_input" placeholder="Ej: 5" required value="{{ interval_max_input|default_if_none:'' }}">
+                             </div>
+                         </div>
+                         <div class="form-row">
+                              <div class="form-group">
+                                 <label for="limitPointInput"><i class="bi bi-infinity"></i> Punto para límite</label>
+                                 <input type="number" step="any" id="limitPointInput" name="limit_point_input" placeholder="Ej: 2" required value="{{ limit_point_input|default_if_none:'' }}">
+                              </div>
+                              <div class="form-group">
+                                 <label for="graficarInput"><i class="bi bi-image-alt"></i> ¿Graficar?</label>
+                                 <select id="graficarInput" name="graficar_input" required>
+                                     <option value="s" {% if graficar_input == 's' %}selected{% endif %}>Sí</option>
+                                     <option value="n" {% if graficar_input != 's' %}selected{% endif %}>No</option>
+                                 </select>
+                              </div>
+                         </div>
+                         <button type="submit" class="calculate-btn"><i class="bi bi-search"></i> Analizar Función</button>
+                         <button type="button" id="clearBtn" class="btn btn-secondary ms-2">Borrar</button>
+                     </form>
                 </div>
-
-                {% if resultado or error or grafico_url %}
-                <div class="result-card" id="resultCard" style="display: block;">
+                {% if resultado or error %}
+                <div class="result-card" id="resultCard">
                     <div class="result-header">
                         <div class="terminal-controls">
                             <span class="control-dot red"></span>
                             <span class="control-dot yellow"></span>
                             <span class="control-dot green"></span>
                         </div>
-                        <h3>Resultado</h3>
+                        <h3>Resultado del Análisis</h3>
                         <button class="copy-btn" title="Copiar resultado"><i class="bi bi-clipboard"></i></button>
                     </div>
                     <div class="result-content">
-                        <div id="resultOutput">
+                        <pre id="resultOutput">
+                            {% if resultado %}
+                                <div class="result-line"><span class="result-label">Análisis:</span><span class="result-value success">{{ resultado }}</span></div>
+                            {% endif %}
                             {% if error %}
                                 <div class="result-line"><span class="result-label">Error:</span><span class="result-value error">{{ error }}</span></div>
-                            {% else %}
-                                {% if function_input %}
-                                <div class="result-line"><span class="result-label">Función:</span><span class="result-value">{{ function_input }}</span></div>
-                                {% endif %}
-                                {% if resultado %}
-                                <div class="result-line"><span class="result-label">Análisis:</span></div>
-                                <pre class="result-value success" style="white-space: pre-wrap; margin-left: 15px;">{{ resultado }}</pre>
-                                {% endif %}
-                                {% if grafico_url %}
-                                <div class="text-center mt-3">
-                                    <h5 class="text-white-50">Gráfica generada:</h5>
-                                    <img src="{{ grafico_url }}" alt="Gráfica de la función" class="img-fluid border rounded" />
-                                </div>
-                                {% endif %}
                             {% endif %}
-                        </div>
+                        </pre>
                     </div>
                 </div>
-                {% else %}
-                <div class="result-card" id="resultCard" style="display: none;"></div>
+                {% endif %}
+                {% if grafico_url %}
+                <div class="graph-card" id="graphCard">
+                     <h3>Gráfica Generada</h3>
+                     <img class="graph-img" src="{{ grafico_url }}" alt="Gráfica de la función" />
+                </div>
                 {% endif %}
             </div>
         </main>
+        
+        <aside class="guide-sidebar" id="guideSidebar">
+            <button class="close-guide-btn" id="closeGuideBtn" title="Cerrar guía"><i class="bi bi-x-lg"></i></button>
+            <h3>Guía de Análisis 📝</h3>
+            <div class="step">
+                <h4>Paso 1: La Primera Derivada</h4>
+                <p>
+                    El comportamiento de una función $f(x)$ se determina con su primera derivada, $f'(x)$.
+                    El criterio es simple:
+                </p>
+                <ul>
+                    <li>Si $f'(x) < 0$ en un intervalo, $f(x)$ es <b>decreciente</b> en ese intervalo.</li>
+                    <li>Si $f'(x) > 0$ en un intervalo, $f(x)$ es <b>creciente</b> en ese intervalo.</li>
+                </ul>
+            </div>
+            <div class="step">
+                <h4>Paso 2: Puntos Críticos</h4>
+                <p>
+                    Debes encontrar los puntos críticos. Estos son los valores de $x$ donde la primera derivada es cero o no existe:
+                    $$ f'(x) = 0 \quad \text{o} \quad f'(x) \text{ no está definida} $$
+                    Estos puntos dividen el dominio en los intervalos que vamos a analizar.
+                </p>
+            </div>
+            <div class="step">
+                <h4>Paso 3: Analizar los Intervalos</h4>
+                <p>
+                    Para cada intervalo creado en el paso anterior, elige un <b>valor de prueba</b> cualquiera que esté dentro de ese intervalo.
+                </p>
+            </div>
+             <div class="step">
+                <h4>Paso 4: Evaluar el Signo</h4>
+                <p>
+                    Sustituye cada valor de prueba en la primera derivada $f'(x)$ y observa el signo del resultado.
+                </p>
+                 <ul>
+                     <li><b>Signo negativo (-):</b> La función original $f(x)$ es decreciente en todo ese intervalo.</li>
+                     <li><b>Signo positivo (+):</b> La función original $f(x)$ es creciente en todo ese intervalo.</li>
+                 </ul>
+            </div>
+            <div class="step">
+                <h4>Paso 5: Conclusión</h4>
+                <p>
+                    Con base en el análisis de signos, se determinan los intervalos donde la función es decreciente. Esta calculadora realiza estos pasos automáticamente para el intervalo que tú proporcionas.
+                </p>
+            </div>
+        </aside>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            const resultCard = document.getElementById('resultCard');
-            const hasResultOrError = "{{ resultado|yesno:'true,false' }}" === "true" || "{{ error|yesno:'true,false' }}" === "true" || "{{ grafico_url|yesno:'true,false' }}" === "true";
-            if (resultCard && hasResultOrError) {
-                setTimeout(() => {
-                    resultCard.style.display = 'block';
-                    resultCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }, 100);
+            // --- Lógica del sidebar y menú hamburguesa ---
+            const hamburgerBtn = document.querySelector('.hamburger-menu');
+            const closeSidebarBtn = document.querySelector('.close-sidebar-btn');
+            const sidebar = document.getElementById('sidebarNav');
+            const mainContent = document.querySelector('.main-content');
+
+            if (sidebar && mainContent && hamburgerBtn) {
+                function setSidebarState(isOpen) {
+                    if (isOpen) {
+                        sidebar.classList.add('active');
+                        hamburgerBtn.style.display = 'none';
+                        if (closeSidebarBtn) closeSidebarBtn.style.display = 'block';
+                        mainContent.style.marginLeft = '260px';
+                    } else {
+                        sidebar.classList.remove('active');
+                        hamburgerBtn.style.display = 'block';
+                        if (closeSidebarBtn) closeSidebarBtn.style.display = 'none';
+                        mainContent.style.marginLeft = '0';
+                    }
+                }
+                function toggleSidebar() {
+                    setSidebarState(!sidebar.classList.contains('active'));
+                }
+                hamburgerBtn.addEventListener('click', toggleSidebar);
+                if (closeSidebarBtn) {
+                    closeSidebarBtn.addEventListener('click', toggleSidebar);
+                }
+                function handleResizeAndInitialLoad() {
+                    if (window.innerWidth > 991.98) {
+                        setSidebarState(true);
+                    } else {
+                        setSidebarState(false);
+                    }
+                }
+                handleResizeAndInitialLoad();
+                window.addEventListener('resize', handleResizeAndInitialLoad);
             }
 
-            // Esta función es del script original y no aplica aquí, pero no causa problemas.
-            function actualizarCamposSegunOperacion() { }
-            actualizarCamposSegunOperacion();
+            // --- Lógica para la Guía Derecha ---
+            const toggleGuideBtn = document.getElementById('toggleGuideBtn');
+            const closeGuideBtn = document.getElementById('closeGuideBtn');
+            const guideSidebar = document.getElementById('guideSidebar');
+
+            if (toggleGuideBtn && guideSidebar && closeGuideBtn) {
+                 function toggleGuide() {
+                    guideSidebar.classList.toggle('active');
+                }
+                toggleGuideBtn.addEventListener('click', toggleGuide);
+                closeGuideBtn.addEventListener('click', toggleGuide);
+            }
+
+            // --- Lógica de resultados y botones ---
+            const resultCard = document.getElementById('resultCard');
+            const graphCard = document.getElementById('graphCard');
+            const hasResultOrError = "{{ resultado|yesno:'true,false' }}" === "true" || "{{ error|yesno:'true,false' }}" === "true";
+            const hasGraph = "{{ grafico_url|yesno:'true,false' }}" === "true";
+
+            if (resultCard && hasResultOrError) {
+                resultCard.style.display = 'block';
+            }
+            if (graphCard && hasGraph) {
+                graphCard.style.display = 'block';
+            }
+            if(hasResultOrError || hasGraph) {
+                setTimeout(() => {
+                    const firstCardToShow = document.querySelector('.result-card, .graph-card');
+                    if(firstCardToShow) {
+                       firstCardToShow.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                }, 100);
+            }
 
             const copyBtn = document.querySelector('.copy-btn');
             if (copyBtn) {
                 copyBtn.addEventListener('click', function () {
-                    const resultTextElement = document.querySelector('pre.result-value');
-                    if (resultTextElement) {
-                        navigator.clipboard.writeText(resultTextElement.textContent.trim()).then(() => {
-                            const originalIcon = this.innerHTML;
-                            this.innerHTML = '<i class="bi bi-check-lg"></i>';
-                            setTimeout(() => {
-                                this.innerHTML = originalIcon;
-                            }, 2000);
-                        });
-                    }
+                    const resultText = document.getElementById('resultOutput').innerText;
+                    navigator.clipboard.writeText(resultText).then(() => {
+                        const originalIcon = this.innerHTML;
+                        this.innerHTML = '<i class="bi bi-check-lg"></i>';
+                        setTimeout(() => { this.innerHTML = originalIcon; }, 2000);
+                    });
                 });
             }
 
             const clearBtn = document.getElementById('clearBtn');
             if (clearBtn) {
                 clearBtn.addEventListener('click', () => {
-                    const form = document.getElementById('calcForm');
-                    form.reset();
-                    form.querySelectorAll('input[type="text"], input[type="number"]').forEach(input => {
-                        input.value = '';
-                    });
-                    document.getElementById('graficarInput').value = 'n';
-                    
-                    if (resultCard) {
-                        resultCard.style.display = 'none';
-                        const resultOutput = document.getElementById('resultOutput');
-if(resultOutput) {
-                            resultOutput.innerHTML = '';
-                        }
-                    }
+                    document.getElementById('calcForm').reset();
+                    if (resultCard) resultCard.style.display = 'none';
+                    if (graphCard) graphCard.style.display = 'none';
                 });
             }
-
-            const hamburgerBtn = document.querySelector('.hamburger-menu');
-            const closeSidebarBtn = document.querySelector('.close-sidebar-btn');
-            const sidebar = document.getElementById('sidebarNav');
-            const mainContent = document.querySelector('.main-content');
-
-            if (!sidebar || !mainContent || !hamburgerBtn) {
-                console.error("Error: No se encontraron todos los elementos necesarios para el navbar.");
-                return;
-            }
-
-            function setSidebarState(isOpen) {
-                if (isOpen) {
-                    sidebar.classList.add('active');
-                    hamburgerBtn.style.display = 'none';
-                    if (closeSidebarBtn) {
-                        closeSidebarBtn.style.display = 'block';
-                    }
-                    mainContent.style.marginLeft = '260px';
-                } else {
-                    sidebar.classList.remove('active');
-                    hamburgerBtn.style.display = 'block';
-                    if (closeSidebarBtn) {
-                        closeSidebarBtn.style.display = 'none';
-                    }
-                    mainContent.style.marginLeft = '0';
-                }
-            }
-
-            function toggleSidebar() {
-                setSidebarState(!sidebar.classList.contains('active'));
-            }
-
-            hamburgerBtn.addEventListener('click', toggleSidebar);
-            if (closeSidebarBtn) {
-                closeSidebarBtn.addEventListener('click', toggleSidebar);
-            }
-
-            function handleResizeAndInitialLoad() {
-                if (window.innerWidth > 991.98) {
-                    setSidebarState(true);
-                } else {
-                    setSidebarState(false);
-                }
-            }
-
-            handleResizeAndInitialLoad();
-            window.addEventListener('resize', handleResizeAndInitialLoad);
         });
     </script>
 </body>
