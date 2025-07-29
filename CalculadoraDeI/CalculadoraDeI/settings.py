@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'CalculadoraApp.apps.CalculadoraappConfig',
     'preguntas.apps.PreguntasConfig',
+    'mathfilters', 
 ]
 
 
