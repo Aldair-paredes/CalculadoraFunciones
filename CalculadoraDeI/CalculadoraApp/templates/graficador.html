@@ -47,10 +47,8 @@
             <ul class="navbar-nav w-100">
                 <li class="nav-item"><a class="nav-link" href="{% url 'pagprincipal' %}"><i class="bi bi-house-door-fill me-2"></i>Inicio</a></li>
                 <li class="nav-item"><a class="nav-link active" href="{% url 'temas' %}"><i class="bi bi-journal-text me-2"></i>Temas</a></li>
-                <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-person-lines-fill me-2"></i>Cuestionario</a></li>
-                <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-people-fill me-2"></i>Grupo</a></li>
-                <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-chat-dots-fill me-2"></i>Testimonios</a></li>
-                <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-file-earmark-text-fill me-2"></i>Documentos</a></li>
+                <li class="nav-item"><a class="nav-link" href="{% url 'preguntas:quiz_view' %}"><i class="bi bi-person-lines-fill me-2"></i>Cuestionario</a></li>
+                <li class="nav-item"><a class="nav-link" href="{% url 'teorias' %}"><i class="bi bi-file-earmark-text-fill me-2"></i>Teorías</a></li>
             </ul>
             <div class="btn-group mt-auto w-100">
                 <a href="#" class="btn btn-primary d-flex align-items-center justify-content-center"><i class="bi bi-box-arrow-in-right me-2"></i>Iniciar sesión</a>
@@ -59,11 +57,11 @@
         </nav>
 
         <main class="main-content">
-            <div class="centered-calculator"> {# Reutilizamos la clase para centrar y dar estilo de tarjeta #}
+            <div class="centered-calculator"> 
                 <div class="calculator-card">
                     <div class="calculator-header">
                         <h1>Graficador de Funciones</h1>
-                        <p class="subtitle">Tipos disponibles: lineal, cuadrática.</p>
+                        <p class="subtitle">Solo Grafica Funciones, Tipos disponibles: lineal, cuadrática.</p>
                     </div>
 
                     <form action="{% url 'graficador_funciones' %}" method="post" class="calculator-form" id="graphForm">
@@ -128,7 +126,7 @@
                         </div>
 
                         <button type="submit" class="calculate-btn"><i class="bi bi-graph-up"></i> Graficar</button>
-                        <button type="button" id="clearBtn" class="btn btn-secondary ms-2">Borrar todo</button>
+                        <button type="button" id="clearBtn" class="calculate-btn btn-secondary" style="background: var(--calc-color-mantle); margin-top: 1rem;"> <i class="bi bi-eraser-fill"></i>Borrar función</button>
                     </form>
                 </div>
 
@@ -141,7 +139,7 @@
                             <span class="control-dot green"></span>
                         </div>
                         <h3>Gráfica Generada</h3>
-                        {# No hay botón de copiar para la imagen, pero podrías añadir uno si quieres el URL de la imagen #}
+                        }
                     </div>
                     <div class="result-content graph-container">
                         {% if graph_url %}
@@ -206,8 +204,7 @@
                     }
                 });
             }
-
-            // Manejo del sidebar (igual que en tu original)
+ // Manejo del sidebar 
             const hamburgerBtn = document.querySelector('.hamburger-menu');
             const closeSidebarBtn = document.querySelector('.close-sidebar-btn');
             const sidebar = document.getElementById('sidebarNav');
@@ -215,20 +212,26 @@
 
             if (!sidebar || !mainContent || !hamburgerBtn) {
                 console.error("Error: No se encontraron todos los elementos necesarios para el navbar.");
-                return;
+                console.error("Sidebar:", sidebar, "Main Content:", mainContent, "Hamburger Button:", hamburgerBtn);
+                return; 
             }
+
 
             function setSidebarState(isOpen) {
                 if (isOpen) {
                     sidebar.classList.add('active');
-                    hamburgerBtn.style.display = 'none';
-                    if (closeSidebarBtn) closeSidebarBtn.style.display = 'block';
-                    mainContent.style.marginLeft = '260px';
+                    hamburgerBtn.style.display = 'none'; 
+                    if (closeSidebarBtn) {
+                        closeSidebarBtn.style.display = 'block';
+                    }
+                    mainContent.style.marginLeft = '260px'; 
                 } else {
                     sidebar.classList.remove('active');
-                    hamburgerBtn.style.display = 'block';
-                    if (closeSidebarBtn) closeSidebarBtn.style.display = 'none';
-                    mainContent.style.marginLeft = '0';
+                    hamburgerBtn.style.display = 'block'; 
+                    if (closeSidebarBtn) {
+                        closeSidebarBtn.style.display = 'none'; 
+                    }
+                    mainContent.style.marginLeft = '0'; 
                 }
             }
 
@@ -242,12 +245,18 @@
             }
 
             function handleResizeAndInitialLoad() {
-                setSidebarState(false);
+                if (window.innerWidth > 991.98) {
+                    setSidebarState(true); 
+                } else { 
+                    setSidebarState(false); 
+                }
             }
 
             handleResizeAndInitialLoad();
+
             window.addEventListener('resize', handleResizeAndInitialLoad);
         });
+            
     </script>
 </body>
 </html>
