@@ -865,184 +865,240 @@ def calculadora_continuidad(request):
     }
     return render(request, 'biyectiva.html', context)
 #Decreciente Agustin
-
 import sympy as sp
 import numpy as np
 import matplotlib.pyplot as plt
+import io
+import base64
+import re
 from django.shortcuts import render
-from django.conf import settings
-import os
-import uuid
 
-def decreciente(request):
+def preparar_expresion(expr_str):
+    expr_str = expr_str.replace('^', '**')
+    expr_str = re.sub(r'(\d)([a-zA-Z(])', r'\1*\2', expr_str)
+    expr_str = re.sub(r'(\))([a-zA-Z(])', r'\1*\2', expr_str)
+    return expr_str
+
+def analizar_funcion_view(request):
+    resultado = ''
+    error = None
+    grafico_url = None
+
     if request.method == 'POST':
-        try:
-            funcion_str = request.POST.get('funcion')
-            intervalo_min = float(request.POST.get('intervalo_min'))
-            intervalo_max = float(request.POST.get('intervalo_max'))
-            punto_limite = float(request.POST.get('punto_limite'))
-            graficar = request.POST.get('graficar') == 's'
+        function_input = request.POST.get('function_input', '').strip()
+        interval_min_input = request.POST.get('interval_min_input', '').strip()
+        interval_max_input = request.POST.get('interval_max_input', '').strip()
+        limit_point_input = request.POST.get('limit_point_input', '').strip()
+        graficar_input = request.POST.get('graficar_input', 'n')
 
-            x = sp.symbols('x')
-            f = sp.sympify(funcion_str)
-            derivada = sp.diff(f, x)
+        # Validar entradas
+        if not function_input or not interval_min_input or not interval_max_input or not limit_point_input:
+            error = "Por favor, completa todos los campos."
+        else:
+            try:
+                x = sp.symbols('x')
+                funcion_corregida = preparar_expresion(function_input)
+                f = sp.sympify(funcion_corregida)
 
-            limite = sp.limit(f, x, punto_limite)
-
-            puntos = np.linspace(intervalo_min, intervalo_max, 100)
-            derivadas_numericas = [float(derivada.subs(x, punto)) for punto in puntos]
-            es_decreciente = all(valor <= 0 for valor in derivadas_numericas)
-
-            resultado = (
-                f"Límite de f(x) cuando x → {punto_limite}: {limite}\n"
-                f"Derivada: f'(x) = {derivada}\n"
-                f"Conclusión: {'La función es decreciente en todo el intervalo.' if es_decreciente else 'La función no es completamente decreciente en el intervalo.'}"
-            )
-
-            grafico_url = None
-
-            if graficar:
-                f_lambd = sp.lambdify(x, f, modules=['numpy'])
-                deriv_lambd = sp.lambdify(x, derivada, modules=['numpy'])
-
-                y_f = f_lambd(puntos)
-                y_df = deriv_lambd(puntos)
-
-                if np.isscalar(y_f):
-                    y_f = np.full_like(puntos, y_f, dtype=float)
+                a = float(interval_min_input)
+                b = float(interval_max_input)
+                if a >= b:
+                    error = "El límite inferior debe ser menor que el superior."
                 else:
-                    y_f = np.array(y_f, dtype=float)
+                    derivada = sp.diff(f, x)
 
-                if np.isscalar(y_df):
-                    y_df = np.full_like(puntos, y_df, dtype=float)
-                else:
-                    y_df = np.array(y_df, dtype=float)
+                    resultado += f"Función: f(x) = {f}\n"
+                    resultado += f"Derivada: f'(x) = {derivada}\n"
 
-                plt.figure(figsize=(10, 6))
-                plt.plot(puntos, y_f, label='f(x)', color='blue')
-                plt.plot(puntos, y_df, label="f'(x)", color='red', linestyle='--')
-                plt.axhline(0, color='black', linewidth=0.5)
-                plt.title('Función y su derivada')
-                plt.xlabel('x')
-                plt.ylabel('Valor')
-                plt.legend()
-                plt.grid(True)
+                    # Soluciones
+                    soluciones = sp.solve(f, x)
+                    if soluciones:
+                        resultado += f"Soluciones f(x) = 0: {soluciones}\n"
+                    else:
+                        resultado += "No se encontraron soluciones reales para f(x) = 0.\n"
 
-                filename = f"grafico_{uuid.uuid4().hex}.png"
-                filepath = os.path.join(settings.MEDIA_ROOT, filename)
-                plt.savefig(filepath)
-                plt.close()
+                    # Límite
+                    try:
+                        punto_lim = float(limit_point_input)
+                        lim = sp.limit(f, x, punto_lim)
+                        resultado += f"Límite cuando x→{punto_lim}: {lim}\n"
+                    except Exception as e:
+                        resultado += "No se pudo calcular el límite.\n"
 
-                grafico_url = settings.MEDIA_URL + filename
+                    # Análisis decreciente
+                    puntos = np.linspace(a, b, 300)
 
-            return render(request, 'Decreciente.html', {
-                'resultado': resultado,
-                'grafico_url': grafico_url,
-            })
+                    f_lamb = sp.lambdify(x, f, 'numpy')
+                    df_lamb = sp.lambdify(x, derivada, 'numpy')
 
-        except Exception as e:
-            return render(request, 'Decreciente.html', {
-                'error': f"Error: {str(e)}",
-            })
+                    y_f = f_lamb(puntos)
+                    y_df = df_lamb(puntos)
 
-    return render(request, 'Decreciente.html')
+                    # Aquí corregimos el error de dimensiones para y_f
+                    if np.isscalar(y_f):
+                        y_f = np.full_like(puntos, y_f, dtype=np.float64)
+                    else:
+                        y_f = np.array(y_f, dtype=np.float64)
 
+                    # Igual para y_df
+                    if np.isscalar(y_df):
+                        y_df = np.full_like(puntos, y_df, dtype=np.float64)
+                    else:
+                        y_df = np.array(y_df, dtype=np.float64)
+
+                    # Limpiar infinitos
+                    y_f[np.isinf(y_f)] = np.nan
+                    y_df[np.isinf(y_df)] = np.nan
+
+                    # Comprobar si derivada <= 0 en todo intervalo (decreciente)
+                    y_df_clean = np.nan_to_num(y_df, nan=0.0, posinf=1e10, neginf=-1e10)
+                    if np.all(y_df_clean <= 1e-9):
+                        resultado += "La función es decreciente en todo el intervalo.\n"
+                    else:
+                        resultado += "La función NO es completamente decreciente en el intervalo.\n"
+
+                    # Generar gráfica si se pidió
+                    if graficar_input == 's':
+                        plt.figure(figsize=(10, 6))
+                        plt.plot(puntos, y_f, label=f'f(x) = {sp.latex(f)}', color='blue')
+                        plt.plot(puntos, y_df, label=f"f'(x) = {sp.latex(derivada)}", color='red', linestyle='--')
+                        plt.axhline(0, color='black', linewidth=0.5)
+                        plt.xlabel('x')
+                        plt.ylabel('y')
+                        plt.title('Función y su Derivada')
+                        plt.legend()
+                        plt.grid(True)
+                        plt.tight_layout()
+
+                        buf = io.BytesIO()
+                        plt.savefig(buf, format='png')
+                        plt.close()
+                        buf.seek(0)
+                        image_base64 = base64.b64encode(buf.read()).decode('utf-8')
+                        grafico_url = f"data:image/png;base64,{image_base64}"
+
+            except Exception as e:
+                error = f"Error al procesar la función: {e}"
+
+    else:
+        function_input = ''
+        interval_min_input = ''
+        interval_max_input = ''
+        limit_point_input = ''
+        graficar_input = 'n'
+
+    context = {
+        'resultado': resultado,
+        'error': error,
+        'grafico_url': grafico_url,
+        'function_input': function_input,
+        'interval_min_input': interval_min_input,
+        'interval_max_input': interval_max_input,
+        'limit_point_input': limit_point_input,
+        'graficar_input': graficar_input,
+    }
+
+    return render(request, 'decreciente.html', context)
 
 
 #Inyectiva Agustin
-
 from django.shortcuts import render
 import sympy as sp
 import matplotlib.pyplot as plt
 import numpy as np
-import os
-from django.conf import settings
+import io
+import base64
 
-def funcion_inyectiva(request):
-    resultado = {}
-    
-    if request.method == 'POST':
-        expresion = request.POST.get('funcion')
-        operacion = request.POST.get('operacion')
-        valor_x = request.POST.get('valor_x')
+def inyectiva_view(request):
+    if request.method == "POST":
+        expresion = request.POST.get("expresion")
+        punto_input = request.POST.get("punto")
 
         x = sp.Symbol('x')
+
         try:
             funcion = sp.sympify(expresion)
-        except:
-            resultado = {'expresion': expresion, 'operacion': operacion, 'valor': 'Error: función inválida'}
-            return render(request, 'inyectiva.html', {'resultado': resultado})
-
-        valor = None
+        except Exception:
+            return render(request, "inyectiva.html", {"error": "Error al interpretar la función."})
 
         try:
-            if operacion == 'derivar':
-                valor = sp.diff(funcion, x)
-            elif operacion == 'evaluar':
-                valor = funcion.subs(x, float(valor_x))
-            elif operacion == 'limite':
-                valor = sp.limit(funcion, x, float(valor_x))
-            elif operacion == 'simplificar':
-                valor = sp.simplify(funcion)
-            elif operacion == 'resolver':
-                valor = sp.solve(funcion, x)
-        except Exception as e:
-            valor = f'Error al calcular: {str(e)}'
+            punto = float(punto_input)
+        except Exception:
+            return render(request, "inyectiva.html", {"error": "El valor de x debe ser un número válido."})
 
-        resultado = {
-            'expresion': expresion,
-            'operacion': operacion,
-            'valor': valor
+        derivada = sp.diff(funcion, x)
+        evaluada = funcion.subs(x, punto)
+        simplificada = sp.simplify(funcion)
+
+        # Límite
+        try:
+            limite = sp.limit(funcion, x, punto)
+        except Exception:
+            limite = "No se pudo calcular"
+
+        # Soluciones
+        try:
+            soluciones = sp.solve(funcion, x)
+        except Exception:
+            soluciones = "No se pudo calcular"
+
+        # Inyectividad
+        try:
+            derivada_simp = sp.simplify(derivada)
+            signo_deriv = sp.solve(derivada_simp > 0)
+            inyectiva = bool(signo_deriv)
+        except Exception:
+            inyectiva = False
+
+        # Gráfica
+        try:
+            f_lambd = sp.lambdify(x, funcion, modules=['numpy'])
+            x_vals = np.linspace(punto - 10, punto + 10, 400)
+            y_vals = f_lambd(x_vals)
+
+            if np.any(np.isnan(y_vals)) or np.any(np.isinf(y_vals)):
+                raise ValueError("Valores inválidos")
+
+            fig, ax = plt.subplots()
+            ax.plot(x_vals, y_vals, label=f'f(x) = {funcion}', color='blue')
+            ax.axhline(0, color='gray', linestyle='--')
+            ax.axvline(0, color='gray', linestyle='--')
+            ax.scatter(punto, float(evaluada), color='red', label=f'f({punto}) = {evaluada}')
+            ax.set_title("Gráfica de la función")
+            ax.set_xlabel("x")
+            ax.set_ylabel("f(x)")
+            ax.grid(True)
+            ax.legend()
+
+            buffer = io.BytesIO()
+            plt.tight_layout()
+            plt.savefig(buffer, format='png')
+            buffer.seek(0)
+            image_png = buffer.getvalue()
+            buffer.close()
+            grafica_base64 = base64.b64encode(image_png).decode('utf-8')
+            plt.close()
+        except Exception:
+            grafica_base64 = None
+
+        contexto = {
+            "funcion": funcion,
+            "derivada": derivada,
+            "evaluada": evaluada,
+            "punto": punto,
+            "limite": limite,
+            "simplificada": simplificada,
+            "soluciones": soluciones,
+            "inyectiva": inyectiva,
+            "grafica": grafica_base64,
         }
 
-    return render(request, 'inyectiva.html', {'resultado': resultado})
+        return render(request, "inyectiva.html", contexto)
 
-def teorias(request):
-    return render(request, 'teorias.html')
+    return render(request, "inyectiva.html")
 
-def continuidad(request):
-    error = None
-    resultado_continuidad = None
-    grafica_base64 = None
-    function_input = ''
-    punto_continuidad_input = ''
-    rango_x_min_input = ''
-    rango_x_max_input = ''
+#SEPARACION
 
-    if request.method == "POST":
-        function_input = request.POST.get('function_input', '').strip()
-        punto_continuidad_input = request.POST.get('punto_continuidad_input', '').strip()
-        rango_x_min_input = request.POST.get('rango_x_min_continuidad', '').strip()
-        rango_x_max_input = request.POST.get('rango_x_max_continuidad', '').strip()
-
-        if not function_input or not punto_continuidad_input:
-            error = "La expresión de la función y el punto de continuidad son requeridos."
-        else:
-            es_continua, mensaje = verificar_continuidad_en_punto(function_input, punto_continuidad_input)
-            resultado_continuidad = {
-                "Estado de Continuidad": "Sí" if es_continua else "No",
-                "Detalles": mensaje
-            }
-
-            grafica_base64, grafica_error = graficar_funcion_continuidad(
-                function_input,
-                punto_continuidad_input,
-                rango_x_min_input,
-                rango_x_max_input
-            )
-            if grafica_error:
-                error = f"{error}\nError al generar la gráfica: {grafica_error}" if error else f"Error al generar la gráfica: {grafica_error}"
-
-    context = {
-        'function_input': function_input,
-        'punto_continuidad_input': punto_continuidad_input,
-        'rango_x_min_input': rango_x_min_input,
-        'rango_x_max_input': rango_x_max_input,
-        'resultado_continuidad': resultado_continuidad,
-        'grafica_base64': grafica_base64,
-        'error': error,
-    }
-    return render(request, 'continuidad.html', context)
 
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
@@ -1090,6 +1146,11 @@ def login_view(request):
 def logout_view(request):
     logout(request)
     return redirect('pagprincipal')
+
+from django.shortcuts import render
+
+def teorias(request):
+    return render(request, 'teorias.html')  # Asegúrate que el archivo esté en la carpeta templates/
 
 # En tu archivo views.py
 
