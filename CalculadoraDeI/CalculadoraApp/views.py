@@ -120,6 +120,8 @@ def _validate_and_parse_function(function_input, variable_input, safe_local_dict
     
     return funcion_expr, error
 
+#explicita
+
 def calculadora_explicita(request):
     result = None
     error = None
@@ -1042,74 +1044,81 @@ def continuidad(request):
     }
     return render(request, 'continuidad.html', context)
 
-#funcionamente de inicar sesion y registro
-
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
-from django.contrib import messages
+from .forms import RegistroForm, LoginForm
 from .models import Perfil
 
-def login_view(request):
-    if request.method == 'POST':
-        username = request.POST['username']
-        password = request.POST['password']
-        user = authenticate(request, username=username, password=password)
-
-        if user is not None:
-            login(request, user)
-            perfil = Perfil.objects.get(user=user)
-
-            if perfil.rol == 'alumno':
-                return redirect('vista_alumno')
-            elif perfil.rol == 'maestro':
-                return redirect('vista_maestro')
-        else:
-            messages.error(request, 'Credenciales incorrectas')
-    return render(request, 'login.html')
-
-def registro_view(request):
-    if request.method == 'POST':
-        username = request.POST['username']
-        password = request.POST['password']
-        confirm = request.POST['confirm_password']
-        rol = request.POST['rol']
-
-        if password != confirm:
-            messages.error(request, 'Las contraseñas no coinciden')
-        elif User.objects.filter(username=username).exists():
-            messages.error(request, 'El usuario ya existe')
-        else:
-            user = User.objects.create_user(username=username, password=password)
-            Perfil.objects.create(user=user, rol=rol)
-            return redirect('login')
-
-    return render(request, 'registro.html')
-
-def logout_view(request):
-    logout(request)
-    return redirect('login')
-
-def vista_alumno(request):
-    return render(request, 'vista_alumno.html')
-
-def vista_maestro(request):
-    return render(request, 'vista_maestro.html')
-
-def pagina_principal(request):
-    return render(request, 'pagprincipal.html')
-
-from django.contrib.auth.decorators import login_required
-
-@login_required(login_url='login')
-def pagina_principal(request):
-    return render(request, 'pagprincipal.html')  # o el nombre que uses
-
-
-from .models import Perfil
-
+# Página principal
 def pagprincipal(request):
-    perfil = None
+    contexto = {}
     if request.user.is_authenticated:
         perfil = Perfil.objects.get(user=request.user)
-    return render(request, 'pagprincipal.html', {'perfil': perfil})
+        contexto['usuario'] = request.user.username
+        contexto['rol'] = perfil.rol
+    return render(request, 'pagprincipal.html', contexto)
+
+# Vista de registro
+def registro_view(request):
+    if request.method == 'POST':
+        form = RegistroForm(request.POST)
+        if form.is_valid():
+            usuario = form.save()
+            rol = form.cleaned_data['rol']
+            Perfil.objects.create(user=usuario, rol=rol)
+            login(request, usuario)
+            return redirect('pagprincipal')
+    else:
+        form = RegistroForm()
+    return render(request, 'registro.html', {'form': form})
+
+# Vista de inicio de sesión
+def login_view(request):
+    if request.method == 'POST':
+        form = LoginForm(request.POST)
+        if form.is_valid():
+            usuario = authenticate(username=form.cleaned_data['username'], password=form.cleaned_data['password'])
+            if usuario is not None:
+                login(request, usuario)
+                return redirect('pagprincipal')
+    else:
+        form = LoginForm()
+    return render(request, 'login.html', {'form': form})
+
+# Vista de cierre de sesión
+def logout_view(request):
+    logout(request)
+    return redirect('pagprincipal')
+
+# En tu archivo views.py
+
+def calculadora_view(request):
+    if request.method == 'POST':
+        operation = request.POST.get('operation_select')
+        
+        if operation == 'derivar':
+            # Tu lógica para derivar...
+            pass
+        elif operation == 'limite':
+            # Tu lógica para límites...
+            pass
+        # ... otras operaciones
+        elif operation == 'decreciente':
+            # AQUÍ va la lógica para analizar la función decreciente
+            function_input = request.POST.get('function_input')
+            interval_min = request.POST.get('interval_min_input')
+            interval_max = request.POST.get('interval_max_input')
+            point_to_check = request.POST.get('point_to_check_input') # Renombré el campo para mayor claridad
+            graficar = request.POST.get('graficar_input')
+            
+            # ...Llama a tu función de análisis, genera el texto de resultado y la URL del gráfico...
+            
+            context = {
+                'result': 'El texto con el análisis...',
+                'grafico_url': '/static/graphs/mi_grafico.png', # La URL de la imagen generada
+                # ...otros datos para rellenar el formulario
+            }
+            return render(request, 'tu_template.html', context)
+
+    return render(request, 'tu_template.html')
