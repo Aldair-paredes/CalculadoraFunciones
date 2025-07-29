@@ -15,4 +15,5 @@ urlpatterns = [
     path('teorias/', views.teorias, name='teorias'),
     path('funcion_creciente',views.creciente_view, name='funcion_creciente'),
     path('continuidad/', views.calculadora_continuidad, name='continuidad'),
+    path('teoria_implicita/', views.teoria_implicita, name='teoria_implicita')
 ]

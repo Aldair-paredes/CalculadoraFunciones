@@ -35,6 +35,9 @@ def pagprincipal(request):
 def temas (request):
     return render(request, 'temas.html')
 
+def teoria_implicita (request):
+    return render(request, 'teoria_implicita')
+
 def tema_funciones (request):
     return render(request, 'tema_funciones.html')
 
