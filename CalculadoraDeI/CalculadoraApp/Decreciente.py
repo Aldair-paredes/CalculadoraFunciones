@@ -1,146 +1,110 @@
 import sympy as sp
 import matplotlib.pyplot as plt
 import numpy as np
+import re
 
-# Aqui para ingresar la funcion y analizar si es decreciente
+def preparar_expresion(expr_str):
+    expr_str = expr_str.replace('^', '**')
+    expr_str = re.sub(r'(\d)([a-zA-Z(])', r'\1*\2', expr_str)
+    expr_str = re.sub(r'(\))([a-zA-Z(])', r'\1*\2', expr_str)
+    return expr_str
 
-<<<<<<< HEAD
-# Aqui para ingresar la funcion y analizar si es decreciente
+def leer_flotante(mensaje):
+    valor = input(mensaje)
+    if valor is None or valor.strip() == '':
+        raise ValueError("⚠️ Entrada vacía. No se ingresó un número.")
+    return float(valor.strip())
 
-=======
->>>>>>> 306f1ff97307917dfa96388bdeafb98d37f9a183
 def analizar_funcion():
-    print("Análisis de funciones decrecientes")
+    print("=== Análisis de funciones ===")
+
     x = sp.symbols('x')
-<<<<<<< HEAD
-    expresion= input("ingresa la funcion x (por ejempli: -2*x + 3): ")
-<<<<<<< HEAD
-# aqui lo que hace el codigo es tomar la funcion y si es posible calcular la derivada
-=======
->>>>>>> 306f1ff97307917dfa96388bdeafb98d37f9a183
-=======
-<<<<<<< HEAD
-    expresion = input("Ingresa la función en x (por ejemplo: -2*x + 3): ")
+    expresion_usuario = input("Ingresa la función (ej: -2x+3, x^2, sin(x)): ").strip()
 
-=======
-    expresion= input("ingresa la funcion x (por ejempli: -2*x + 3): ")
-# aqui lo que hace el codigo es tomar la funcion y si es posible calcular la derivada
->>>>>>> 54a7487 (agregar comentario de lo que hace cada parte de mi codigo)
->>>>>>> Agustin
+    if not expresion_usuario:
+        print("❌ No ingresaste una función.")
+        return
+
+    expresion_corregida = preparar_expresion(expresion_usuario)
+
     try:
-        # Interpretar la función
-        f = sp.sympify(expresion)
-<<<<<<< HEAD
-        print(f"\nFunción original: f(x) = {f}")
-
-        # Derivar la función
-        derivada = sp.diff(f, x)
-        print(f"Derivada: f'(x) = {derivada}")
-
-        # Simplificar la función
-        simplificada = sp.simplify(f)
-        print(f"Función simplificada: {simplificada}")
-
-        # Resolver la ecuación f(x) = 0
-        soluciones = sp.solve(f, x)
-        print(f"Soluciones a f(x)=0: {soluciones if soluciones else 'No hay soluciones reales encontradas.'}")
-=======
-    derivada = sp.diff(f,x)
-    print(f"f(x) = {f}")
-    print(f"f'(x) = {derivada}")
-<<<<<<< HEAD
-<<<<<<< HEAD
-# aqui vamos a ingresar los intervalos que queremos analizar
-=======
-
->>>>>>> 306f1ff97307917dfa96388bdeafb98d37f9a183
-=======
-# aqui vamos a ingresar los intervalos que queremos analizar
->>>>>>> Agustin
-    intervalos_minimo = float(input("limite inferior del intervalo:"))
-    intervalos_maximo = float(input("limite superior del intervalo:"))
-
-    puntos = sp.linspace(intervalos_minimo, intervalos_maximo, 5)
-    decreciente = True
-    for punto in puntos:
-<<<<<<< HEAD
-        valor = derivda.subs (x, punto)
-        print(f"f'({puntos}) = {valor}")
-        if valor > 0:
-            decreciente = False
-# aqui es donde dara el resultado si la funcion es decreciente o no 
-<<<<<<< HEAD
-=======
-        valor = derivada.subs (x, punto)
-        print(f"f'({puntos}) = {valor}")
-        if valor > 0:
-            decreciente = False
-
->>>>>>> 306f1ff97307917dfa96388bdeafb98d37f9a183
-=======
->>>>>>> Agustin
-            if decreciente:
-                print (" la funcion es decreciente en el intervalo")
-               
-            else: 
-                print ("la duncion no es completamen en el intervalo")
-                except:
-<<<<<<< HEAD
-        print(" Error al interpretar la función. Asegúrate de escribirla correctamente.") }
-<<<<<<< HEAD
-=======
-        print(" Error al interpretar la función. Asegúrate de escribirla correctamente.") 
->>>>>>> 306f1ff97307917dfa96388bdeafb98d37f9a183
-=======
->>>>>>> 54a7487 (agregar comentario de lo que hace cada parte de mi codigo)
->>>>>>> Agustin
-
-        # Calcular límite en un punto (pide el punto al usuario)
-        punto_limite = float(input("\nIngresa el punto donde calcular el límite: "))
-        limite = sp.limit(f, x, punto_limite)
-        print(f"Límite de f(x) cuando x → {punto_limite}: {limite}")
-
-        # Evaluar si la función es decreciente en un intervalo
-        intervalo_minimo = float(input("\nLímite inferior del intervalo: "))
-        intervalo_maximo = float(input("Límite superior del intervalo: "))
-
-        puntos = np.linspace(intervalo_minimo, intervalo_maximo, 100)
-        derivadas_numericas = [float(derivada.subs(x, punto)) for punto in puntos]
-
-        decreciente = all(valor <= 0 for valor in derivadas_numericas)
-
-        if decreciente:
-            print("\nConclusión: La función es decreciente en todo el intervalo.")
-        else:
-            print("\nConclusión: La función no es completamente decreciente en el intervalo.")
-
-        # Opcional: graficar función y derivada
-        graficar = input("\n¿Deseas graficar la función y su derivada? (s/n): ").strip().lower()
-        if graficar == 's':
-            f_lambd = sp.lambdify(x, f, modules=['numpy'])
-            deriv_lambd = sp.lambdify(x, derivada, modules=['numpy'])
-            y_f = f_lambd(puntos)
-            y_df = deriv_lambd(puntos)
-
-            # Asegurarse de que y_f y y_df sean arrays compatibles con puntos
-            if np.isscalar(y_f):
-                y_f = np.full_like(puntos, y_f)
-            if np.isscalar(y_df):
-                y_df = np.full_like(puntos, y_df)
-
-            plt.figure(figsize=(10,6))
-            plt.plot(puntos, y_f, label='f(x)', color='blue')
-            plt.plot(puntos, y_df, label="f'(x)", color='red', linestyle='--')
-            plt.axhline(0, color='black', linewidth=0.5)
-            plt.legend()
-            plt.title('Función y su derivada')
-            plt.xlabel('x')
-            plt.ylabel('Valor')
-            plt.grid(True)
-            plt.show()
-
+        f = sp.sympify(expresion_corregida)
     except Exception as e:
-        print("\nError al interpretar la función. Asegúrate de escribirla correctamente.") 
-        print(f"Detalle del error: {e}")
+        print(f"❌ Error al interpretar la función: {e}")
+        return
 
+    print(f"\n✅ Función interpretada: f(x) = {f}")
+
+    try:
+        derivada = sp.diff(f, x)
+        print(f"📉 Derivada: f'(x) = {derivada}")
+    except Exception as e:
+        print(f"❌ Error al derivar la función: {e}")
+        return
+
+    try:
+        soluciones = sp.solve(f, x)
+        print(f"🔍 Soluciones f(x)=0: {soluciones if soluciones else 'Ninguna'}")
+    except Exception as e:
+        print(f"⚠️ No se pudieron calcular soluciones: {e}")
+
+    # Cálculo del límite
+    try:
+        punto = leer_flotante("Punto para límite: ")
+        lim = sp.limit(f, x, punto)
+        print(f"📌 Límite cuando x → {punto} = {lim}")
+    except Exception as e:
+        print(f"⚠️ No se pudo calcular el límite: {e}")
+
+    # Análisis de decrecimiento
+    print("\n--- Análisis de Decrecimiento ---")
+    try:
+        a = leer_flotante("Límite inferior: ")
+        b = leer_flotante("Límite superior: ")
+
+        if a >= b:
+            print("❌ El límite inferior debe ser menor que el superior.")
+            return
+    except Exception as e:
+        print(f"❌ Error al leer el intervalo: {e}")
+        return
+
+    try:
+        puntos = np.linspace(a, b, 300)
+        f_lamb = sp.lambdify(x, f, modules=['numpy'])
+        df_lamb = sp.lambdify(x, derivada, modules=['numpy'])
+
+        y_f = f_lamb(puntos)
+        y_df = df_lamb(puntos)
+
+        y_f = np.nan_to_num(y_f, nan=np.nan)
+        y_df = np.nan_to_num(y_df, nan=0.0, posinf=1e10, neginf=-1e10)
+
+        if np.all(y_df <= 1e-9):
+            print("✅ La función es decreciente en el intervalo.")
+        else:
+            print("❌ La función NO es completamente decreciente en el intervalo.")
+    except Exception as e:
+        print(f"❌ Error en el análisis de decrecimiento: {e}")
+        return
+
+    # Graficar
+    try:
+        graficar = input("¿Graficar la función y derivada? (s/n): ").strip().lower()
+        if graficar == 's':
+            plt.figure(figsize=(10, 6))
+            plt.plot(puntos, y_f, label=f'f(x) = {sp.latex(f)}', color='blue')
+            plt.plot(puntos, y_df, label=f"f'(x) = {sp.latex(derivada)}", color='red', linestyle='--')
+            plt.axhline(0, color='black', linewidth=0.5)
+            plt.xlabel('x')
+            plt.ylabel('y')
+            plt.title('Función y su Derivada')
+            plt.legend()
+            plt.grid(True)
+            plt.tight_layout()
+            plt.show()
+    except Exception as e:
+        print(f"❌ Error al graficar: {e}")
+
+# Ejecutar
 analizar_funcion()

@@ -1,73 +1,335 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Analizador de Función Decreciente</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" />
+    <link href="{% static 'css/navbar.css' %}" rel="stylesheet" />
+    <link href="{% static 'css/explicita.css' %}" rel="stylesheet" />
 </head>
 <body>
-    <h1>Analizador de Función Decreciente</h1>
-    <p>Ingresa una función, intervalo y punto para analizar si es decreciente.</p>
-    <hr>
+    <div class="app-container">
+        <button class="hamburger-menu" type="button" aria-label="Toggle navigation">
+            <i class="bi bi-list"></i>
+        </button>
 
-    <form action="" method="post">
-        {% csrf_token %}
+        <nav class="sidebar" id="sidebarNav">
+            <button class="close-sidebar-btn" type="button" aria-label="Cerrar menú">
+                <i class="bi bi-x-lg"></i>
+            </button>
+            <a class="navbar-brand" href="#">
+                <img src="{% static 'img/WOLF.png' %}" alt="Logo UNID" />
+                <span>UNID</span>
+            </a>
+            <ul class="navbar-nav w-100">
+                <li class="nav-item"><a class="nav-link" href="{% url 'pagprincipal' %}"><i class="bi bi-house-door-fill me-2"></i>Inicio</a></li>
+                <li class="nav-item"><a class="nav-link active" href="{% url 'temas' %}"><i class="bi bi-journal-text me-2"></i>Temas</a></li>
+                <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-person-lines-fill me-2"></i>Cuestionario</a></li>
+                <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-people-fill me-2"></i>Grupo</a></li>
+                <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-chat-dots-fill me-2"></i>Testimonios</a></li>
+                <li class="nav-item"><a class="nav-link" href="{% url 'teorias' %}"><i class="bi bi-book-fill me-2"></i>Teorías</a></li>
+            </ul>
+            <div class="btn-group mt-auto w-100">
+                <a href="{% url 'login' %}" class="btn btn-primary d-flex align-items-center justify-content-center">
+                    <i class="bi bi-box-arrow-in-right me-2"></i>Iniciar sesión
+                </a>
+                <a href="{% url 'registro' %}" class="btn btn-light d-flex align-items-center justify-content-center">
+                    <i class="bi bi-person-plus-fill me-2"></i>Registrarse
+                </a>
+            </div>
+        </nav>
 
-        <div>
-            <label for="funcion">Función (en x):</label>
-            <input type="text" id="funcion" name="funcion" placeholder="Ej: -2*x + 3" required>
-        </div>
+        <main class="main-content">
+            <div class="calculator-page-layout">
+                <div class="centered-calculator">
+                    <div class="calculator-card">
+                        <!-- Botón de Guía de Uso ahora dentro de calculator-card -->
+                        <button type="button" id="toggleInstructionsBtn" class="btn btn-info toggle-instructions-btn" title="Mostrar guía">
+                            Guía de Uso <i class="bi bi-chevron-down"></i>
+                        </button>
 
-        <div>
-            <label for="intervalo_min">Límite inferior del intervalo:</label>
-            <input type="number" step="any" id="intervalo_min" name="intervalo_min" placeholder="Ej: -5" required>
-        </div>
+                        <div class="calculator-header">
+                            <h1>Analizador de Función Decreciente</h1>
+                            <p class="subtitle">Ingresa la función, intervalo y punto para analizar.</p>
+                        </div>
 
-        <div>
-            <label for="intervalo_max">Límite superior del intervalo:</label>
-            <input type="number" step="any" id="intervalo_max" name="intervalo_max" placeholder="Ej: 5" required>
-        </div>
+                        <form action="" method="post" class="calculator-form" id="calcForm">
+                            {% csrf_token %}
+                            <div class="form-group full-width">
+                                <label for="functionInput"><i class="bi bi-function"></i> Función (en x)</label>
+                                <input type="text" id="functionInput" name="function_input" placeholder="Ej: -2*x + 3" required
+                                    value="{{ function_input|default_if_none:'' }}">
+                            </div>
 
-        <div>
-            <label for="punto_limite">Punto para calcular el límite:</label>
-            <input type="number" step="any" id="punto_limite" name="punto_limite" placeholder="Ej: 0" required>
-        </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="intervalMinInput"><i class="bi bi-arrow-down-right-circle"></i> Límite inferior</label>
+                                    <input type="number" step="any" id="intervalMinInput" name="interval_min_input" placeholder="Ej: -5" required
+                                        value="{{ interval_min_input|default_if_none:'' }}">
+                                </div>
+                                <div class="form-group">
+                                    <label for="intervalMaxInput"><i class="bi bi-arrow-up-right-circle"></i> Límite superior</label>
+                                    <input type="number" step="any" id="intervalMaxInput" name="interval_max_input" placeholder="Ej: 5" required
+                                        value="{{ interval_max_input|default_if_none:'' }}">
+                                </div>
+                            </div>
 
-        <div>
-            <label for="graficar">¿Deseas graficar?</label>
-            <select id="graficar" name="graficar">
-                <option value="n">No</option>
-                <option value="s">Sí</option>
-            </select>
-        </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="limitPointInput"><i class="bi bi-infinity"></i> Punto del Límite</label>
+                                    <input type="number" step="any" id="limitPointInput" name="limit_point_input" placeholder="Ej: 2" required
+                                        value="{{ limit_point_input|default_if_none:'' }}">
+                                </div>
+                                <div class="form-group">
+                                    <label for="graficarInput"><i class="bi bi-image"></i> ¿Graficar?</label>
+                                    <select id="graficarInput" name="graficar_input" required>
+                                        <option value="n" {% if graficar_input != 's' %}selected{% endif %}>No</option>
+                                        <option value="s" {% if graficar_input == 's' %}selected{% endif %}>Sí</option>
+                                    </select>
+                                </div>
+                            </div>
 
-        <button type="submit">Analizar Función</button>
-    </form>
+                            <!-- Contenedor para los botones de acción principales -->
+                            <div class="calculator-main-actions">
+                                <button type="submit" class="calculate-btn"><i class="bi bi-calculator"></i> Analizar Función</button>
+                                <button type="button" id="clearBtn" class="btn btn-secondary clear-btn">Borrar</button>
+                            </div>
+                        </form>
+                    </div>
 
-    <hr>
+                    {% if resultado or error or grafico_url %}
+                    <div class="result-card" id="resultCard" style="display: block;">
+                        <div class="result-header">
+                            <div class="terminal-controls">
+                                <span class="control-dot red"></span>
+                                <span class="control-dot yellow"></span>
+                                <span class="control-dot green"></span>
+                            </div>
+                            <h3>Resultado</h3>
+                            <button class="copy-btn" title="Copiar resultado"><i class="bi bi-clipboard"></i></button>
+                        </div>
+                        <div class="result-content">
+                            <div id="resultOutput">
+                                {% if error %}
+                                    <div class="result-line"><span class="result-label">Error:</span><span class="result-value error">{{ error }}</span></div>
+                                {% else %}
+                                    {% if function_input %}
+                                    <div class="result-line"><span class="result-label">Función:</span><span class="result-value">{{ function_input }}</span></div>
+                                    {% endif %}
+                                    {% if resultado %}
+                                    <div class="result-line"><span class="result-label">Análisis:</span></div>
+                                    <pre class="result-value success" style="white-space: pre-wrap; margin-left: 15px;">{{ resultado }}</pre>
+                                    {% endif %}
+                                    {% if grafico_url %}
+                                    <div class="text-center mt-3">
+                                        <h5 class="text-white-50">Gráfica generada:</h5>
+                                        <img src="{{ grafico_url }}" alt="Gráfica de la función" class="img-fluid border rounded" />
+                                    </div>
+                                    {% endif %}
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="result-card" id="resultCard" style="display: none;"></div>
+                    {% endif %}
+                </div>
 
-    <div>
-        <h2>Resultado:</h2>
-        <pre id="resultOutput">
-            {% if resultado %}
-                Función ingresada: {{ request.POST.funcion }}
-                Límite inferior: {{ request.POST.intervalo_min }}
-                Límite superior: {{ request.POST.intervalo_max }}
-                Punto del límite: {{ request.POST.punto_limite }}
-                {{ resultado }}
-            {% elif error %}
-                ¡Error!: {{ error }}
-            {% else %}
-                Esperando análisis...
-            {% endif %}
-        </pre>
+                <!-- Panel de Instrucciones -->
+                <div class="calculator-instructions hidden" id="instructionsPanel">
+                    <div class="instructions-content">
+                        <h2>Guía de Uso del Analizador de Función Decreciente</h2>
+                        <p>Aquí te explicamos cómo utilizar esta herramienta para analizar funciones.</p>
+                        
+                        <h3>1. Campo "Función (en x)"</h3>
+                        <ul>
+                            <li><strong>Qué poner:</strong> Introduce la expresión matemática de tu función, utilizando <code>x</code> como la variable.</li>
+                            <li><strong>Ejemplos:</strong> <code>x**3 - 3*x</code>, <code>-2*x + 3</code>, <code>exp(-x)</code>.</li>
+                            <li><strong>Consideraciones:</strong>
+                                <ul>
+                                    <li>Usa <code>**</code> para potencias (ej: $x^2$ es <code>x**2</code>).</li>
+                                    <li>Usa <code>*</code> para multiplicación (ej: $3x$ es <code>3*x</code>).</li>
+                                    <li>Funciones soportadas: <code>sin()</code>, <code>cos()</code>, <code>tan()</code>, <code>cot()</code>, <code>sec()</code>, <code>csc()</code>, <code>asin()</code>, <code>acos()</code>, <code>atan()</code>, <code>acot()</code>, <code>asec()</code>, <code>acsc()</code>, <code>sinh()</code>, <code>cosh()</code>, <code>tanh()</code>, <code>coth()</code>, <code>sech()</code>, <code>csch()</code>, <code>asinh()</code>, <code>acosh()</code>, <code>atanh()</code>, <code>acoth()</code>, <code>asech()</code>, <code>acsch()</code>, <code>log()</code> (logaritmo natural), <code>log10()</code> (logaritmo base 10), <code>exp()</code> ($e^x$), <code>sqrt()</code> (raíz cuadrada), <code>abs()</code> (valor absoluto).</li>
+                                    <li>Para el número PI ($\pi$), usa <code>pi</code>.</li>
+                                    <li>Para el número de Euler ($e$), usa <code>E</code>.</li>
+                                </ul>
+                            </li>
+                        </ul>
+
+                        <h3>2. Campos "Límite inferior" y "Límite superior"</h3>
+                        <ul>
+                            <li><strong>Qué poner:</strong> Define el intervalo $[a, b]$ en el que deseas analizar si la función es decreciente. Ingresa valores numéricos.</li>
+                            <li><strong>Ejemplos:</strong> Límite inferior: <code>-5</code>, Límite superior: <code>5</code>.</li>
+                            <li><strong>Consideraciones:</strong> Asegúrate de que el límite inferior sea menor que el límite superior.</li>
+                        </ul>
+
+                        <h3>3. Campo "Punto del Límite"</h3>
+                        <ul>
+                            <li><strong>Qué poner:</strong> Un valor específico de <code>x</code> dentro del intervalo para evaluar la función en ese punto.</li>
+                            <li><strong>Ejemplos:</strong> <code>0</code>, <code>2.5</code>, <code>-1</code>.</li>
+                        </ul>
+
+                        <h3>4. Campo "¿Graficar?"</h3>
+                        <ul>
+                            <li><strong>Qué poner:</strong> Selecciona "Sí" si deseas ver una representación gráfica de la función en el intervalo especificado. Selecciona "No" si solo quieres el análisis textual.</li>
+                        </ul>
+
+                        <p><strong>Qué esperar del resultado:</strong></p>
+                        <p>La herramienta analizará si la función es decreciente en el intervalo dado, evaluará la función en el "Punto del Límite" y, opcionalmente, mostrará una gráfica.</p>
+                    </div>
+                </div>
+            </div>
+        </main>
     </div>
 
-    {% if grafico_url %}
-        <div style="text-align:center; margin-top:20px;">
-            <h3>Gráfica generada:</h3>
-            <img src="{{ grafico_url }}" alt="Gráfica de la función y su derivada" style="max-width:100%; border:1px solid #ccc;">
-        </div>
-    {% endif %}
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const instructionsPanel = document.getElementById('instructionsPanel');
+            const toggleInstructionsBtn = document.getElementById('toggleInstructionsBtn');
+            const centeredCalculator = document.querySelector('.centered-calculator');
+            const calculatorPageLayout = document.querySelector('.calculator-page-layout');
+            const resultCard = document.getElementById('resultCard');
+            const hasResultOrError = "{{ resultado|yesno:'true,false' }}" === "true" || "{{ error|yesno:'true,false' }}" === "true" || "{{ grafico_url|yesno:'true,false' }}" === "true";
+
+            if (resultCard && hasResultOrError) {
+                setTimeout(() => {
+                    resultCard.style.display = 'block';
+                    resultCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }, 100);
+            }
+
+            // Esta función ya no es necesaria aquí, pero se mantiene para evitar errores si otras partes la esperan.
+            function actualizarCamposSegunOperacion() { }
+            actualizarCamposSegunOperacion();
+
+            const copyBtn = document.querySelector('.copy-btn');
+            if (copyBtn) {
+                copyBtn.addEventListener('click', function () {
+                    const resultTextElement = document.querySelector('pre.result-value');
+                    if (resultTextElement) {
+                        navigator.clipboard.writeText(resultTextElement.textContent.trim()).then(() => {
+                            const originalIcon = this.innerHTML;
+                            this.innerHTML = '<i class="bi bi-check-lg"></i>';
+                            setTimeout(() => {
+                                this.innerHTML = originalIcon;
+                            }, 2000);
+                        });
+                    }
+                });
+            }
+
+            const clearBtn = document.getElementById('clearBtn');
+            if (clearBtn) {
+                clearBtn.addEventListener('click', () => {
+                    const form = document.getElementById('calcForm');
+                    form.reset();
+                    form.querySelectorAll('input[type="text"], input[type="number"]').forEach(input => {
+                        input.value = '';
+                    });
+                    document.getElementById('graficarInput').value = 'n'; // Restablece el valor por defecto
+                    
+                    if (resultCard) {
+                        resultCard.style.display = 'none';
+                        const resultOutput = document.getElementById('resultOutput');
+                        if(resultOutput) {
+                            resultOutput.innerHTML = ''; // Borra el contenido del resultado
+                        }
+                    }
+                });
+            }
+
+            const hamburgerBtn = document.querySelector('.hamburger-menu');
+            const closeSidebarBtn = document.querySelector('.close-sidebar-btn');
+            const sidebar = document.getElementById('sidebarNav');
+            const mainContent = document.querySelector('.main-content');
+
+            if (!sidebar || !mainContent || !hamburgerBtn) {
+                console.error("Error: No se encontraron todos los elementos necesarios para el navbar.");
+                console.error("Sidebar:", sidebar, "Main Content:", mainContent, "Hamburger Button:", hamburgerBtn);
+                return;
+            }
+
+            function setSidebarState(isOpen) {
+                if (isOpen) {
+                    sidebar.classList.add('active');
+                    hamburgerBtn.style.display = 'none';
+                    if (closeSidebarBtn) {
+                        closeSidebarBtn.style.display = 'block';
+                    }
+                    mainContent.style.marginLeft = '260px';
+                } else {
+                    sidebar.classList.remove('active');
+                    hamburgerBtn.style.display = 'block';
+                    if (closeSidebarBtn) {
+                        closeSidebarBtn.style.display = 'none';
+                    }
+                    mainContent.style.marginLeft = '0';
+                }
+            }
+
+            function toggleSidebar() {
+                setSidebarState(!sidebar.classList.contains('active'));
+            }
+
+            hamburgerBtn.addEventListener('click', toggleSidebar);
+            if (closeSidebarBtn) {
+                closeSidebarBtn.addEventListener('click', toggleSidebar);
+            }
+
+            function handleResizeAndInitialLoad() {
+                const isSmallScreen = window.innerWidth <= 991.98;
+                
+                instructionsPanel.classList.add('hidden'); 
+
+                if (window.innerWidth > 991.98) {
+                    setSidebarState(true); 
+                } else {
+                    setSidebarState(false); 
+                }
+                
+                updateToggleInstructionsBtnContent();
+            }
+
+            function updateToggleInstructionsBtnContent() {
+                const isSmallScreen = window.innerWidth <= 991.98;
+                if (instructionsPanel.classList.contains('hidden')) {
+                    toggleInstructionsBtn.innerHTML = 'Guía de Uso <i class="bi bi-chevron-down"></i>';
+                    toggleInstructionsBtn.title = 'Mostrar guía';
+                } else {
+                    if (isSmallScreen) {
+                        toggleInstructionsBtn.innerHTML = '<i class="bi bi-chevron-up"></i>';
+                        toggleInstructionsBtn.title = 'Ocultar guía';
+                    } else {
+                        toggleInstructionsBtn.innerHTML = '<i class="bi bi-chevron-right"></i>';
+                        toggleInstructionsBtn.title = 'Ocultar guía';
+                    }
+                }
+            }
+
+            handleResizeAndInitialLoad();
+            window.addEventListener('resize', handleResizeAndInitialLoad);
+
+            function toggleInstructions() {
+                instructionsPanel.classList.toggle('hidden');
+                updateToggleInstructionsBtnContent();
+
+                if (instructionsPanel.classList.contains('hidden')) {
+                    calculatorPageLayout.style.justifyContent = 'center';
+                    centeredCalculator.style.flex = '1 1 1000px'; 
+                } else {
+                    calculatorPageLayout.style.justifyContent = 'space-between';
+                    centeredCalculator.style.flex = '3 1 800px'; 
+                }
+            }
+
+            if (toggleInstructionsBtn) {
+                toggleInstructionsBtn.addEventListener('click', toggleInstructions);
+            }
+        });
+    </script>
 </body>
 </html>

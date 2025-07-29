@@ -5,17 +5,10 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Calculadora de Funciones Transcendentes</title>
-    <link href="{% static 'css/navbar.css' %}" rel="stylesheet" />
-    <link href="{% static 'css/explicita.css' %}" rel="stylesheet" />
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" />
-    <style>
-        .operation-variable,
-        .operation-limit,
-        .operation-evaluar {
-            display: none;
-        }
-    </style>
+    <link href="{% static 'css/navbar.css' %}" rel="stylesheet" />
+    <link href="{% static 'css/explicita.css' %}" rel="stylesheet" />
 </head>
 <body>
     <div class="app-container">
@@ -46,84 +39,145 @@
         </nav>
 
         <main class="main-content">
-            <div class="centered-calculator">
-                <div class="calculator-card">
-                    <div class="calculator-header">
-                        <h1>Calculadora de Funciones Transcendentes</h1>
-                        <p class="subtitle">Operaciones disponibles: derivar, evaluar, límite, simplificar, resolver.</p>
+            <div class="calculator-page-layout">
+                <div class="centered-calculator">
+                    <div class="calculator-card">
+                        <button type="button" id="toggleInstructionsBtn" class="btn btn-info toggle-instructions-btn" title="Mostrar guía">
+                            Guía de Uso <i class="bi bi-chevron-down"></i>
+                        </button>
+
+                        <div class="calculator-header">
+                            <h1>Calculadora de Funciones Transcendentes</h1>
+                            <p class="subtitle">Operaciones disponibles: derivar, evaluar, límite, simplificar, resolver.</p>
+                        </div>
+
+                        <form action="" method="post" class="calculator-form" id="calcForm">
+                            {% csrf_token %}
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="functionInput"><i class="bi bi-function"></i> Función</label>
+                                    <input type="text" id="functionInput" name="function_input" placeholder="Ej: sin(x), exp(x), log(x)" required
+                                        value="{{ function_input|default_if_none:'' }}">
+                                </div>
+                                <div class="form-group operation-variable">
+                                    <label for="variableInput"><i class="bi bi-x-diamond"></i> Variable</label>
+                                    <input type="text" id="variableInput" name="variable_input" placeholder="Ej: x, y"
+                                        value="{{ variable_input|default_if_none:'' }}">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="operationSelect"><i class="bi bi-gear"></i> Operación</label>
+                                    <select id="operationSelect" name="operation_select" required>
+                                        <option value="" {% if not operation_select %}selected{% endif %}>Selecciona una operación</option>
+                                        <option value="derivar" {% if operation_select == "derivar" %}selected{% endif %}>Derivar</option>
+                                        <option value="evaluar" {% if operation_select == "evaluar" %}selected{% endif %}>Evaluar</option>
+                                        <option value="limite" {% if operation_select == "limite" %}selected{% endif %}>Límite</option>
+                                        <option value="simplificar" {% if operation_select == "simplificar" %}selected{% endif %}>Simplificar</option>
+                                        <option value="resolver" {% if operation_select == "resolver" %}selected{% endif %}>Resolver</option>
+                                    </select>
+                                </div>
+                                <div class="form-group operation-limit">
+                                    <label for="limitPointInput"><i class="bi bi-infinity"></i> Punto del Límite</label>
+                                    <input type="text" id="limitPointInput" name="limit_point_input" placeholder="Ej: 0, 5, oo, infinito"
+                                        value="{{ limit_point_input|default_if_none:'' }}">
+                                </div>
+                            </div>
+                            <div class="form-group full-width operation-evaluar">
+                                <label for="evaluateValuesInput"><i class="bi bi-123"></i> Valores para evaluar</label>
+                                <input type="text" id="evaluateValuesInput" name="evaluate_values_input" placeholder="Ej: x=2, y=3"
+                                    value="{{ evaluate_values_input|default_if_none:'' }}">
+                            </div>
+
+                            <div class="calculator-main-actions">
+                                <button type="submit" class="calculate-btn"><i class="bi bi-calculator"></i> Calcular</button>
+                                <button type="button" id="clearBtn" class="btn btn-secondary clear-btn">Borrar función</button>
+                            </div>
+                        </form>
                     </div>
 
-                    <form action="" method="post" class="calculator-form" id="calcForm">
-                        {% csrf_token %}
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="functionInput"><i class="bi bi-function"></i> Función</label>
-                                <input type="text" id="functionInput" name="function_input" placeholder="Ej: sin(x), exp(x), log(x)" required
-                                    value="{{ function_input|default_if_none:'' }}">
+                    {% if result or error %}
+                    <div class="result-card" id="resultCard" style="display: block;">
+                        <div class="result-header">
+                            <div class="terminal-controls">
+                                <span class="control-dot red"></span>
+                                <span class="control-dot yellow"></span>
+                                <span class="control-dot green"></span>
                             </div>
-                            <div class="form-group operation-variable">
-                                <label for="variableInput"><i class="bi bi-x-diamond"></i> Variable</label>
-                                <input type="text" id="variableInput" name="variable_input" placeholder="Ej: x, y"
-                                    value="{{ variable_input|default_if_none:'' }}">
-                            </div>
+                            <h3>Resultado</h3>
+                            <button class="copy-btn" title="Copiar resultado"><i class="bi bi-clipboard"></i></button>
                         </div>
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="operationSelect"><i class="bi bi-gear"></i> Operación</label>
-                                <select id="operationSelect" name="operation_select" required>
-                                    <option value="" {% if not operation_select %}selected{% endif %}>Selecciona una operación</option>
-                                    <option value="derivar" {% if operation_select == "derivar" %}selected{% endif %}>Derivar</option>
-                                    <option value="evaluar" {% if operation_select == "evaluar" %}selected{% endif %}>Evaluar</option>
-                                    <option value="limite" {% if operation_select == "limite" %}selected{% endif %}>Límite</option>
-                                    <option value="simplificar" {% if operation_select == "simplificar" %}selected{% endif %}>Simplificar</option>
-                                    <option value="resolver" {% if operation_select == "resolver" %}selected{% endif %}>Resolver</option>
-                                </select>
-                            </div>
-                            <div class="form-group operation-limit">
-                                <label for="limitPointInput"><i class="bi bi-infinity"></i> Punto del Límite</label>
-                                <input type="text" id="limitPointInput" name="limit_point_input" placeholder="Ej: 0, 5, oo, infinito"
-                                    value="{{ limit_point_input|default_if_none:'' }}">
-                            </div>
+                        <div class="result-content">
+                            <pre id="resultOutput">
+                                {% if result %}
+                                    <div class="result-line"><span class="result-label">Función:</span><span class="result-value">{{ function_input }}</span></div>
+                                    <div class="result-line"><span class="result-label">Operación:</span><span class="result-value">{{ operation_select }}</span></div>
+                                    <div class="result-line"><span class="result-label">Resultado:</span><span class="result-value success">{{ result }}</span></div>
+                                {% elif error %}
+                                    <div class="result-line"><span class="result-label">Función:</span><span class="result-value">{{ function_input }}</span></div>
+                                    <div class="result-line"><span class="result-label">Operación:</span><span class="result-value">{{ operation_select }}</span></div>
+                                    <div class="result-line"><span class="result-label">Error:</span><span class="result-value error">{{ error }}</span></div>
+                                {% endif %}
+                            </pre>
                         </div>
-                        <div class="form-group full-width operation-evaluar">
-                            <label for="evaluateValuesInput"><i class="bi bi-123"></i> Valores para evaluar</label>
-                            <input type="text" id="evaluateValuesInput" name="evaluate_values_input" placeholder="Ej: x=2, y=3"
-                                value="{{ evaluate_values_input|default_if_none:'' }}">
-                        </div>
-
-                        <button type="submit" class="calculate-btn"><i class="bi bi-calculator"></i> Calcular</button>
-                        <button type="button" id="clearBtn" class="btn btn-secondary ms-2">Borrar función</button>
-                    </form>
+                    </div>
+                    {% else %}
+                    <div class="result-card" id="resultCard" style="display: none;"></div>
+                    {% endif %}
                 </div>
 
-                {% if result or error %}
-                <div class="result-card" id="resultCard" style="display: block;">
-                    <div class="result-header">
-                        <div class="terminal-controls">
-                            <span class="control-dot red"></span>
-                            <span class="control-dot yellow"></span>
-                            <span class="control-dot green"></span>
-                        </div>
-                        <h3>Resultado</h3>
-                        <button class="copy-btn" title="Copiar resultado"><i class="bi bi-clipboard"></i></button>
-                    </div>
-                    <div class="result-content">
-                        <pre id="resultOutput">
-                            {% if result %}
-                                <div class="result-line"><span class="result-label">Función:</span><span class="result-value">{{ function_input }}</span></div>
-                                <div class="result-line"><span class="result-label">Operación:</span><span class="result-value">{{ operation_select }}</span></div>
-                                <div class="result-line"><span class="result-label">Resultado:</span><span class="result-value success">{{ result }}</span></div>
-                            {% elif error %}
-                                <div class="result-line"><span class="result-label">Función:</span><span class="result-value">{{ function_input }}</span></div>
-                                <div class="result-line"><span class="result-label">Operación:</span><span class="result-value">{{ operation_select }}</span></div>
-                                <div class="result-line"><span class="result-label">Error:</span><span class="result-value error">{{ error }}</span></div>
-                            {% endif %}
-                        </pre>
+                <div class="calculator-instructions hidden" id="instructionsPanel">
+                    <div class="instructions-content">
+                        <h2>Guía de Uso de la Calculadora</h2>
+                        <p>Aquí te explicamos cómo utilizar esta calculadora de funciones trascendentes.</p>
+                        
+                        <h3>1. Campo "Función"</h3>
+                        <ul>
+                            <li><strong>Qué poner:</strong> Introduce la expresión matemática de tu función.</li>
+                            <li><strong>Ejemplos:</strong> <code>sin(x)</code>, <code>exp(x)</code>, <code>log(x)</code>, <code>tan(x) + 2*x</code>.</li>
+                            <li><strong>Consideraciones:</strong>
+                                <ul>
+                                    <li>Usa <code>**</code> para potencias (ej: $x^2$ es <code>x**2</code>).</li>
+                                    <li>Usa <code>*</code> para multiplicación (ej: $3x$ es <code>3*x</code>).</li>
+                                    <li>Funciones soportadas: <code>sin()</code>, <code>cos()</code>, <code>tan()</code>, <code>cot()</code>, <code>sec()</code>, <code>csc()</code>, <code>asin()</code>, <code>acos()</code>, <code>atan()</code>, <code>acot()</code>, <code>asec()</code>, <code>acsc()</code>, <code>sinh()</code>, <code>cosh()</code>, <code>tanh()</code>, <code>coth()</code>, <code>sech()</code>, <code>csch()</code>, <code>asinh()</code>, <code>acosh()</code>, <code>atanh()</code>, <code>acoth()</code>, <code>asech()</code>, <code>acsch()</code>, <code>log()</code> (logaritmo natural), <code>log10()</code> (logaritmo base 10), <code>exp()</code> ($e^x$), <code>sqrt()</code> (raíz cuadrada), <code>abs()</code> (valor absoluto).</li>
+                                    <li>Para el número PI ($\pi$), usa <code>pi</code>.</li>
+                                    <li>Para el número de Euler ($e$), usa <code>E</code>.</li>
+                                </ul>
+                            </li>
+                        </ul>
+
+                        <h3>2. Campo "Operación"</h3>
+                        <ul>
+                            <li><strong>Qué poner:</strong> Selecciona la operación que deseas realizar.</li>
+                            <li><strong>Derivar:</strong> Calcula la derivada de la función respecto a la variable especificada.</li>
+                            <li><strong>Evaluar:</strong> Sustituye los valores dados en la función.</li>
+                            <li><strong>Límite:</strong> Calcula el límite de la función cuando la variable se acerca a un punto.</li>
+                            <li><strong>Simplificar:</strong> Simplifica la expresión matemática.</li>
+                            <li><strong>Resolver:</strong> Resuelve la ecuación (cuando la función se iguala a cero).</li>
+                        </ul>
+
+                        <h3>3. Campo "Variable"</h3>
+                        <ul>
+                            <li><strong>Qué poner:</strong> La variable respecto a la cual se realizará la operación.</li>
+                            <li><strong>Ejemplos:</strong> <code>x</code>, <code>y</code>, <code>t</code>.</li>
+                            <li><strong>Consideraciones:</strong> Es crucial para operaciones como derivar o calcular límites.</li>
+                        </ul>
+
+                        <h3>4. Campo "Punto del Límite" (para operación "Límite")</h3>
+                        <ul>
+                            <li><strong>Qué poner:</strong> El valor al que se acerca la variable.</li>
+                            <li><strong>Ejemplos:</strong> <code>0</code>, <code>5</code>, <code>oo</code> (para infinito), <code>-oo</code> (para menos infinito).</li>
+                        </ul>
+
+                        <h3>5. Campo "Valores para evaluar" (para operación "Evaluar")</h3>
+                        <ul>
+                            <li><strong>Qué poner:</strong> Pares de variable=valor separados por comas.</li>
+                            <li><strong>Ejemplos:</strong> <code>x=2</code>, <code>x=1, y=3</code>.</li>
+                        </ul>
+                        
+                        <p>¡Experimenta con diferentes funciones y operaciones para dominar el cálculo!</p>
                     </div>
                 </div>
-                {% else %}
-                <div class="result-card" id="resultCard" style="display: none;"></div>
-                {% endif %}
             </div>
         </main>
     </div>
@@ -131,8 +185,13 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
+            const instructionsPanel = document.getElementById('instructionsPanel');
+            const toggleInstructionsBtn = document.getElementById('toggleInstructionsBtn');
+            const centeredCalculator = document.querySelector('.centered-calculator');
+            const calculatorPageLayout = document.querySelector('.calculator-page-layout');
             const resultCard = document.getElementById('resultCard');
             const hasResultOrError = "{{ result|yesno:'true,false' }}" === "true" || "{{ error|yesno:'true,false' }}" === "true";
+
             if (resultCard && hasResultOrError) {
                 setTimeout(() => {
                     resultCard.style.display = 'block';
@@ -161,19 +220,28 @@
             }
 
             actualizarCamposSegunOperacion();
-
             document.getElementById('operationSelect').addEventListener('change', actualizarCamposSegunOperacion);
 
             const copyBtn = document.querySelector('.copy-btn');
             if (copyBtn) {
                 copyBtn.addEventListener('click', function () {
                     const resultText = document.getElementById('resultOutput').textContent;
-                    document.execCommand('copy');
-                    const originalIcon = this.innerHTML;
-                    this.innerHTML = '<i class="bi bi-check"></i>';
-                    setTimeout(() => {
-                        this.innerHTML = originalIcon;
-                    }, 2000);
+                    const textArea = document.createElement('textarea');
+                    textArea.value = resultText;
+                    document.body.appendChild(textArea);
+                    textArea.select();
+                    try {
+                        document.execCommand('copy');
+                        console.log('Texto copiado al portapapeles');
+                        const originalIcon = this.innerHTML;
+                        this.innerHTML = '<i class="bi bi-check"></i>';
+                        setTimeout(() => {
+                            this.innerHTML = originalIcon;
+                        }, 2000);
+                    } catch (err) {
+                        console.error('No se pudo copiar el texto: ', err);
+                    }
+                    document.body.removeChild(textArea);
                 });
             }
 
@@ -238,15 +306,55 @@
             }
 
             function handleResizeAndInitialLoad() {
+                const isSmallScreen = window.innerWidth <= 991.98;
+                
+                instructionsPanel.classList.add('hidden'); 
+
                 if (window.innerWidth > 991.98) {
                     setSidebarState(true); 
                 } else {
                     setSidebarState(false); 
                 }
+                
+                updateToggleInstructionsBtnContent();
+            }
+
+            function updateToggleInstructionsBtnContent() {
+                const isSmallScreen = window.innerWidth <= 991.98;
+                if (instructionsPanel.classList.contains('hidden')) {
+                    toggleInstructionsBtn.innerHTML = 'Guía de Uso <i class="bi bi-chevron-down"></i>';
+                    toggleInstructionsBtn.title = 'Mostrar guía';
+                } else {
+                    if (isSmallScreen) {
+                        toggleInstructionsBtn.innerHTML = '<i class="bi bi-chevron-up"></i>';
+                        toggleInstructionsBtn.title = 'Ocultar guía';
+                    } else {
+                        toggleInstructionsBtn.innerHTML = '<i class="bi bi-chevron-right"></i>';
+                        toggleInstructionsBtn.title = 'Ocultar guía';
+                    }
+                }
             }
 
             handleResizeAndInitialLoad();
             window.addEventListener('resize', handleResizeAndInitialLoad);
+
+            function toggleInstructions() {
+                instructionsPanel.classList.toggle('hidden');
+
+                updateToggleInstructionsBtnContent();
+
+                if (instructionsPanel.classList.contains('hidden')) {
+                    calculatorPageLayout.style.justifyContent = 'center';
+                    centeredCalculator.style.flex = '1 1 1000px'; 
+                } else {
+                    calculatorPageLayout.style.justifyContent = 'space-between';
+                    centeredCalculator.style.flex = '3 1 800px'; 
+                }
+            }
+
+            if (toggleInstructionsBtn) {
+                toggleInstructionsBtn.addEventListener('click', toggleInstructions);
+            }
         });
     </script>
 </body>

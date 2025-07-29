@@ -1,5 +1,7 @@
 from django.urls import path
 from CalculadoraApp import views
+from .views import registro_view, login_view, logout_view
+from django.contrib import admin
 
 urlpatterns = [
     path('', views.pagprincipal, name='pagprincipal'),
@@ -10,10 +12,20 @@ urlpatterns = [
     path('calculadora-transcendente/', views.calculadora_transcendente, name='calculadora_transcendente'),
     path('calculadora-biyectiva/', views.calculadora_biyectiva, name='calculadora_biyectiva'),
     path('calculadora-algebraica/', views.calculadora_algebraica, name='calculadora_algebraica'),
-    path('decreciente/', views.analizarfuncionview, name='decreciente'),
-    path('inyectiva/', views.funcion_inyectiva, name='inyectiva'),
-    path('teorias/', views.teorias, name='teorias'),
-    path('funcion_creciente',views.creciente_view, name='funcion_creciente'),
+    path('graficador_funciones/', views.graficador_funciones, name='graficador_funciones'),
+
+
+    path('inyectiva/', views.inyectiva_view, name='inyectiva'),
+
+
+    path('decreciente/', views.analizar_funcion_view, name='decreciente'),
+    path('funcion_creciente/', views.creciente_view, name='funcion_creciente'),
     path('continuidad/', views.calculadora_continuidad, name='continuidad'),
-    path('teoria_implicita/', views.teoria_implicita, name='teoria_implicita')
-]
+    path('teoria_implicita/', views.teoria_implicita, name='teoria_implicita'),
+    path('teorias/', views.teorias, name='teorias'),
+    path('accounts/login/', views.login_view, name='accounts_login'),
+    path('login/', views.login_view, name='login'),
+    path('logout/', views.logout_view, name='logout'),
+    path('registro/', views.registro_view, name='registro'),
+    ]
+
