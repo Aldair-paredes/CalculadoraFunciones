@@ -27,7 +27,10 @@
                 <span>UNID</span>
             </a>
 {% if user.is_authenticated %}
-  <p>Bienvenido, {{ user.username }} ({{ user.perfil.rol }})</p>
+  <p>Bienvenido, {{ usuario }} ({{ rol }})</p>
+{% else %}
+  <p>Bienvenido, Invitado.</p>
+  {# O un enlace para iniciar sesión/registrarse #}
 {% endif %}
 
 

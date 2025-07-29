@@ -7,7 +7,7 @@ class Perfil(models.Model):
         ('maestro', 'Maestro'),
     )
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    rol = models.CharField(max_length=10, choices=ROLES)
+    rol = models.CharField(max_length=10, choices=ROLES, default='alumno')
 
     def __str__(self):
         return f"{self.user.username} ({self.rol})"

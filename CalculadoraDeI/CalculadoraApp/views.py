@@ -1,4 +1,6 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
+from django.contrib.auth import authenticate, login, logout
+from .models import Perfil
 from django.http import HttpRequest
 from collections.abc import Iterable
 from .funcion.implicita import FuncionImplicita
@@ -12,14 +14,11 @@ from .algebraica import (
 )
 from sympy import symbols, Eq, sympify, sqrt, simplify, solve
 
-<<<<<<< HEAD
-=======
 import numpy as np
 import matplotlib.pyplot as plt
 import io
 import urllib.parse
 import base64
->>>>>>> Leo
 
 # Variables globales para SymPy
 x, y, z = symbols('x y z')
@@ -621,7 +620,6 @@ def handle_radical_function(data):
     
     return result
 
-<<<<<<< HEAD
 def calculadora_biyectiva(request):
     result = None
     error = None
@@ -1118,10 +1116,16 @@ from .models import Perfil
 # Página principal
 def pagprincipal(request):
     contexto = {}
+    contexto['usuario'] = "Invitado"
+    contexto['usuario'] = "No autenticado"
     if request.user.is_authenticated:
-        perfil = Perfil.objects.get(user=request.user)
+        Perfil_instancia, created = Perfil.objects.get_or_create(user=request.user)
+        if created and not Perfil_instancia.rol:
+            Perfil_instancia.rol = "Estudiante"
+            Perfil_instancia.save()
         contexto['usuario'] = request.user.username
-        contexto['rol'] = perfil.rol
+        contexto['rol'] = Perfil_instancia.rol
+
     return render(request, 'pagprincipal.html', contexto)
 
 # Vista de registro
@@ -1143,7 +1147,9 @@ def login_view(request):
     if request.method == 'POST':
         form = LoginForm(request.POST)
         if form.is_valid():
-            usuario = authenticate(username=form.cleaned_data['username'], password=form.cleaned_data['password'])
+            username = form.cleaned_data['username']
+            password = form.cleaned_data['password']
+            usuario = authenticate(request, username=username, password=password)
             if usuario is not None:
                 login(request, usuario)
                 return redirect('pagprincipal')
@@ -1192,7 +1198,6 @@ def calculadora_view(request):
             return render(request, 'tu_template.html', context)
 
     return render(request, 'tu_template.html')
-=======
 def graficador_funciones(request):
     graph_url = None
     error = None
@@ -1301,4 +1306,3 @@ def graficador_funciones(request):
     })
 
 
->>>>>>> Leo

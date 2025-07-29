@@ -12,6 +12,7 @@ urlpatterns = [
     path('calculadora-transcendente/', views.calculadora_transcendente, name='calculadora_transcendente'),
     path('calculadora-biyectiva/', views.calculadora_biyectiva, name='calculadora_biyectiva'),
     path('calculadora-algebraica/', views.calculadora_algebraica, name='calculadora_algebraica'),
+    path('graficador_funciones/', views.graficador_funciones, name='graficador_funciones'),
 
 
   path('inyectiva/', views.inyectiva_view, name='inyectiva'),
@@ -22,7 +23,6 @@ urlpatterns = [
     path('continuidad/', views.calculadora_continuidad, name='continuidad'),
     path('teorias/', views.teorias, name='teorias'),
 
-    path('admin/', admin.site.urls),
     path('accounts/login/', views.login_view, name='accounts_login'),
     path('login/', views.login_view, name='login'),
     path('logout/', views.logout_view, name='logout'),
