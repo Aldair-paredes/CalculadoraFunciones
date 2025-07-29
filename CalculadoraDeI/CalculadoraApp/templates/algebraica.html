@@ -172,47 +172,7 @@
                         <button class="copy-btn" title="Copiar resultado"><i class="bi bi-clipboard"></i></button>
                     </div>
                     <div class="result-content">
-                        <pre id="resultOutput">
-                            {% if result %}
-                                <div class="result-line"><span class="result-label">Tipo:</span><span class="result-value">{{ function_type|title }}</span></div>
-                                <div class="result-line"><span class="result-label">Función:</span><span class="result-value">{{ result.function }}</span></div>
-                                
-                                {% if result.evaluation %}
-                                    <div class="result-line"><span class="result-label">Evaluación:</span><span class="result-value success">{{ result.evaluation }}</span></div>
-                                {% endif %}
-                                
-                                {% if result.solution %}
-                                    <div class="result-line"><span class="result-label">Solución:</span><span class="result-value success">{{ result.solution }}</span></div>
-                                {% endif %}
-                                
-                                {% if result.roots %}
-                                    <div class="result-line"><span class="result-label">Raíces:</span><span class="result-value success">{{ result.roots }}</span></div>
-                                {% endif %}
-                                
-                                {% if result.vertex %}
-                                    <div class="result-line"><span class="result-label">Vértice:</span><span class="result-value success">{{ result.vertex }}</span></div>
-                                {% endif %}
-                                
-                                {% if result.factored %}
-                                    <div class="result-line"><span class="result-label">Factorizada:</span><span class="result-value success">{{ result.factored }}</span></div>
-                                {% endif %}
-                                
-                                {% if result.simplified %}
-                                    <div class="result-line"><span class="result-label">Simplificada:</span><span class="result-value success">{{ result.simplified }}</span></div>
-                                {% endif %}
-                                
-                                {% if result.asymptotes %}
-                                    <div class="result-line"><span class="result-label">Asíntotas:</span><span class="result-value success">{{ result.asymptotes }}</span></div>
-                                {% endif %}
-                                
-                                {% if result.domain %}
-                                    <div class="result-line"><span class="result-label">Dominio:</span><span class="result-value success">{{ result.domain }}</span></div>
-                                {% endif %}
-                                
-                            {% elif error %}
-                                <div class="result-line"><span class="result-label">Error:</span><span class="result-value error">{{ error }}</span></div>
-                            {% endif %}
-                        </pre>
+                        <pre id="resultOutput">{% if result %}<div class="result-line"><span class="result-label">Tipo:</span><span class="result-value">{{ function_type|title }}</span></div><div class="result-line"><span class="result-label">Función:</span><span class="result-value">{{ result.function }}</span></div>{% if result.evaluation %}<div class="result-line"><span class="result-label">Evaluación:</span><span class="result-value success">{{ result.evaluation }}</span></div>{% endif %}{% if result.solution %}<div class="result-line"><span class="result-label">Solución:</span><span class="result-value success">{{ result.solution }}</span></div>{% endif %}{% if result.roots %}<div class="result-line"><span class="result-label">Raíces:</span><span class="result-value success">{{ result.roots }}</span></div>{% endif %}{% if result.vertex %}<div class="result-line"><span class="result-label">Vértice:</span><span class="result-value success">{{ result.vertex }}</span></div>{% endif %}{% if result.factored %}<div class="result-line"><span class="result-label">Factorizada:</span><span class="result-value success">{{ result.factored }}</span></div>{% endif %}{% if result.simplified %}<div class="result-line"><span class="result-label">Simplificada:</span><span class="result-value success">{{ result.simplified }}</span></div>{% endif %}{% if result.asymptotes %}<div class="result-line"><span class="result-label">Asíntotas:</span><span class="result-value success">{{ result.asymptotes }}</span></div>{% endif %}{% if result.domain %}<div class="result-line"><span class="result-label">Dominio:</span><span class="result-value success">{{ result.domain }}</span></div>{% endif %}{% elif error %}<div class="result-line"><span class="result-label">Error:</span><span class="result-value error">{{ error }}</span></div>{% endif %}</pre>
                     </div>
                 </div>
                 {% else %}
@@ -277,7 +237,7 @@
                 });
             }
 
-            // Manejo del sidebar (igual que en tu original)
+            // Manejo del sidebar 
             const hamburgerBtn = document.querySelector('.hamburger-menu');
             const closeSidebarBtn = document.querySelector('.close-sidebar-btn');
             const sidebar = document.getElementById('sidebarNav');

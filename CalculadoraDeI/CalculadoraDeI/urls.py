@@ -13,5 +13,6 @@ path('', views.pagprincipal, name='pagprincipal'),
     path('tema_funciones/', views.tema_funciones, name='tema_funciones'),
      path('calculadora-transcendente/', views.calculadora_transcendente, name='calculadora_transcendente'),
      path('calculadora-algebraica/', views.calculadora_algebraica, name='calculadora_algebraica'),
+     path('graficador/', views.graficador_funciones, name='graficador_funciones'),
 
 ]

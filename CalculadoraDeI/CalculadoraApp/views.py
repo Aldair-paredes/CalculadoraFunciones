@@ -11,6 +11,12 @@ from .algebraica import (
 )
 from sympy import symbols, Eq, sympify, sqrt, simplify, solve
 
+import numpy as np
+import matplotlib.pyplot as plt
+import io
+import urllib.parse
+import base64
+
 # Variables globales para SymPy
 x, y, z = symbols('x y z')
 
@@ -245,3 +251,112 @@ def handle_radical_function(data):
             result['evaluation'] = f"f({val_x}) = {func_expr.subs(x, val_x)} (complejo)"
     
     return result
+
+def graficador_funciones(request):
+    graph_url = None
+    error = None
+    function_expression = ""
+    input_data = {
+        'function_type': '',
+        'a_linear': '', 'b_linear': '',
+        'a_quadratic': '', 'b_quadratic': '', 'c_quadratic': '',
+        'x_min': '-10', 'x_max': '10' # Valores por defecto
+    }
+
+    if request.method == 'POST':
+        function_type = request.POST.get('function_type')
+        x_min_str = request.POST.get('x_min', '-10')
+        x_max_str = request.POST.get('x_max', '10')
+
+        input_data['function_type'] = function_type
+        input_data['x_min'] = x_min_str
+        input_data['x_max'] = x_max_str
+
+        try:
+            x_min = float(x_min_str)
+            x_max = float(x_max_str)
+            if x_min >= x_max:
+                raise ValueError("El valor mínimo de X debe ser menor que el valor máximo.")
+        except ValueError as e:
+            error = f"Error en los límites de X: {e}"
+            return render(request, 'graficador.html', {'error': error, 'input_data': input_data})
+
+        func = None
+        
+        if function_type == 'linear':
+            a_str = request.POST.get('a_linear')
+            b_str = request.POST.get('b_linear')
+            input_data['a_linear'] = a_str
+            input_data['b_linear'] = b_str
+
+            try:
+                a = float(a_str)
+                b = float(b_str)
+                func = lambda x: a * x + b
+                function_expression = f"f(x) = {a}x + {b}"
+            except (ValueError, TypeError):
+                error = "Entrada inválida para función lineal. Asegúrate de ingresar números válidos para 'a' y 'b'."
+
+        elif function_type == 'quadratic':
+            a_str = request.POST.get('a_quadratic')
+            b_str = request.POST.get('b_quadratic')
+            c_str = request.POST.get('c_quadratic')
+            input_data['a_quadratic'] = a_str
+            input_data['b_quadratic'] = b_str
+            input_data['c_quadratic'] = c_str
+
+            try:
+                a = float(a_str)
+                b = float(b_str)
+                c = float(c_str)
+                func = lambda x: a * x**2 + b * x + c
+                function_expression = f"f(x) = {a}x² + {b}x + {c}"
+            except (ValueError, TypeError):
+                error = "Entrada inválida para función cuadrática. Asegúrate de ingresar números válidos para 'a', 'b' y 'c'."
+        else:
+            error = "Tipo de función no válido."
+
+        if func and not error:
+            try:
+                x_valores = np.linspace(x_min, x_max, 400)
+                y_valores = func(x_valores)
+
+                # --- Generar la gráfica con Matplotlib ---
+                plt.figure(figsize=(10, 6))
+                plt.plot(x_valores, y_valores, label=function_expression, color='#007bff') # Usamos el color de Bootstrap primary
+
+                # Añadir ejes en el origen si están dentro del rango
+                if x_min <= 0 <= x_max:
+                    plt.axvline(0, color='grey', linestyle='--', linewidth=0.7)
+                if min(y_valores) <= 0 <= max(y_valores):
+                    plt.axhline(0, color='grey', linestyle='--', linewidth=0.7)
+
+                plt.title(f'Gráfica de la Función: {function_expression}', fontsize=16)
+                plt.xlabel('Dominio (x)', fontsize=12)
+                plt.ylabel('Rango / Imagen (y)', fontsize=12)
+                plt.grid(True, linestyle=':', alpha=0.7)
+                plt.legend(fontsize=12)
+                plt.tight_layout()
+
+                # Guardar la gráfica en un buffer de memoria
+                buffer = io.BytesIO()
+                plt.savefig(buffer, format='png')
+                buffer.seek(0)
+                plt.close() # Cierra la figura para liberar memoria
+
+                # Codificar la imagen en base64 para incrustarla en HTML
+                image_png = buffer.getvalue()
+                graph_url = urllib.parse.quote(base64.b64encode(image_png).decode())
+
+            except Exception as e:
+                error = f"Ocurrió un error al generar la gráfica: {e}"
+    
+    return render(request, 'graficador.html', {
+        'graph_url': f"data:image/png;base64,{graph_url}" if graph_url else None,
+        'error': error,
+        'input_data': input_data,
+        'function_type': input_data['function_type'], # Pasamos function_type para que el select se mantenga seleccionado
+        'function_expression': function_expression, # Para mostrar la expresión de la función en el resultado
+    })
+
+
