@@ -35,11 +35,13 @@
             <ul class="navbar-nav w-100">
                 <li class="nav-item"><a class="nav-link" href="{% url 'pagprincipal' %}"><i class="bi bi-house-door-fill me-2"></i>Inicio</a></li>
                 <li class="nav-item"><a class="nav-link active" href="{% url 'temas' %}"><i class="bi bi-journal-text me-2"></i>Temas</a></li>
-             <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-person-lines-fill me-2"></i>Cuestionario</a></li>
-                <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-people-fill me-2"></i>Grupo</a></li>
-                <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-chat-dots-fill me-2"></i>Testimonios</a></li>
-                <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-file-earmark-text-fill me-2"></i>Documentos</a></li>
+             <li class="nav-item"><a class="nav-link" href="{% url 'preguntas:quiz_view' %}"><i class="bi bi-person-lines-fill me-2"></i>Cuestionario</a></li>
+                <li class="nav-item"><a class="nav-link" href="{% url 'teorias' %}"><i class="bi bi-file-earmark-text-fill me-2"></i>Teorías</a></li>
             </ul>
+            <div class="btn-group mt-auto w-100">
+                <a href="{% url 'login' %}" class="btn btn-primary d-flex align-items-center justify-content-center"><i class="bi bi-box-arrow-in-right me-2"></i>Iniciar sesión</a>
+                <a href="{% url 'registro' %}" class="btn btn-light d-flex align-items-center justify-content-center"><i class="bi bi-person-plus-fill me-2"></i>Registrarse</a>
+            </div>
         </nav>
 
         <main class="main-content">
@@ -63,7 +65,7 @@
                                     <option value="" {% if not operation_select %}selected{% endif %}>Selecciona una operación</option>
                                     <option value="evaluar" {% if operation_select == "evaluar" %}selected{% endif %}>Evaluar en un punto</option>
                                     <option value="derivar" {% if operation_select == "derivar" %}selected{% endif %}>Calcular Derivada</option>
-                                    <option value="encontrar_crecimiento" {% if operation_select == "encontrar_crecimiento" %}selected{% endif %}>Encontrar Intervalos Crecientes</option> {# Valor del select, usado en JS #}
+                                    <option value="encontrar_crecimiento" {% if operation_select == "encontrar_crecimiento" %}selected{% endif %}>Encontrar Intervalos Crecientes</option> 
                                     <option value="graficar" {% if operation_select == "graficar" %}selected{% endif %}>Graficar Función y Derivada</option>
                                 </select>
                             </div>
@@ -99,7 +101,7 @@
                         </div>
                         
                         <button type="submit" class="calculate-btn"><i class="bi bi-calculator"></i> Calcular</button>
-                        <button type="button" id="clearBtn" class="btn btn-secondary" >Borrar</button>
+                        <button type="button" id="clearBtn" class="calculate-btn btn-secondary" style="background: var(--calc-color-mantle); margin-top: 1rem;"> <i class="bi bi-eraser-fill"></i>Borrar función</button>
                     </form>
                 </div>
 
@@ -240,37 +242,49 @@
                     }
                 });
             }
-
             const sidebar = document.getElementById('sidebarNav');
             const main = document.querySelector('.main-content');
             const hamburger = document.querySelector('.hamburger-menu');
             const closeBtn = document.querySelector('.close-sidebar-btn');
 
-            function toggleSidebar(open) {
-                if (!sidebar || !main || !hamburger) {
-                    console.error("Error: No se encontraron todos los elementos necesarios para el navbar.");
-                    return;
+            function setSidebarState(isOpen) {
+                if (isOpen) {
+                    sidebar.classList.add('active');
+                    hamburger.style.display = 'none'; 
+                    if (closeBtn) {
+                        closeBtn.style.display = 'block';
+                    }
+                    main.style.marginLeft = '260px'; 
+                } else {
+                    sidebar.classList.remove('active');
+                    hamburger.style.display = 'block'; 
+                    if (closeBtn) {
+                        closeBtn.style.display = 'none'; 
+                    }
+                    main.style.marginLeft = '0'; 
                 }
-                sidebar.classList.toggle('active', open);
-                hamburger.style.display = open ? 'none' : 'block';
-                if (closeBtn) {
-                    closeBtn.style.display = open ? 'block' : 'none';
-                }
-                main.style.marginLeft = open ? '260px' : '0';
             }
 
-            hamburger.addEventListener('click', () => toggleSidebar(true));
-            if (closeBtn) {
-                closeBtn.addEventListener('click', () => toggleSidebar(false));
+            function toggleSidebar() {
+                setSidebarState(!sidebar.classList.contains('active'));
             }
-            toggleSidebar(false);
-            window.addEventListener('load', () => {
-                const selectedOperation = "{{ operation_select|default_if_none:'' }}";
-                if (selectedOperation) {
-                    select.value = selectedOperation;
-                    actualizarCampos();
-                }
-            });
+
+            hamburger.addEventListener('click', toggleSidebar);
+            if (closeBtn) {
+                closeBtn.addEventListener('click', toggleSidebar);
+           }
+
+            function handleResizeAndInitialLoad() {
+                if (window.innerWidth > 991.98) {
+                    setSidebarState(true); 
+                } else { 
+                 setSidebarState(false); 
+              }
+           }
+
+            handleResizeAndInitialLoad();
+            window.addEventListener('resize', handleResizeAndInitialLoad);
+            
         });
     </script>
 </body>

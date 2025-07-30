@@ -2,28 +2,27 @@
             text-align: center;
             margin-top: 20px;
             padding: 15px;
-            background-color: var(--calc-terminal-body-bg); /* Usar color de fondo del terminal */
-            border-radius: 12px; /* Usar un radio de borde consistente */
-            box-shadow: var(--calc-card-shadow); /* Usar sombra de tarjeta */
+            background-color: var(--calc-terminal-body-bg); 
+            border-radius: 12px; 
+            box-shadow: var(--calc-card-shadow); 
         }
         .graph-container h4 {
-            color: var(--calc-terminal-label-color); /* Usar color de etiqueta del terminal */
+            color: var(--calc-terminal-label-color); 
             margin-bottom: 15px;
             font-size: 1.2rem;
         }
         .graph-container img {
             max-width: 100%;
             height: auto;
-            border-radius: 8px; /* Ligeramente más pequeño para la imagen */
+            border-radius: 8px; 
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
         }
         .graph-container p.text-muted {
-            color: #abb2bf; /* Color de texto del terminal */
+            color: #abb2bf; 
             font-size: 0.9rem;
             margin-top: 10px;
         }
 
-        /* Tus estilos CSS existentes (pegados de tu entrada) */
         :root {
             --calc-color-dark-font: #343a40; 
             --calc-color-light-bg: #ffffff; 
