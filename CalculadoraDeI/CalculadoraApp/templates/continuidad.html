@@ -5,18 +5,21 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Calculadora de Continuidad</title>
-    <link href="{% static 'css/navbar.css' %}" rel="stylesheet" /> 
+    <link href="{% static 'css/navbar.css' %}" rel="stylesheet" />
     <link href="{% static 'css/implicita.css' %}" rel="stylesheet" /> 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" />
-   
+    <style>
+        .operation-graficar {
+            display: none; 
+        }
+    </style>
 </head>
 <body>
     <div class="app-container">
         <button class="hamburger-menu" type="button" aria-label="Toggle navigation">
             <i class="bi bi-list"></i>
         </button>
-
         <nav class="sidebar" id="sidebarNav">
             <button class="close-sidebar-btn" type="button" aria-label="Cerrar menú">
                 <i class="bi bi-x-lg"></i>
@@ -28,7 +31,246 @@
             <ul class="navbar-nav w-100">
                 <li class="nav-item"><a class="nav-link" href="{% url 'pagprincipal' %}"><i class="bi bi-house-door-fill me-2"></i>Inicio</a></li>
                 <li class="nav-item"><a class="nav-link active" href="{% url 'temas' %}"><i class="bi bi-journal-text me-2"></i>Temas</a></li>
-             <li class="nav-item"><a class="nav-link" href="{% url 'preguntas:quiz_view' %}"><i class="bi bi-person-lines-fill me-2"></i>Cuestionario</a></li>
+                <li class="nav-item"><a class="nav-link" href="{% url 'preguntas:quiz_view' %}"><i class="bi bi-person-lines-fill me-2"></i>Cuestionario</a></li>
                 <li class="nav-item"><a class="nav-link" href="{% url 'teorias' %}"><i class="bi bi-file-earmark-text-fill me-2"></i>Teorías</a></li>
             </ul>
+            <div class="btn-group mt-auto w-100">
+                <a href="{% url 'login' %}" class="btn btn-primary d-flex align-items-center justify-content-center"><i class="bi bi-box-arrow-in-right me-2"></i>Iniciar sesión</a>
+                <a href="{% url 'registro' %}" class="btn btn-light d-flex align-items-center justify-content-center"><i class="bi bi-person-plus-fill me-2"></i>Registrarse</a>
+            </div>
         </nav>
+        <main class="main-content">
+            <div class="centered-calculator">
+                <div class="calculator-card">
+                    <div class="calculator-header">
+                        <h1>Calculadora de Continuidad</h1>
+                        <p class="subtitle">Verifica la continuidad de una función en un punto dado y visualiza su gráfica.</p>
+                    </div>
+
+                    <form method="post" id="calcForm" class="calculator-form">
+                        {% csrf_token %}
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="expresion"><i class="bi bi-function"></i> Expresión f(x):</label>
+                                <input type="text" id="expresion" name="expresion" placeholder="Ej: 1/x, sin(x), x**2 - 4" required value="{{ expresion_input|default_if_none:'' }}">
+                            </div>
+                            <div class="form-group">
+                                <label for="punto_a"><i class="bi bi-geo-alt-fill"></i> Punto 'a' para análisis:</label>
+                                <input type="text" id="punto_a" name="punto_a" placeholder="Ej: 0, 2, pi" required value="{{ punto_a_input|default_if_none:'' }}">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="operation_select"><i class="bi bi-gear"></i> Acción:</label>
+                                <select id="operation_select" name="operation_select" required>
+                                    <option value="verificar" {% if operation_select == "verificar" %}selected{% endif %}>Verificar Continuidad</option>
+                                    <option value="graficar" {% if operation_select == "graficar" %}selected{% endif %}>Graficar Función</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-row operation-graficar">
+                            <div class="form-group">
+                                <label for="rango_x_min"><i class="bi bi-arrow-left-right"></i> Rango X (Min):</label>
+                                <input type="text" id="rango_x_min" name="rango_x_min" placeholder="Ej: -5" value="{{ rango_x_min_input|default_if_none:'' }}">
+                            </div>
+                            <div class="form-group">
+                                <label for="rango_x_max"><i class="bi bi-arrow-left-right"></i> Rango X (Max):</label>
+                                <input type="text" id="rango_x_max" name="rango_x_max" placeholder="Ej: 5" value="{{ rango_x_max_input|default_if_none:'' }}">
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="calculate-btn"><i class="bi bi-calculator"></i> Calcular</button>
+                        <button type="button" id="clearBtn" class="calculate-btn btn-secondary" style="background: var(--calc-color-mantle); margin-top: 1rem;"> <i class="bi bi-eraser-fill"></i>Borrar</button>
+                    </form>
+                </div>
+
+                {% if resultado or error or grafica_base64 %} 
+                <div class="result-card" id="resultCard" style="display: block;">
+                    <div class="result-header">
+                        <div class="terminal-controls">
+                            <span class="control-dot red"></span>
+                            <span class="control-dot yellow"></span>
+                            <span class="control-dot green"></span>
+                        </div>
+                        <h3>Resultado</h3>
+                        <button class="copy-btn" title="Copiar resultado"><i class="bi bi-clipboard"></i></button>
+                    </div>
+                    <div class="result-content">
+                        <pre id="resultOutput">
+                            {% if operation_select == 'graficar' and grafica_base64 %}
+                                <div class="result-line"><span class="result-label">Expresión:</span><span class="result-value">{{ expresion_input }}</span></div>
+                                <div class="result-line"><span class="result-label">Punto de análisis:</span><span class="result-value">{{ punto_a_input }}</span></div>
+                                <div class="result-line"><span class="result-label">Acción:</span><span class="result-value">Graficar Función</span></div>
+                                <div class="graph-container">
+                                    <h4>Gráfica de f(x) = {{ expresion_input }}</h4>
+                                    <img src="data:image/png;base64,{{ grafica_base64 }}" alt="Gráfica de la función">
+                                    <p class="text-muted mt-2">El punto de análisis `a` se marca con un círculo rojo.</p>
+                                </div>
+                            {% elif resultado %}
+                                <div class="result-line"><span class="result-label">Expresión:</span><span class="result-value">{{ expresion_input }}</span></div>
+                                <div class="result-line"><span class="result-label">Punto de análisis:</span><span class="result-value">{{ punto_a_input }}</span></div>
+                                <div class="result-line"><span class="result-label">Acción:</span><span class="result-value">Verificar Continuidad</span></div>
+                                {% if es_continua %}
+                                    <div class="result-line"><span class="result-label">Estado:</span><span class="result-value success">{{ resultado|safe }}</span></div>
+                                {% else %}
+                                    <div class="result-line"><span class="result-label">Estado:</span><span class="result-value error">{{ resultado|safe }}</span></div>
+                                {% endif %}
+                            {% elif error %}
+                                <div class="result-line"><span class="result-label">Expresión:</span><span class="result-value">{{ expresion_input }}</span></div>
+                                <div class="result-line"><span class="result-label">Punto de análisis:</span><span class="result-value">{{ punto_a_input }}</span></div>
+                                <div class="result-line"><span class="result-label">Error:</span><span class="result-value error">{{ error }}</span></div>
+                            {% endif %}
+                        </pre>
+                    </div>
+                </div>
+                {% else %}
+                <div class="result-card" id="resultCard" style="display: none;">
+                    <div class="result-header">
+                        <div class="terminal-controls">
+                            <span class="control-dot red"></span>
+                            <span class="control-dot yellow"></span>
+                            <span class="control-dot green"></span>
+                        </div>
+                        <h3>Resultado</h3>
+                        <button class="copy-btn" title="Copiar resultado"><i class="bi bi-clipboard"></i></button>
+                    </div>
+                    <div class="result-content">
+                        <p class="placeholder">El resultado aparecerá aquí después de calcular.</p>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </main>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const select = document.getElementById('operation_select');
+            const graficarFields = document.querySelector('.operation-graficar');
+            const resultCard = document.getElementById('resultCard');
+            const clearBtn = document.getElementById('clearBtn');
+            const copyBtn = document.querySelector('.copy-btn');
+            const expresionInput = document.getElementById('expresion');
+            const puntoAInput = document.getElementById('punto_a');
+            const rangoXMinInput = document.getElementById('rango_x_min');
+            const rangoXMaxInput = document.getElementById('rango_x_max');
+            
+            function actualizarCampos() {
+                if (select.value === 'graficar') {
+                    graficarFields.style.display = 'flex';
+                    rangoXMinInput.setAttribute('required', 'true');
+                    rangoXMaxInput.setAttribute('required', 'true');
+                    puntoAInput.removeAttribute('required'); 
+                } else {
+                    graficarFields.style.display = 'none';
+                    rangoXMinInput.removeAttribute('required');
+                    rangoXMaxInput.removeAttribute('required');
+                    puntoAInput.setAttribute('required', 'true'); 
+                }
+            }
+
+            select.addEventListener('change', actualizarCampos);
+            actualizarCampos(); 
+
+            const hasResultOrErrorOrGraph = "{{ resultado|yesno:'true,false' }}" === "true" || "{{ error|yesno:'true,false' }}" === "true" || "{{ grafica_base64|yesno:'true,false' }}" === "true";
+            if (resultCard && hasResultOrErrorOrGraph) {
+                setTimeout(() => {
+                    resultCard.style.display = 'block';
+                    resultCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }, 100);
+            } else if (resultCard && !hasResultOrErrorOrGraph) {
+                resultCard.style.display = 'none'; 
+            }
+
+            clearBtn.addEventListener('click', () => {
+                document.getElementById('calcForm').reset();
+                expresionInput.value = '';
+                puntoAInput.value = '';
+                rangoXMinInput.value = '';
+                rangoXMaxInput.value = '';
+                
+                if (resultCard) {
+                    resultCard.style.display = 'none';
+                    document.getElementById('resultOutput').innerHTML = '<p class="placeholder">El resultado aparecerá aquí después de calcular.</p>';
+                }
+                actualizarCampos();
+            });
+
+            if (copyBtn) {
+                copyBtn.addEventListener('click', function () {
+                    const resultOutputElement = document.getElementById('resultOutput');
+                    if (resultOutputElement) {
+                        const selectedOperation = select.value;
+                        let textToCopy = '';
+
+                        if (selectedOperation === 'graficar') {
+                            textToCopy = "La gráfica se ha generado y está disponible visualmente en la calculadora.";
+                        } else {
+                            const resultLines = Array.from(resultOutputElement.querySelectorAll('.result-line'));
+                            textToCopy = resultLines.map(line => {
+                                const label = line.querySelector('.result-label')?.textContent.replace(':', '').trim();
+                                const value = line.querySelector('.result-value')?.textContent.trim();
+                                return `${label}: ${value}`;
+                            }).join('\n');
+                        }
+                        
+                        navigator.clipboard.writeText(textToCopy);
+                        
+                        const originalIcon = this.innerHTML;
+                        this.innerHTML = '<i class="bi bi-check"></i>';
+                        setTimeout(() => {
+                            this.innerHTML = originalIcon;
+                        }, 2000);
+                    }
+                });
+            }
+
+            const sidebar = document.getElementById('sidebarNav');
+            const main = document.querySelector('.main-content');
+            const hamburger = document.querySelector('.hamburger-menu');
+            const closeBtnSidebar = document.querySelector('.close-sidebar-btn');
+
+            function setSidebarState(isOpen) {
+                if (isOpen) {
+                    sidebar.classList.add('active');
+                    hamburger.style.display = 'none'; 
+                    if (closeBtnSidebar) {
+                        closeBtnSidebar.style.display = 'block';
+                    }
+                    main.style.marginLeft = '260px'; 
+                } else {
+                    sidebar.classList.remove('active');
+                    hamburger.style.display = 'block'; 
+                    if (closeBtnSidebar) {
+                        closeBtnSidebar.style.display = 'none'; 
+                    }
+                    main.style.marginLeft = '0'; 
+                }
+            }
+
+            function toggleSidebar() {
+                setSidebarState(!sidebar.classList.contains('active'));
+            }
+
+            hamburger.addEventListener('click', toggleSidebar);
+            if (closeBtnSidebar) {
+                closeBtnSidebar.addEventListener('click', toggleSidebar);
+            }
+
+            function handleResizeAndInitialLoad() {
+                if (window.innerWidth > 991.98) {
+                    setSidebarState(true); 
+                } else { 
+                    setSidebarState(false); 
+                }
+            }
+
+            handleResizeAndInitialLoad();
+            window.addEventListener('resize', handleResizeAndInitialLoad);
+        });
+    </script>
+</body>
+</html>

@@ -20,7 +20,7 @@ urlpatterns = [
 
     path('decreciente/', views.analizar_funcion_view, name='decreciente'),
     path('funcion_creciente/', views.creciente_view, name='funcion_creciente'),
-    path('continuidad/', views.calculadora_continuidad, name='continuidad'),
+    path('continuidad/', views.continuidad_calculadora, name='continuidad'),
     path('teoria_implicita/', views.teoria_implicita, name='teoria_implicita'),
     path('teorias/', views.teorias, name='teorias'),
     path('accounts/login/', views.login_view, name='accounts_login'),
