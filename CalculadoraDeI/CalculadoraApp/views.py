@@ -856,7 +856,6 @@ def creciente_view(request):
     return render(request, 'funcion_creciente.html', context)
 
 
-def calculadora_continuidad(request):
     function_input = ""
     punto_continuidad_input = ""
     rango_x_min_input = ""
@@ -900,6 +899,7 @@ def calculadora_continuidad(request):
         'error': error,
     }
     return render(request, 'biyectiva.html', context)
+
 #Decreciente Agustin
 import sympy as sp
 import numpy as np
@@ -1296,11 +1296,9 @@ def graficador_funciones(request):
                 x_valores = np.linspace(x_min, x_max, 400)
                 y_valores = func(x_valores)
 
-                # --- Generar la gráfica con Matplotlib ---
                 plt.figure(figsize=(10, 6))
-                plt.plot(x_valores, y_valores, label=function_expression, color='#007bff') # Usamos el color de Bootstrap primary
+                plt.plot(x_valores, y_valores, label=function_expression, color='#007bff') 
 
-                # Añadir ejes en el origen si están dentro del rango
                 if x_min <= 0 <= x_max:
                     plt.axvline(0, color='grey', linestyle='--', linewidth=0.7)
                 if min(y_valores) <= 0 <= max(y_valores):
@@ -1335,3 +1333,39 @@ def graficador_funciones(request):
     })
 
 
+def continuidad_calculadora(request):
+    context = {}
+
+    if request.method == 'POST':
+        expresion_input = request.POST.get('expresion')
+        punto_a_input = request.POST.get('punto_a')
+        operation_select = request.POST.get('operation_select')
+        rango_x_min_input = request.POST.get('rango_x_min')
+        rango_x_max_input = request.POST.get('rango_x_max')
+
+        context = {
+            'expresion_input': expresion_input,
+            'punto_a_input': punto_a_input,
+            'operation_select': operation_select,
+            'rango_x_min_input': rango_x_min_input,
+            'rango_x_max_input': rango_x_max_input,
+        }
+
+        if operation_select == 'verificar':
+            es_continua, resultado_mensaje = verificar_continuidad_en_punto(expresion_input, punto_a_input)
+            context['resultado'] = resultado_mensaje
+            context['es_continua'] = es_continua 
+            context['error'] = None 
+
+        elif operation_select == 'graficar':
+        
+            grafica_base64, graph_error = graficar_funcion_continuidad(expresion_input, punto_a_input, rango_x_min_input, rango_x_max_input)
+            context['grafica_base64'] = grafica_base64
+            context['error'] = graph_error 
+            context['resultado'] = None 
+            context['es_continua'] = None 
+
+        else:
+            context['error'] = "Operación no válida seleccionada."
+
+    return render(request, 'continuidad.html', context)
