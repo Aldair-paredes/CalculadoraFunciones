@@ -5,17 +5,47 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Calculadora de Función Implícita</title>
-    <link href="{% static 'css/navbar.css' %}" rel="stylesheet" />
-    <link href="{% static 'css/implicita.css' %}" rel="stylesheet" /> 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" />
+    <link href="{% static 'css/navbar.css' %}" rel="stylesheet" />
+    <link href="{% static 'css/implicita.css' %}" rel="stylesheet" /> 
+    
     <style>
-        .operation-evaluar,
-        .operation-variable, 
-        .operation-limit,
-        .operation-resolver,
-        .operation-graficar {
+        /* Oculta los campos de operación que no están seleccionados */
+        .operation-evaluar, .operation-variable, .operation-limit,
+        .operation-resolver, .operation-graficar {
             display: none;
+        }
+
+        /* 1. Asegura que el panel de instrucciones esté oculto por defecto */
+        .hidden {
+          display: none !important;
+        }
+
+        /* 2. Prepara la tarjeta para posicionar el botón flotante */
+        .calculator-card {
+          position: relative; /* MUY IMPORTANTE: para que el botón se posicione dentro de esta tarjeta */
+          padding-top: 2.5rem; /* Añade espacio superior para que el contenido no choque con el botón */
+        }
+
+        /* 3. Estilos para el botón de la Guía de Uso */
+        .toggle-instructions-btn {
+          position: absolute;   /* Posiciona el botón de forma flotante */
+          top: 15px;            /* Distancia desde arriba */
+          right: 15px;          /* Distancia desde la derecha */
+          z-index: 10;          /* Lo pone por encima de otros elementos */
+          background-color: #3b82f6; /* Un color azul, puedes cambiarlo */
+          color: white;
+          border-radius: 8px;
+          border: none;
+          padding: 6px 12px;
+          font-size: 0.9rem;
+          cursor: pointer;
+          transition: background-color 0.2s;
+        }
+
+        .toggle-instructions-btn:hover {
+          background-color: #2563eb;
         }
     </style>
 </head>
@@ -24,194 +54,67 @@
         <button class="hamburger-menu" type="button" aria-label="Toggle navigation">
             <i class="bi bi-list"></i>
         </button>
+
         <nav class="sidebar" id="sidebarNav">
-            <button class="close-sidebar-btn" type="button" aria-label="Cerrar menú">
-                <i class="bi bi-x-lg"></i>
-            </button>
-            <a class="navbar-brand" href="#">
-                <img src="{% static 'img/WOLF.png' %}" alt="Logo UNID" />
-                <span>UNID</span>
-            </a>
+            <button class="close-sidebar-btn" type="button" aria-label="Cerrar menú"><i class="bi bi-x-lg"></i></button>
+            <a class="navbar-brand" href="#"><img src="{% static 'img/WOLF.png' %}" alt="Logo UNID" /><span>UNID</span></a>
             <ul class="navbar-nav w-100">
                 <li class="nav-item"><a class="nav-link" href="{% url 'pagprincipal' %}"><i class="bi bi-house-door-fill me-2"></i>Inicio</a></li>
                 <li class="nav-item"><a class="nav-link active" href="{% url 'temas' %}"><i class="bi bi-journal-text me-2"></i>Temas</a></li>
                 <li class="nav-item"><a class="nav-link" href="{% url 'preguntas:quiz_view' %}"><i class="bi bi-person-lines-fill me-2"></i>Cuestionario</a></li>
-                <li class="nav-item"><a class="nav-link" href="{% url 'teorias' %}"><i class="bi bi-file-earmark-text-fill me-2"></i>Teorías</a></li>
+                <li class="nav-item"><a class="nav-link" href="{% url 'teorias' %}"><i class="bi bi-book-fill me-2"></i>Teorías</a></li>
             </ul>
             <div class="btn-group mt-auto w-100">
                 <a href="{% url 'login' %}" class="btn btn-primary d-flex align-items-center justify-content-center"><i class="bi bi-box-arrow-in-right me-2"></i>Iniciar sesión</a>
                 <a href="{% url 'registro' %}" class="btn btn-light d-flex align-items-center justify-content-center"><i class="bi bi-person-plus-fill me-2"></i>Registrarse</a>
             </div>
-
         </nav>
+
         <main class="main-content">
-            <div class="centered-calculator">
-                <div class="calculator-card">
-                    <div class="calculator-header">
-                        <h1>Calculadora de Función Implícita</h1>
-                        <p class="subtitle">Operaciones disponibles:  evaluar, derivar, simplificar, resolver, límite y graficar funciones implícitas.</p>
-                    </div>
-
-                    <form method="post" id="calcForm" class="calculator-form">
-                        {% csrf_token %}
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="expresion"><i class="bi bi-function"></i> Expresión:</label>
-                                <input type="text" id="expresion" name="expresion" placeholder="Ej: x**2 + y**2 - 1" required value="{{ expresion_input|default_if_none:'' }}">
-                            </div>
-                            <div class="form-group">
-                                <label for="operation_select"><i class="bi bi-gear"></i> Operación:</label>
-                                <select id="operation_select" name="operation_select" required>
-                                    <option value="" {% if not operation_select %}selected{% endif %}>Selecciona una operación</option>
-                                    <option value="evaluar" {% if operation_select == "evaluar" %}selected{% endif %}>Evaluar</option>
-                                    <option value="derivar" {% if operation_select == "derivar" %}selected{% endif %}>Derivar</option>
-                                    <option value="limite" {% if operation_select == "limite" %}selected{% endif %}>Límite</option>
-                                    <option value="simplificar" {% if operation_select == "simplificar" %}selected{% endif %}>Simplificar</option>
-                                    <option value="resolver" {% if operation_select == "resolver" %}selected{% endif %}>Resolver</option>
-                                    <option value="graficar" {% if operation_select == "graficar" %}selected{% endif %}>Graficar</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="form-row operation-evaluar">
-                            <div class="form-group">
-                                <label for="x_val"><i class="bi bi-x"></i> Valor de x:</label>
-                                <input type="text" id="x_val" name="x_val" placeholder="Ej: 2" value="{{ x_val_input|default_if_none:'' }}">
-                            </div>
-                            <div class="form-group">
-                                <label for="y_val"><i class="bi bi-y"></i> Valor de y:</label>
-                                <input type="text" id="y_val" name="y_val" placeholder="Ej: 3" value="{{ y_val_input|default_if_none:'' }}">
-                            </div>
-                        </div>
-
-                        <div class="form-row operation-variable">
-                            <div class="form-group">
-                                <label for="derivar_var"><i class="bi bi-x-diamond"></i> Variable (x o y):</label>
-                                <input type="text" id="derivar_var" name="derivar_var" placeholder="Ej: x" value="{{ derivar_var_input|default_if_none:'' }}">
-                            </div>
-                            <div class="form-group">
-                                <label for="derivar_orden"><i class="bi bi-sort-numeric-up"></i> Orden:</label>
-                                <input type="number" id="derivar_orden" name="derivar_orden" min="1" placeholder="Ej: 1" value="{{ derivar_orden_input|default_if_none:'' }}">
-                            </div>
-                        </div>
-
-                        <div class="form-row operation-limit">
-                            <div class="form-group">
-                                <label for="limite_var"><i class="bi bi-x-diamond"></i> Variable para límite:</label>
-                                <input type="text" id="limite_var" name="limite_var" placeholder="Ej: x" value="{{ limite_var_input|default_if_none:'' }}">
-                            </div>
-                            <div class="form-group">
-                                <label for="limite_punto"><i class="bi bi-infinity"></i> Punto al que tiende:</label>
-                                <input type="text" id="limite_punto" name="limite_punto" placeholder="Ej: 0, oo, 2" value="{{ limite_punto_input|default_if_none:'' }}">
-                            </div>
-                            <div class="form-group">
-                                <label for="limite_dir"><i class="bi bi-arrow-left-right"></i> Dirección (+ o -):</label>
-                                <input type="text" id="limite_dir" name="limite_dir" placeholder="Ej: +, -, o vacío" value="{{ limite_dir_input|default_if_none:'' }}">
-                            </div>
-                        </div>
-
-                        <div class="form-row operation-resolver">
-                            <div class="form-group">
-                                <label for="resolver_var"><i class="bi bi-equals"></i> Variable a despejar (x o y):</label>
-                                <input type="text" id="resolver_var" name="resolver_var" placeholder="Ej: y" value="{{ resolver_var_input|default_if_none:'' }}">
-                            </div>
-                            <div class="form-group">
-                                <label for="resolver_val"><i class="bi bi-123"></i> Valor para la otra variable (opcional):</label>
-                                <input type="text" id="resolver_val" name="resolver_val" placeholder="Ej: x=5" value="{{ resolver_val_input|default_if_none:'' }}">
-                            </div>
-                        </div>
+            <div class="calculator-page-layout">
+                <div class="centered-calculator">
+                    <div class="calculator-card">
                         
-                        <div class="form-row operation-graficar">
-                            <div class="form-group">
-                                <label for="rango_x_min"><i class="bi bi-arrow-left-right"></i> Rango X (Min):</label>
-                                <input type="text" id="rango_x_min" name="rango_x_min" placeholder="Ej: -5" value="{{ rango_x_min_input|default_if_none:'' }}">
-                            </div>
-                            <div class="form-group">
-                                <label for="rango_x_max"><i class="bi bi-arrow-left-right"></i> Rango X (Max):</label>
-                                <input type="text" id="rango_x_max" name="rango_x_max" placeholder="Ej: 5" value="{{ rango_x_max_input|default_if_none:'' }}">
-                            </div>
-                            <div class="form-group">
-                                <label for="rango_y_min"><i class="bi bi-arrow-up-down"></i> Rango Y (Min):</label>
-                                <input type="text" id="rango_y_min" name="rango_y_min" placeholder="Ej: -5" value="{{ rango_y_min_input|default_if_none:'' }}">
-                            </div>
-                            <div class="form-group">
-                                <label for="rango_y_max"><i class="bi bi-arrow-up-down"></i> Rango Y (Max):</label>
-                                <input type="text" id="rango_y_max" name="rango_y_max" placeholder="Ej: 5" value="{{ rango_y_max_input|default_if_none:'' }}">
-                            </div>
-                            <div class="form-group">
-                                <label for="puntos"><i class="bi bi-grip-horizontal"></i> Puntos:</label>
-                                <input type="number" id="puntos" name="puntos" min="50" max="1000" placeholder="Ej: 200" value="{{ puntos_input|default_if_none:'' }}">
-                            </div>
+                        <button type="button" id="toggleInstructionsBtn" class="toggle-instructions-btn" title="Mostrar guía">
+                            Guía de Uso <i class="bi bi-chevron-down"></i>
+                        </button>
+
+                        <div class="calculator-header">
+                            <h1>Calculadora de Función Implícita</h1>
+                            <p class="subtitle">Realiza operaciones con funciones implícitas.</p>
                         </div>
-                        
-                        <button type="submit" class="calculate-btn"><i class="bi bi-calculator"></i> Calcular</button>
-                        <button type="button" id="clearBtn" class="calculate-btn btn-secondary" style="background: var(--calc-color-mantle); margin-top: 1rem;"> <i class="bi bi-eraser-fill"></i>Borrar función</button>
-                    </form>
+
+                        <form method="post" id="calcForm" class="calculator-form">
+                            {% csrf_token %}
+                            <div class="form-row">
+                                <div class="form-group"><label for="expresion"><i class="bi bi-function"></i> Expresión:</label><input type="text" id="expresion" name="expresion" placeholder="Ej: x**2 + y**2 - 1" required value="{{ expresion_input|default_if_none:'' }}"></div>
+                                <div class="form-group"><label for="operation_select"><i class="bi bi-gear"></i> Operación:</label><select id="operation_select" name="operation_select" required><option value="" {% if not operation_select %}selected{% endif %}>Selecciona una operación</option><option value="evaluar" {% if operation_select == "evaluar" %}selected{% endif %}>Evaluar</option><option value="derivar" {% if operation_select == "derivar" %}selected{% endif %}>Derivar</option><option value="limite" {% if operation_select == "limite" %}selected{% endif %}>Límite</option><option value="simplificar" {% if operation_select == "simplificar" %}selected{% endif %}>Simplificar</option><option value="resolver" {% if operation_select == "resolver" %}selected{% endif %}>Resolver</option><option value="graficar" {% if operation_select == "graficar" %}selected{% endif %}>Graficar</option></select></div>
+                            </div>
+                            <div class="form-row operation-evaluar"><div class="form-group"><label for="x_val"><i class="bi bi-x"></i> Valor de x:</label><input type="text" id="x_val" name="x_val" placeholder="Ej: 2" value="{{ x_val_input|default_if_none:'' }}"></div><div class="form-group"><label for="y_val"><i class="bi bi-y"></i> Valor de y:</label><input type="text" id="y_val" name="y_val" placeholder="Ej: 3" value="{{ y_val_input|default_if_none:'' }}"></div></div>
+                            <div class="form-row operation-variable"><div class="form-group"><label for="derivar_var"><i class="bi bi-x-diamond"></i> Variable (x o y):</label><input type="text" id="derivar_var" name="derivar_var" placeholder="Ej: x" value="{{ derivar_var_input|default_if_none:'' }}"></div><div class="form-group"><label for="derivar_orden"><i class="bi bi-sort-numeric-up"></i> Orden:</label><input type="number" id="derivar_orden" name="derivar_orden" min="1" placeholder="Ej: 1" value="{{ derivar_orden_input|default_if_none:'' }}"></div></div>
+                            <div class="form-row operation-limit"><div class="form-group"><label for="limite_var"><i class="bi bi-x-diamond"></i> Variable:</label><input type="text" id="limite_var" name="limite_var" placeholder="Ej: x" value="{{ limite_var_input|default_if_none:'' }}"></div><div class="form-group"><label for="limite_punto"><i class="bi bi-infinity"></i> Punto:</label><input type="text" id="limite_punto" name="limite_punto" placeholder="Ej: 0, oo" value="{{ limite_punto_input|default_if_none:'' }}"></div><div class="form-group"><label for="limite_dir"><i class="bi bi-arrow-left-right"></i> Dirección:</label><input type="text" id="limite_dir" name="limite_dir" placeholder="Ej: + o -" value="{{ limite_dir_input|default_if_none:'' }}"></div></div>
+                            <div class="form-row operation-resolver"><div class="form-group"><label for="resolver_var"><i class="bi bi-equals"></i> Despejar:</label><input type="text" id="resolver_var" name="resolver_var" placeholder="Ej: y" value="{{ resolver_var_input|default_if_none:'' }}"></div><div class="form-group"><label for="resolver_val"><i class="bi bi-123"></i> Valor otra var:</label><input type="text" id="resolver_val" name="resolver_val" placeholder="Opcional, ej: x=5" value="{{ resolver_val_input|default_if_none:'' }}"></div></div>
+                            <div class="form-row operation-graficar"><div class="form-group"><label for="rango_x_min"><i class="bi bi-arrow-left"></i> X Min:</label><input type="text" id="rango_x_min" name="rango_x_min" placeholder="Ej: -5" value="{{ rango_x_min_input|default_if_none:'' }}"></div><div class="form-group"><label for="rango_x_max"><i class="bi bi-arrow-right"></i> X Max:</label><input type="text" id="rango_x_max" name="rango_x_max" placeholder="Ej: 5" value="{{ rango_x_max_input|default_if_none:'' }}"></div><div class="form-group"><label for="rango_y_min"><i class="bi bi-arrow-down"></i> Y Min:</label><input type="text" id="rango_y_min" name="rango_y_min" placeholder="Ej: -5" value="{{ rango_y_min_input|default_if_none:'' }}"></div><div class="form-group"><label for="rango_y_max"><i class="bi bi-arrow-up"></i> Y Max:</label><input type="text" id="rango_y_max" name="rango_y_max" placeholder="Ej: 5" value="{{ rango_y_max_input|default_if_none:'' }}"></div><div class="form-group"><label for="puntos"><i class="bi bi-dot"></i> Puntos:</label><input type="number" id="puntos" name="puntos" min="50" max="1000" placeholder="Ej: 200" value="{{ puntos_input|default_if_none:'' }}"></div></div>
+                            <div class="calculator-main-actions"><button type="submit" class="calculate-btn"><i class="bi bi-calculator"></i> Calcular</button><button type="button" id="clearBtn" class="calculate-btn btn-secondary" style="background: var(--calc-color-mantle); margin-top: 1rem;"> <i class="bi bi-eraser-fill"></i>Borrar</button></div>
+                        </form>
+                    </div>
+
+                    {% if resultado or error or grafica_base64 %}<div class="result-card" id="resultCard" style="display: block;"><div class="result-header"><div class="terminal-controls"><span class="control-dot red"></span><span class="control-dot yellow"></span><span class="control-dot green"></span></div><h3>Resultado</h3><button class="copy-btn" title="Copiar resultado"><i class="bi bi-clipboard"></i></button></div><div class="result-content"><div id="resultOutput">{% if error %}<div class="result-line"><span class="result-label">Error:</span><span class="result-value error">{{ error }}</span></div>{% else %}{% if operation_select == 'graficar' and grafica_base64 %}<div class="result-line"><span class="result-label">Expresión:</span><span class="result-value">{{ expresion_input }}</span></div><div class="text-center mt-3"><h5 class="text-white-50">Gráfica:</h5><img src="data:image/png;base64,{{ grafica_base64 }}" alt="Gráfica de la función {{ expresion_input }}" class="img-fluid border rounded"></div>{% elif resultado %}<div class="result-line"><span class="result-label">Expresión:</span><span class="result-value">{{ expresion_input }}</span></div><div class="result-line"><span class="result-label">Operación:</span><span class="result-value">{{ operation_select }}</span></div><hr><div class="result-line"><span class="result-label">Resultado:</span><span class="result-value">{{ resultado }}</span></div>{% endif %}{% endif %}</div></div></div>{% else %}<div class="result-card" id="resultCard" style="display: none;"></div>{% endif %}
                 </div>
 
-                {% if resultado or error or grafica_base64 %} 
-                <div class="result-card" id="resultCard" style="display: block;">
-                    <div class="result-header">
-                        <div class="terminal-controls">
-                            <span class="control-dot red"></span>
-                            <span class="control-dot yellow"></span>
-                            <span class="control-dot green"></span>
-                        </div>
-                        <h3>Resultado</h3>
-                        <button class="copy-btn" title="Copiar resultado"><i class="bi bi-clipboard"></i></button>
-                    </div>
-                    <div class="result-content">
-                        <pre id="resultOutput">
-                            {% if operation_select == 'graficar' and grafica_base64 %}
-                                <div class="result-line"><span class="result-label">Expresión:</span><span class="result-value">{{ expresion_input }}</span></div>
-                                <div class="result-line"><span class="result-label">Operación:</span><span class="result-value">Graficar</span></div>
-                                <div class="graph-container">
-                                    <h4>Gráfica de la Función Implícita</h4>
-                                    <img src="data:image/png;base64,{{ grafica_base64 }}" alt="Gráfica de la función implícita">
-                                    <p class="text-muted mt-2">La gráfica se genera en el rango especificado.</p>
-                                </div>
-                            {% elif resultado %}
-                                <div class="result-line"><span class="result-label">Expresión:</span><span class="result-value">{{ expresion_input }}</span></div>
-                                <div class="result-line"><span class="result-label">Operación:</span><span class="result-value">{{ operation_select|title }}</span></div>
-                                {% for clave, valor in resultado.items %}
-                                    {% if clave == "Resultado" or clave == "Solución" %}
-                                        <div class="result-line"><span class="result-label">{{ clave|title }}:</span><span class="result-value success">{{ valor }}</span></div>
-                                    {% elif clave == "Soluciones" %}
-                                        <div class="result-line"><span class="result-label">{{ clave|title }}:</span><span class="result-value success">
-                                            <ul>
-                                                {% for sol in valor %}
-                                                    <li>{{ sol }}</li>
-                                                {% endfor %}
-                                            </ul>
-                                        </span></div>
-                                    {% else %}
-                                        <div class="result-line"><span class="result-label">{{ clave|title }}:</span><span class="result-value">{{ valor }}</span></div>
-                                    {% endif %}
-                                {% endfor %}
-                            {% elif error %}
-                                <div class="result-line"><span class="result-label">Expresión:</span><span class="result-value">{{ expresion_input }}</span></div>
-                                <div class="result-line"><span class="result-label">Operación:</span><span class="result-value">{{ operation_select|title }}</span></div>
-                                <div class="result-line"><span class="result-label">Error:</span><span class="result-value error">{{ error }}</span></div>
-                            {% endif %}
-                        </pre>
+                <div class="calculator-instructions hidden" id="instructionsPanel">
+                    <div class="instructions-content">
+                        <h2>Guía de Uso de la Calculadora de Función Implícita</h2>
+                        <p>Esta herramienta permite realizar diversas operaciones con funciones implícitas.</p>
+                        <h3>1. Campo "Expresión"</h3>
+                        <ul><li><strong>Qué poner:</strong> La ecuación implícita igualada a cero. Usa <code>x</code> y <code>y</code>.</li><li><strong>Ejemplos:</strong> <code>x**2 + y**2 - 1</code>, <code>y**2 - x**3 - x**2</code>.</li><li><strong>Sintaxis:</strong> <code>**</code> para potencias, <code>*</code> para multiplicar, <code>sin()</code>, <code>log()</code>, <code>pi</code>, <code>E</code>, etc.</li></ul>
+                        <h3>2. Campo "Operación"</h3>
+                        <p>Selecciona la operación. Cada una habilita campos adicionales:</p>
+                        <ul><li><strong>Evaluar:</strong> Sustituye <code>x</code> y <code>y</code>.</li><li><strong>Derivar:</strong> Calcula la derivada respecto a <code>x</code> o <code>y</code>.</li><li><strong>Límite:</strong> Calcula el límite. Usa <code>oo</code> para infinito.</li><li><strong>Simplificar:</strong> Reduce la expresión.</li><li><strong>Resolver:</strong> Despeja <code>x</code> o <code>y</code>.</li><li><strong>Graficar:</strong> Dibuja la función en los rangos que definas.</li></ul>
+                        <h3>3. Resultados</h3>
+                        <p>La tarjeta de resultados mostrará la salida de la operación seleccionada.</p>
                     </div>
                 </div>
-                {% else %}
-                <div class="result-card" id="resultCard" style="display: none;">
-                    <div class="result-header">
-                        <div class="terminal-controls">
-                            <span class="control-dot red"></span>
-                            <span class="control-dot yellow"></span>
-                            <span class="control-dot green"></span>
-                        </div>
-                        <h3>Resultado</h3>
-                        <button class="copy-btn" title="Copiar resultado"><i class="bi bi-clipboard"></i></button>
-                    </div>
-                    <div class="result-content">
-                        <p class="placeholder">El resultado aparecerá aquí después de calcular.</p>
-                    </div>
-                </div>
-                {% endif %}
             </div>
         </main>
     </div>
@@ -219,146 +122,108 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            const select = document.getElementById('operation_select');
-            const campos = {
-                evaluar: document.querySelector('.operation-evaluar'),
-                derivar: document.querySelector('.operation-variable'), 
-                limite: document.querySelector('.operation-limit'),
-                resolver: document.querySelector('.operation-resolver'),
-                graficar: document.querySelector('.operation-graficar') 
-            };
+            // --- Elementos del DOM ---
+            const form = document.getElementById('calcForm');
+            const operationSelect = document.getElementById('operation_select');
+            const resultCard = document.getElementById('resultCard');
+            const copyBtn = document.querySelector('.copy-btn');
+            const clearBtn = document.getElementById('clearBtn');
+            const hamburgerBtn = document.querySelector('.hamburger-menu');
+            const closeSidebarBtn = document.querySelector('.close-sidebar-btn');
+            const sidebar = document.getElementById('sidebarNav');
+            const mainContent = document.querySelector('.main-content');
+            const instructionsPanel = document.getElementById('instructionsPanel');
+            const toggleInstructionsBtn = document.getElementById('toggleInstructionsBtn');
 
-            function actualizarCampos() {
-                for (let key in campos) {
-                    if (campos[key]) { 
-                        campos[key].style.display = 'none';
-                    }
-                }
-                const op = select.value;
-                if (op && campos[op]) {
-                    campos[op].style.display = 'flex'; 
-                }
+            // --- Lógica para mostrar/ocultar campos del formulario ---
+            function actualizarCamposSegunOperacion() {
+                const selectedOperation = operationSelect.value;
+                form.querySelectorAll('[class*="operation-"]').forEach(div => div.style.display = 'none');
+                const divToShow = form.querySelector(`.operation-${selectedOperation}`);
+                if (divToShow) divToShow.style.display = 'flex';
+            }
+            if (operationSelect) {
+                operationSelect.addEventListener('change', actualizarCamposSegunOperacion);
             }
 
-            select.addEventListener('change', actualizarCampos);
-            actualizarCampos(); 
-
-            const resultCard = document.getElementById('resultCard');
-            const hasResultOrErrorOrGraph = "{{ resultado|yesno:'true,false' }}" === "true" || "{{ error|yesno:'true,false' }}" === "true" || "{{ grafica_base64|yesno:'true,false' }}" === "true";
-            if (resultCard && hasResultOrErrorOrGraph) {
+            // --- Lógica para mostrar resultado al cargar ---
+            const hasResultOrError = "{{ resultado|yesno:'true,false' }}" === "true" || "{{ error|yesno:'true,false' }}" === "true" || "{{ grafica_base64|yesno:'true,false' }}" === "true";
+            if (resultCard && hasResultOrError) {
                 setTimeout(() => {
                     resultCard.style.display = 'block';
                     resultCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 }, 100);
-            } else if (resultCard && !hasResultOrErrorOrGraph) {
-                resultCard.style.display = 'none'; 
             }
 
-            document.getElementById('clearBtn').addEventListener('click', () => {
-                document.getElementById('calcForm').reset();
-                document.getElementById('expresion').value = '';
-                document.getElementById('x_val').value = '';
-                document.getElementById('y_val').value = '';
-                document.getElementById('derivar_var').value = '';
-                document.getElementById('derivar_orden').value = '';
-                document.getElementById('limite_var').value = '';
-                document.getElementById('limite_punto').value = '';
-                document.getElementById('limite_dir').value = '';
-                document.getElementById('resolver_var').value = '';
-                document.getElementById('resolver_val').value = '';
-                document.getElementById('rango_x_min').value = '';
-                document.getElementById('rango_x_max').value = '';
-                document.getElementById('rango_y_min').value = '';
-                document.getElementById('rango_y_max').value = '';
-                document.getElementById('puntos').value = '';
-
-                if (resultCard) {
-                    resultCard.style.display = 'none';
-                    document.getElementById('resultOutput').innerHTML = '<p class="placeholder">El resultado aparecerá aquí después de calcular.</p>';
-                }
-                actualizarCampos(); 
-            });
-
-            const copyBtn = document.querySelector('.copy-btn');
+            // --- Botones de Copiar y Borrar ---
             if (copyBtn) {
                 copyBtn.addEventListener('click', function () {
                     const resultOutputElement = document.getElementById('resultOutput');
                     if (resultOutputElement) {
-                        const selectedOperation = select.value;
-                        if (selectedOperation === 'graficar') {
-                            navigator.clipboard.writeText("La gráfica se ha generado y está disponible visualmente en la calculadora.");
-                        } else {
-                            const resultText = Array.from(resultOutputElement.querySelectorAll('.result-line'))
-                                .map(line => {
-                                    const labelElement = line.querySelector('.result-label');
-                                    const valueElement = line.querySelector('.result-value');
-                                    let label = labelElement ? labelElement.textContent.replace(':', '').trim() : '';
-                                    let value = '';
-
-                                    const ulElement = valueElement ? valueElement.querySelector('ul') : null;
-                                    if (ulElement) {
-                                        const listItems = Array.from(ulElement.querySelectorAll('li')).map(li => li.textContent.trim());
-                                        value = listItems.map(item => `  - ${item}`).join('\n');
-                                    } else {
-                                        value = valueElement ? valueElement.textContent.trim() : '';
-                                    }
-                                    return `${label}: ${value}`;
-                                }).join('\n');
-
-                            navigator.clipboard.writeText(resultText);
-                        }
-                        
-                        const originalIcon = this.innerHTML;
-                        this.innerHTML = '<i class="bi bi-check"></i>';
-                        setTimeout(() => {
-                            this.innerHTML = originalIcon;
-                        }, 2000);
+                        navigator.clipboard.writeText(resultOutputElement.innerText.trim()).then(() => {
+                            const originalIcon = this.innerHTML;
+                            this.innerHTML = '<i class="bi bi-check-lg"></i>';
+                            setTimeout(() => { this.innerHTML = originalIcon; }, 2000);
+                        });
                     }
                 });
             }
-            const sidebar = document.getElementById('sidebarNav');
-            const main = document.querySelector('.main-content');
-            const hamburger = document.querySelector('.hamburger-menu');
-            const closeBtn = document.querySelector('.close-sidebar-btn');
+            if (clearBtn) {
+                clearBtn.addEventListener('click', () => {
+                    form.reset();
+                    form.querySelectorAll('input[type="text"], input[type="number"]').forEach(input => input.value = '');
+                    actualizarCamposSegunOperacion();
+                    if (resultCard) resultCard.style.display = 'none';
+                });
+            }
 
+            // --- Lógica de la Barra Lateral (Sidebar) y Panel de Instrucciones ---
             function setSidebarState(isOpen) {
                 if (isOpen) {
                     sidebar.classList.add('active');
-                    hamburger.style.display = 'none'; 
-                    if (closeBtn) {
-                        closeBtn.style.display = 'block';
-                    }
-                    main.style.marginLeft = '260px'; 
+                    hamburgerBtn.style.display = 'none';
+                    if (closeSidebarBtn) closeSidebarBtn.style.display = 'block';
+                    mainContent.style.marginLeft = '260px';
                 } else {
                     sidebar.classList.remove('active');
-                    hamburger.style.display = 'block'; 
-                    if (closeBtn) {
-                        closeBtn.style.display = 'none'; 
-                    }
-                    main.style.marginLeft = '0'; 
+                    hamburgerBtn.style.display = 'block';
+                    if (closeSidebarBtn) closeSidebarBtn.style.display = 'none';
+                    mainContent.style.marginLeft = '0';
                 }
             }
 
-            function toggleSidebar() {
-                setSidebarState(!sidebar.classList.contains('active'));
+            function toggleInstructions() {
+                instructionsPanel.classList.toggle('hidden');
+                updateToggleInstructionsBtnContent();
+            }
+            
+            function updateToggleInstructionsBtnContent() {
+                if (!toggleInstructionsBtn) return;
+                if (instructionsPanel.classList.contains('hidden')) {
+                    toggleInstructionsBtn.innerHTML = 'Guía de Uso <i class="bi bi-chevron-down"></i>';
+                } else {
+                    toggleInstructionsBtn.innerHTML = 'Ocultar Guía <i class="bi bi-chevron-up"></i>';
+                }
+            }
+            
+            function handleInitialLoadAndResize() {
+                if (window.innerWidth > 991.98) setSidebarState(true); 
+                else setSidebarState(false);
+                
+                instructionsPanel.classList.add('hidden');
+                updateToggleInstructionsBtnContent();
+                actualizarCamposSegunOperacion();
             }
 
-            hamburger.addEventListener('click', toggleSidebar);
-            if (closeBtn) {
-                closeBtn.addEventListener('click', toggleSidebar);
-           }
-
-            function handleResizeAndInitialLoad() {
-                if (window.innerWidth > 991.98) {
-                    setSidebarState(true); 
-                } else { 
-                 setSidebarState(false); 
-              }
-           }
-
-            handleResizeAndInitialLoad();
-            window.addEventListener('resize', handleResizeAndInitialLoad);
-        })
+            // --- Event Listeners ---
+            hamburgerBtn.addEventListener('click', () => setSidebarState(!sidebar.classList.contains('active')));
+            if (closeSidebarBtn) closeSidebarBtn.addEventListener('click', () => setSidebarState(false));
+            if (toggleInstructionsBtn) toggleInstructionsBtn.addEventListener('click', toggleInstructions);
+            
+            // --- Ejecutar al inicio y en redimensión ---
+            handleInitialLoadAndResize();
+            window.addEventListener('resize', handleInitialLoadAndResize);
+        });
     </script>
 </body>
 </html>
