@@ -43,7 +43,34 @@ def temas (request):
     return render(request, 'temas.html')
 
 def teoria_implicita (request):
-    return render(request, 'teoria_implicita')
+    return render(request, 'teoria_implicita.html')
+
+def teoria_explicita (request):
+    return render(request, 'teoria_explicita.html')
+
+def teoria_algebraica (request):
+    return render(request, 'teoria_algebraica.html')
+
+def teoria_trascendente (request):
+    return render(request, 'teoria_trascendente.html')
+
+def teoria_creciente (request):
+    return render(request, 'teoria_creciente.html')
+
+def teoria_decreciente (request):
+    return render(request, 'teoria_decreciente.html')
+
+def teoria_inyectiva (request):
+    return render(request, 'teoria_inyectiva.html')
+
+def teoria_biyectiva (request):
+    return render(request, 'teoria_biyectiva.html')
+
+def teoria_suprayectiva (request):
+    return render(request, 'teoria_suprayectiva.html')
+
+def teoria_continuidad (request):
+    return render(request, 'teoria_continuidad.html')
 
 def tema_funciones (request):
     return render(request, 'tema_funciones.html')

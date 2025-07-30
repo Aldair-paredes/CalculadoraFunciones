@@ -1,0 +1,224 @@
+ {% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teoría Trascendente </title>
+    
+    <link href="{% static 'css/teoria.css' %}" rel="stylesheet" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+    <div class="app-container">
+        <button class="hamburger-menu" type="button" aria-label="Toggle navigation">
+            <i class="bi bi-list"></i>
+        </button>
+
+        <nav class="sidebar" id="sidebarNav">
+            <button class="close-sidebar-btn" type="button" aria-label="Cerrar menú">
+                <i class="bi bi-x-lg"></i>
+            </button>
+            <a class="navbar-brand" href="#">
+                <img src="{% static 'img/WOLF.png' %}" alt="Logo UNID" />
+                <span>UNID</span>
+            </a>
+            <ul class="navbar-nav w-100">
+                <li class="nav-item"><a class="nav-link" href="{% url 'pagprincipal' %}"><i class="bi bi-house-door-fill me-2"></i>Inicio</a></li>
+                <li class="nav-item"><a class="nav-link active" href="{% url 'temas' %}"><i class="bi bi-journal-text me-2"></i>Temas</a></li>
+                <li class="nav-item"><a class="nav-link" href="{% url 'preguntas:quiz_view'%}"><i class="bi bi-person-lines-fill me-2"></i>Cuestionario</a></li>
+                <li class="nav-item"><a class="nav-link" href="{% url 'teorias' %}"><i class="bi bi-file-earmark-text-fill me-2"></i>Teorías</a></li>
+            </ul>
+            <div class="btn-group mt-auto w-100">
+                <a href="#" class="btn btn-primary d-flex align-items-center justify-content-center">
+                    <i class="bi bi-box-arrow-in-right me-2"></i>Iniciar sesión</a>
+                <a href="#" class="btn btn-light d-flex align-items-center justify-content-center">
+                    <i class="bi bi-person-plus-fill me-2"></i>Registrarse</a>
+            </div>
+        </nav>
+
+        <main class="main-content">
+            <div class="bg-calc-card-bg rounded-2xl shadow-lg p-6 sm:p-8 w-full max-w-4xl mx-auto">
+                
+                <div class="text-center mb-10">
+                    <h1 class="text-4xl sm:text-5xl font-bold text-calc-dark-font tracking-tight main-header-line pb-5">Teoría de Función Trascendente </h1>
+                </div>
+
+                <div class="border-b border-gray-200 mb-8">
+                    <nav class="flex flex-wrap -mb-px" aria-label="Tabs">
+                        <button class="tab-btn active text-lg font-semibold border-b-4 border-transparent py-3 px-4 sm:px-6 rounded-t-lg transition-colors duration-300" data-tab="definicion">Definición</button>
+                        <button class="tab-btn text-lg font-semibold border-b-4 border-transparent py-3 px-4 sm:px-6 rounded-t-lg transition-colors duration-300 text-calc-mantle hover:text-calc-manatee hover:border-calc-manatee" data-tab="caracteristicas">Características</button>
+                        <button class="tab-btn text-lg font-semibold border-b-4 border-transparent py-3 px-4 sm:px-6 rounded-t-lg transition-colors duration-300 text-calc-mantle hover:text-calc-manatee hover:border-calc-manatee" data-tab="ejemplos">Ejemplos</button>
+                        <button class="tab-btn text-lg font-semibold border-b-4 border-transparent py-3 px-4 sm:px-6 rounded-t-lg transition-colors duration-300 text-calc-mantle hover:text-calc-manatee hover:border-calc-manatee" data-tab="aplicaciones">Aplicaciones</button>
+                    </nav>
+                </div>
+
+                <div>
+                    <div id="definicion" class="tab-content active animate-fade-in">
+                        <h2 class="text-3xl font-bold mb-4 text-calc-manatee">¿Qué es una Función Trascendente  ?</h2>
+                        <p class="text-lg leading-relaxed">
+                            Una <strong>función trascendente </strong> es cualquier función que no es algebraica. Es decir, no puede ser expresada como un polinomio o una combinación finita de operaciones algebraicas. Estas funciones "trascienden" las operaciones algebraicas.
+                        </p>
+    
+                    <div id="caracteristicas" class="tab-content">
+                        <h2 class="text-3xl font-bold mb-6 text-calc-manatee">Tipos de funciones Trascendente </h2>
+                            <li class="flex items-start relative pl-7">
+                                <span class="text-calc-manatee font-bold text-2xl absolute left-0 top-0">&#8227;</span>
+                                <div>
+                                    <strong>Trigonométricas:</strong> sin(x),cos(x),tan(x)
+                                </div>
+                            </li>
+                            <li class="flex items-start relative pl-7">
+                                 <span class="text-calc-manatee font-bold text-2xl absolute left-0 top-0">&#8227;</span>
+                                <div>
+                                    <strong>Exponenciales:</strong> e^x, 2^x      
+                                    </div>
+                            </li>
+                            <li class="flex items-start relative pl-7">
+                                 <span class="text-calc-manatee font-bold text-2xl absolute left-0 top-0">&#8227;</span>
+                                <div>
+                                    <strong>Logarítmicas:</strong> ln(x), log10(x) </div>
+                            </li>
+                             <li class="flex items-start relative pl-7">
+                                 <span class="text-calc-manatee font-bold text-2xl absolute left-0 top-0">&#8227;</span>
+                                <div>
+                                    <strong>Funciones Hiperbólicas:</strong> sin(x), cos(x), etc. </div>
+                            </li>
+                    </div>
+                    <div id="aplicaciones" class="tab-content">
+                        <h2 class="text-3xl font-bold mb-6 text-calc-manatee">Aplicaciones en el Mundo Real</h2>
+                            <li class="flex items-start relative pl-7">
+                                <span class="text-calc-manatee font-bold text-2xl absolute left-0 top-0">&#8227;</span>
+                                <div>
+                                    <strong>Astronomía:</strong> Movimiento de planetas con funciones trigonométricas.
+                                </div>
+                            </li>
+                            <li class="flex items-start relative pl-7">
+                                 <span class="text-calc-manatee font-bold text-2xl absolute left-0 top-0">&#8227;</span>
+                                <div>
+                                    <strong>Finanzas:</strong> Interés compuesto continuo: A = Pe^rt.
+                                </div>
+                            </li>
+                           
+                    </div>
+
+                    <div id="ejemplos" class="tab-content">
+                        <h2 class="text-3xl font-bold mb-6 text-calc-manatee">Ejemplos</h2>
+                        
+                        <div class="border border-gray-200 rounded-lg p-6 mb-8">
+                            <h3 class="text-2xl font-bold mb-4">Ejemplo 1:</h3>
+                            <p class="text-lg mb-4"> f(x) = e^x</p>
+                        </div>
+
+                        <div class="border border-gray-200 rounded-lg p-6">
+                            <h3 class="text-2xl font-bold mb-4">Ejemplo 2:</h3> 
+                            <p class="text-lg mb-4">f(x) = long(x)</p>
+                    </div>
+                        <div class="border border-gray-200 rounded-lg p-6">
+                            <h3 class="text-2xl font-bold mb-4">Ejemplo 3:</h3> 
+                            <p class="text-lg mb-4">f(x) = sin(x) </p>
+                    </div>
+
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const hamburgerBtn = document.querySelector('.hamburger-menu');
+            const closeSidebarBtn = document.querySelector('.close-sidebar-btn');
+            const sidebar = document.getElementById('sidebarNav');
+            const mainContent = document.querySelector('.main-content');
+
+            if (!sidebar || !mainContent || !hamburgerBtn) {
+                console.error("Error: No se encontraron todos los elementos necesarios para el navbar.");
+                console.error("Sidebar:", sidebar, "Main Content:", mainContent, "Hamburger Button:", hamburgerBtn);
+                return;
+            }
+
+            function setSidebarState(isOpen) {
+                if (isOpen) {
+                    sidebar.classList.add('active');
+                    hamburgerBtn.style.display = 'none';
+                    if (closeSidebarBtn) {
+                        closeSidebarBtn.style.display = 'block';
+                    }
+                    mainContent.style.marginLeft = '260px'; 
+                } else {
+                    sidebar.classList.remove('active');
+                    if (window.innerWidth <= 991.98) {
+                        hamburgerBtn.style.display = 'block';
+                    } else {
+                        hamburgerBtn.style.display = 'none';
+                    }
+                    if (closeSidebarBtn) {
+                        closeSidebarBtn.style.display = 'none';
+                    }
+                    mainContent.style.marginLeft = '0';
+                }
+            }
+
+            function toggleSidebar() {
+                setSidebarState(!sidebar.classList.contains('active'));
+            }
+
+            hamburgerBtn.addEventListener('click', toggleSidebar);
+            if (closeSidebarBtn) {
+                closeSidebarBtn.addEventListener('click', toggleSidebar);
+            }
+
+            function handleInitialAndResizeLoad() {
+                if (window.innerWidth > 991.98) {
+                    setSidebarState(true); 
+                } else {
+                    setSidebarState(false); 
+                }
+            }
+
+             window.addEventListener('resize', handleInitialAndResizeLoad);
+            handleInitialAndResizeLoad(); 
+
+            const tabButtons = document.querySelectorAll('.tab-btn');
+            const tabContents = document.querySelectorAll('.tab-content');
+
+            tabButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const targetTab = button.dataset.tab;
+
+                    tabButtons.forEach(btn => {
+                        btn.classList.remove('active', 'text-white', 'bg-calc-manatee');
+                        btn.classList.add('text-calc-mantle','hover:text-calc-manatee', 'hover:border-calc-manatee');
+                    });
+
+                    button.classList.add('active', 'text-white', 'bg-calc-manatee');
+                    button.classList.remove('text-calc-mantle', 'hover:text-calc-manatee', 'hover:border-calc-manatee');
+
+                    tabContents.forEach(content => content.classList.remove('active'));
+                    document.getElementById(targetTab).classList.add('active');
+
+                    if (typeof MathJax !== 'undefined') {
+                        MathJax.typesetPromise([document.getElementById(targetTab)]).catch((err) => console.log('MathJax typeset error:', err));
+                    }
+                });
+            });
+
+            const initialActiveButton = document.querySelector('.tab-btn.active');
+            if (initialActiveButton) {
+                initialActiveButton.click(); 
+            }
+
+            const derivationSteps = document.querySelectorAll('#derivationSteps .step');
+            derivationSteps.forEach(step => {
+                step.classList.add('visible');
+            });
+        });
+    </script>
+</body>
+</html>
