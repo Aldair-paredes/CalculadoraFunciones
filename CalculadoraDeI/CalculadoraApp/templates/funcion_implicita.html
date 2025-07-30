@@ -8,46 +8,8 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" />
     <link href="{% static 'css/navbar.css' %}" rel="stylesheet" />
-    <link href="{% static 'css/implicita.css' %}" rel="stylesheet" /> 
-    
-    <style>
-        /* Oculta los campos de operación que no están seleccionados */
-        .operation-evaluar, .operation-variable, .operation-limit,
-        .operation-resolver, .operation-graficar {
-            display: none;
-        }
-
-        /* 1. Asegura que el panel de instrucciones esté oculto por defecto */
-        .hidden {
-          display: none !important;
-        }
-
-        /* 2. Prepara la tarjeta para posicionar el botón flotante */
-        .calculator-card {
-          position: relative; /* MUY IMPORTANTE: para que el botón se posicione dentro de esta tarjeta */
-          padding-top: 2.5rem; /* Añade espacio superior para que el contenido no choque con el botón */
-        }
-
-        /* 3. Estilos para el botón de la Guía de Uso */
-        .toggle-instructions-btn {
-          position: absolute;   /* Posiciona el botón de forma flotante */
-          top: 15px;            /* Distancia desde arriba */
-          right: 15px;          /* Distancia desde la derecha */
-          z-index: 10;          /* Lo pone por encima de otros elementos */
-          background-color: #3b82f6; /* Un color azul, puedes cambiarlo */
-          color: white;
-          border-radius: 8px;
-          border: none;
-          padding: 6px 12px;
-          font-size: 0.9rem;
-          cursor: pointer;
-          transition: background-color 0.2s;
-        }
-
-        .toggle-instructions-btn:hover {
-          background-color: #2563eb;
-        }
-    </style>
+    <link href="{% static 'css/implicita.css' %}" rel="stylesheet" />
+    <link href="{% static 'css/guia.css' %}" rel="stylesheet" />
 </head>
 <body>
     <div class="app-container">
@@ -72,47 +34,87 @@
 
         <main class="main-content">
             <div class="calculator-page-layout">
-                <div class="centered-calculator">
-                    <div class="calculator-card">
-                        
-                        <button type="button" id="toggleInstructionsBtn" class="toggle-instructions-btn" title="Mostrar guía">
-                            Guía de Uso <i class="bi bi-chevron-down"></i>
-                        </button>
+                    <div class="centered-calculator">
+                        <div class="calculator-card">
 
-                        <div class="calculator-header">
-                            <h1>Calculadora de Función Implícita</h1>
-                            <p class="subtitle">Realiza operaciones con funciones implícitas.</p>
+                            <button type="button" id="toggleInstructionsBtn" class="toggle-instructions-btn" title="Mostrar guía">
+                                Guía de Uso <i class="bi bi-chevron-down"></i>
+                            </button>
+
+                            <div class="calculator-header">
+                                <h1>Calculadora de Función Implícita</h1>
+                                <p class="subtitle">Realiza operaciones con funciones implícitas.</p>
+                            </div>
+
+                            <form method="post" id="calcForm" class="calculator-form">
+                                {% csrf_token %}
+                                <div class="form-row">
+                                    <div class="form-group"><label for="expresion"><i class="bi bi-function"></i> Expresión:</label><input type="text" id="expresion" name="expresion" placeholder="Ej: x**2 + y**2 - 1" required value="{{ expresion_input|default_if_none:'' }}"></div>
+                                    <div class="form-group"><label for="operation_select"><i class="bi bi-gear"></i> Operación:</label><select id="operation_select" name="operation_select" required><option value="" {% if not operation_select %}selected{% endif %}>Selecciona una operación</option><option value="evaluar" {% if operation_select == "evaluar" %}selected{% endif %}>Evaluar</option><option value="derivar" {% if operation_select == "derivar" %}selected{% endif %}>Derivar</option><option value="limite" {% if operation_select == "limite" %}selected{% endif %}>Límite</option><option value="simplificar" {% if operation_select == "simplificar" %}selected{% endif %}>Simplificar</option><option value="resolver" {% if operation_select == "resolver" %}selected{% endif %}>Resolver</option><option value="graficar" {% if operation_select == "graficar" %}selected{% endif %}>Graficar</option></select></div>
+                                </div>
+                                <div class="form-row operation-evaluar-fields"><div class="form-group"><label for="x_val"><i class="bi bi-x"></i> Valor de x:</label><input type="text" id="x_val" name="x_val" placeholder="Ej: 2" value="{{ x_val_input|default_if_none:'' }}"></div><div class="form-group"><label for="y_val"><i class="bi bi-y"></i> Valor de y:</label><input type="text" id="y_val" name="y_val" placeholder="Ej: 3" value="{{ y_val_input|default_if_none:'' }}"></div></div>
+                                <div class="form-row operation-derivar-fields"><div class="form-group"><label for="derivar_var"><i class="bi bi-x-diamond"></i> Variable (x o y):</label><input type="text" id="derivar_var" name="derivar_var" placeholder="Ej: x" value="{{ derivar_var_input|default_if_none:'' }}"></div><div class="form-group"><label for="derivar_orden"><i class="bi bi-sort-numeric-up"></i> Orden:</label><input type="number" id="derivar_orden" name="derivar_orden" min="1" placeholder="Ej: 1" value="{{ derivar_orden_input|default_if_none:'' }}"></div></div>
+                                <div class="form-row operation-limite-fields"><div class="form-group"><label for="limite_var"><i class="bi bi-x-diamond"></i> Variable:</label><input type="text" id="limite_var" name="limite_var" placeholder="Ej: x" value="{{ limite_var_input|default_if_none:'' }}"></div><div class="form-group"><label for="limite_punto"><i class="bi bi-infinity"></i> Punto:</label><input type="text" id="limite_punto" name="limite_punto" placeholder="Ej: 0, oo" value="{{ limite_punto_input|default_if_none:'' }}"></div><div class="form-group"><label for="limite_dir"><i class="bi bi-arrow-left-right"></i> Dirección:</label><input type="text" id="limite_dir" name="limite_dir" placeholder="Ej: + o -" value="{{ limite_dir_input|default_if_none:'' }}"></div></div>
+                                <div class="form-row operation-resolver-fields"><div class="form-group"><label for="resolver_var"><i class="bi bi-equals"></i> Despejar:</label><input type="text" id="resolver_var" name="resolver_var" placeholder="Ej: y" value="{{ resolver_var_input|default_if_none:'' }}"></div><div class="form-group"><label for="resolver_val"><i class="bi bi-123"></i> Valor otra var:</label><input type="text" id="resolver_val" name="resolver_val" placeholder="Opcional, ej: x=5" value="{{ resolver_val_input|default_if_none:'' }}"></div></div>
+                                <div class="form-row operation-graficar-fields"><div class="form-group"><label for="rango_x_min"><i class="bi bi-arrow-left"></i> X Min:</label><input type="text" id="rango_x_min" name="rango_x_min" placeholder="Ej: -5" value="{{ rango_x_min_input|default_if_none:'' }}"></div><div class="form-group"><label for="rango_x_max"><i class="bi bi-arrow-right"></i> X Max:</label><input type="text" id="rango_x_max" name="rango_x_max" placeholder="Ej: 5" value="{{ rango_x_max_input|default_if_none:'' }}"></div><div class="form-group"><label for="rango_y_min"><i class="bi bi-arrow-down"></i> Y Min:</label><input type="text" id="rango_y_min" name="rango_y_min" placeholder="Ej: -5" value="{{ rango_y_min_input|default_if_none:'' }}"></div><div class="form-group"><label for="rango_y_max"><i class="bi bi-arrow-up"></i> Y Max:</label><input type="text" id="rango_y_max" name="rango_y_max" placeholder="Ej: 5" value="{{ rango_y_max_input|default_if_none:'' }}"></div><div class="form-group"><label for="puntos"><i class="bi bi-dot"></i> Puntos:</label><input type="number" id="puntos" name="puntos" min="50" max="1000" placeholder="Ej: 200" value="{{ puntos_input|default_if_none:'' }}"></div></div>
+                                <div class="calculator-main-actions"><button type="submit" class="calculate-btn"><i class="bi bi-calculator"></i> Calcular</button><button type="button" id="clearBtn" class="calculate-btn btn-secondary" style="background: var(--calc-color-mantle); margin-top: 1rem;"> <i class="bi bi-eraser-fill"></i>Borrar</button></div>
+                            </form>
                         </div>
 
-                        <form method="post" id="calcForm" class="calculator-form">
-                            {% csrf_token %}
-                            <div class="form-row">
-                                <div class="form-group"><label for="expresion"><i class="bi bi-function"></i> Expresión:</label><input type="text" id="expresion" name="expresion" placeholder="Ej: x**2 + y**2 - 1" required value="{{ expresion_input|default_if_none:'' }}"></div>
-                                <div class="form-group"><label for="operation_select"><i class="bi bi-gear"></i> Operación:</label><select id="operation_select" name="operation_select" required><option value="" {% if not operation_select %}selected{% endif %}>Selecciona una operación</option><option value="evaluar" {% if operation_select == "evaluar" %}selected{% endif %}>Evaluar</option><option value="derivar" {% if operation_select == "derivar" %}selected{% endif %}>Derivar</option><option value="limite" {% if operation_select == "limite" %}selected{% endif %}>Límite</option><option value="simplificar" {% if operation_select == "simplificar" %}selected{% endif %}>Simplificar</option><option value="resolver" {% if operation_select == "resolver" %}selected{% endif %}>Resolver</option><option value="graficar" {% if operation_select == "graficar" %}selected{% endif %}>Graficar</option></select></div>
+                        {% if resultado or error or grafica_base64 %}
+                            <div class="result-card" id="resultCard" style="display: block;">
+                                <div class="result-header">
+                                    <div class="terminal-controls"><span class="control-dot red"></span><span class="control-dot yellow"></span><span class="control-dot green"></span></div>
+                                    <h3>Resultado</h3>
+                                    <button class="copy-btn" title="Copiar resultado"><i class="bi bi-clipboard"></i></button>
+                                </div>
+                                <div class="result-content">
+                                    <div id="resultOutput">
+                                        {% if error %}
+                                            <div class="result-line"><span class="result-label">Error:</span><span class="result-value error">{{ error }}</span></div>
+                                        {% else %}
+                                            {% if operation_select == 'graficar' and grafica_base64 %}
+                                                <div class="result-line"><span class="result-label">Expresión:</span><span class="result-value">{{ expresion_input }}</span></div>
+                                                <div class="text-center mt-3"><h5 class="text-white-50">Gráfica:</h5><img src="data:image/png;base64,{{ grafica_base64 }}" alt="Gráfica de la función {{ expresion_input }}" class="img-fluid border rounded"></div>
+                                            {% elif resultado %}
+                                                <div class="result-line"><span class="result-label">Expresión:</span><span class="result-value">{{ expresion_input }}</span></div>
+                                                <div class="result-line"><span class="result-label">Operación:</span><span class="result-value">{{ operation_select }}</span></div>
+                                                <hr>
+                                                <div class="result-line"><span class="result-label">Resultado:</span><span class="result-value">{{ resultado }}</span></div>
+                                            {% endif %}
+                                        {% endif %}
+                                    </div>
+                                </div>
                             </div>
-                            <div class="form-row operation-evaluar"><div class="form-group"><label for="x_val"><i class="bi bi-x"></i> Valor de x:</label><input type="text" id="x_val" name="x_val" placeholder="Ej: 2" value="{{ x_val_input|default_if_none:'' }}"></div><div class="form-group"><label for="y_val"><i class="bi bi-y"></i> Valor de y:</label><input type="text" id="y_val" name="y_val" placeholder="Ej: 3" value="{{ y_val_input|default_if_none:'' }}"></div></div>
-                            <div class="form-row operation-variable"><div class="form-group"><label for="derivar_var"><i class="bi bi-x-diamond"></i> Variable (x o y):</label><input type="text" id="derivar_var" name="derivar_var" placeholder="Ej: x" value="{{ derivar_var_input|default_if_none:'' }}"></div><div class="form-group"><label for="derivar_orden"><i class="bi bi-sort-numeric-up"></i> Orden:</label><input type="number" id="derivar_orden" name="derivar_orden" min="1" placeholder="Ej: 1" value="{{ derivar_orden_input|default_if_none:'' }}"></div></div>
-                            <div class="form-row operation-limit"><div class="form-group"><label for="limite_var"><i class="bi bi-x-diamond"></i> Variable:</label><input type="text" id="limite_var" name="limite_var" placeholder="Ej: x" value="{{ limite_var_input|default_if_none:'' }}"></div><div class="form-group"><label for="limite_punto"><i class="bi bi-infinity"></i> Punto:</label><input type="text" id="limite_punto" name="limite_punto" placeholder="Ej: 0, oo" value="{{ limite_punto_input|default_if_none:'' }}"></div><div class="form-group"><label for="limite_dir"><i class="bi bi-arrow-left-right"></i> Dirección:</label><input type="text" id="limite_dir" name="limite_dir" placeholder="Ej: + o -" value="{{ limite_dir_input|default_if_none:'' }}"></div></div>
-                            <div class="form-row operation-resolver"><div class="form-group"><label for="resolver_var"><i class="bi bi-equals"></i> Despejar:</label><input type="text" id="resolver_var" name="resolver_var" placeholder="Ej: y" value="{{ resolver_var_input|default_if_none:'' }}"></div><div class="form-group"><label for="resolver_val"><i class="bi bi-123"></i> Valor otra var:</label><input type="text" id="resolver_val" name="resolver_val" placeholder="Opcional, ej: x=5" value="{{ resolver_val_input|default_if_none:'' }}"></div></div>
-                            <div class="form-row operation-graficar"><div class="form-group"><label for="rango_x_min"><i class="bi bi-arrow-left"></i> X Min:</label><input type="text" id="rango_x_min" name="rango_x_min" placeholder="Ej: -5" value="{{ rango_x_min_input|default_if_none:'' }}"></div><div class="form-group"><label for="rango_x_max"><i class="bi bi-arrow-right"></i> X Max:</label><input type="text" id="rango_x_max" name="rango_x_max" placeholder="Ej: 5" value="{{ rango_x_max_input|default_if_none:'' }}"></div><div class="form-group"><label for="rango_y_min"><i class="bi bi-arrow-down"></i> Y Min:</label><input type="text" id="rango_y_min" name="rango_y_min" placeholder="Ej: -5" value="{{ rango_y_min_input|default_if_none:'' }}"></div><div class="form-group"><label for="rango_y_max"><i class="bi bi-arrow-up"></i> Y Max:</label><input type="text" id="rango_y_max" name="rango_y_max" placeholder="Ej: 5" value="{{ rango_y_max_input|default_if_none:'' }}"></div><div class="form-group"><label for="puntos"><i class="bi bi-dot"></i> Puntos:</label><input type="number" id="puntos" name="puntos" min="50" max="1000" placeholder="Ej: 200" value="{{ puntos_input|default_if_none:'' }}"></div></div>
-                            <div class="calculator-main-actions"><button type="submit" class="calculate-btn"><i class="bi bi-calculator"></i> Calcular</button><button type="button" id="clearBtn" class="calculate-btn btn-secondary" style="background: var(--calc-color-mantle); margin-top: 1rem;"> <i class="bi bi-eraser-fill"></i>Borrar</button></div>
-                        </form>
+                        {% else %}
+                            <div class="result-card" id="resultCard" style="display: none;">
+                                <div class="result-header">
+                                    <div class="terminal-controls"><span class="control-dot red"></span><span class="control-dot yellow"></span><span class="control-dot green"></span></div>
+                                    <h3>Resultado</h3>
+                                    <button class="copy-btn" title="Copiar resultado"><i class="bi bi-clipboard"></i></button>
+                                </div>
+                                <div class="result-content">
+                                    <p class="placeholder">El resultado aparecerá aquí después de calcular.</p>
+                                </div>
+                            </div>
+                        {% endif %}
                     </div>
-
-                    {% if resultado or error or grafica_base64 %}<div class="result-card" id="resultCard" style="display: block;"><div class="result-header"><div class="terminal-controls"><span class="control-dot red"></span><span class="control-dot yellow"></span><span class="control-dot green"></span></div><h3>Resultado</h3><button class="copy-btn" title="Copiar resultado"><i class="bi bi-clipboard"></i></button></div><div class="result-content"><div id="resultOutput">{% if error %}<div class="result-line"><span class="result-label">Error:</span><span class="result-value error">{{ error }}</span></div>{% else %}{% if operation_select == 'graficar' and grafica_base64 %}<div class="result-line"><span class="result-label">Expresión:</span><span class="result-value">{{ expresion_input }}</span></div><div class="text-center mt-3"><h5 class="text-white-50">Gráfica:</h5><img src="data:image/png;base64,{{ grafica_base64 }}" alt="Gráfica de la función {{ expresion_input }}" class="img-fluid border rounded"></div>{% elif resultado %}<div class="result-line"><span class="result-label">Expresión:</span><span class="result-value">{{ expresion_input }}</span></div><div class="result-line"><span class="result-label">Operación:</span><span class="result-value">{{ operation_select }}</span></div><hr><div class="result-line"><span class="result-label">Resultado:</span><span class="result-value">{{ resultado }}</span></div>{% endif %}{% endif %}</div></div></div>{% else %}<div class="result-card" id="resultCard" style="display: none;"></div>{% endif %}
-                </div>
-
+                
                 <div class="calculator-instructions hidden" id="instructionsPanel">
+                    <div class="instructions-header">
+                    <h2 style="color: #5f7a95;">Guía de Uso de la Calculadora de Función implicita</h2>
+                    </div>
                     <div class="instructions-content">
-                        <h2>Guía de Uso de la Calculadora de Función Implícita</h2>
                         <p>Esta herramienta permite realizar diversas operaciones con funciones implícitas.</p>
                         <h3>1. Campo "Expresión"</h3>
-                        <ul><li><strong>Qué poner:</strong> La ecuación implícita igualada a cero. Usa <code>x</code> y <code>y</code>.</li><li><strong>Ejemplos:</strong> <code>x**2 + y**2 - 1</code>, <code>y**2 - x**3 - x**2</code>.</li><li><strong>Sintaxis:</strong> <code>**</code> para potencias, <code>*</code> para multiplicar, <code>sin()</code>, <code>log()</code>, <code>pi</code>, <code>E</code>, etc.</li></ul>
+                        <ul><li><strong>Qué poner:</strong> La ecuación implícita igualada a cero. Usa <code>x</code> y <code>y</code>.</li><li><strong>Ejemplos:</strong> <code>x**2 + y**2 - 1</code>, <code>y**2 - x**3 - x**2</code>.</li><li><strong>Sintaxis:</strong> Usa <code>**</code> para potencias, <code>*</code> para multiplicar. También puedes usar funciones como <code>sin()</code>, <code>cos()</code>, <code>tan()</code>, <code>log()</code>, <code>exp()</code>, y constantes como <code>pi</code>, <code>E</code>.</li></ul>
                         <h3>2. Campo "Operación"</h3>
-                        <p>Selecciona la operación. Cada una habilita campos adicionales:</p>
-                        <ul><li><strong>Evaluar:</strong> Sustituye <code>x</code> y <code>y</code>.</li><li><strong>Derivar:</strong> Calcula la derivada respecto a <code>x</code> o <code>y</code>.</li><li><strong>Límite:</strong> Calcula el límite. Usa <code>oo</code> para infinito.</li><li><strong>Simplificar:</strong> Reduce la expresión.</li><li><strong>Resolver:</strong> Despeja <code>x</code> o <code>y</code>.</li><li><strong>Graficar:</strong> Dibuja la función en los rangos que definas.</li></ul>
+                        <p>Selecciona la operación que deseas realizar. Cada selección habilitará campos adicionales relevantes:</p>
+                        <ul><li><strong>Evaluar:</strong> Permite sustituir valores numéricos para <code>x</code> y <code>y</code> en la expresión para obtener un resultado.</li><li><strong>Derivar:</strong> Calcula la derivada de la función implícita con respecto a la variable especificada (<code>x</code> o <code>y</code>) y el orden de derivación.</li><li><strong>Límite:</strong> Calcula el límite de la expresión a medida que una variable se acerca a un punto. Para infinito, usa <code>oo</code> (ej: `x -> oo`). Puedes especificar la dirección (`+` o `-` para límites unilaterales).</li><li><strong>Simplificar:</strong> Reduce la expresión implícita a su forma más sencilla.</li><li><strong>Resolver:</strong> Despeja la variable <code>x</code> o <code>y</code> de la ecuación implícita. Opcionalmente, puedes asignar un valor a la otra variable.</li><li><strong>Graficar:</strong> Genera una representación visual de la función implícita dentro de los rangos de <code>x</code> e <code>y</code> que definas. Ajusta el número de puntos para mayor precisión.</li></ul>
                         <h3>3. Resultados</h3>
-                        <p>La tarjeta de resultados mostrará la salida de la operación seleccionada.</p>
+                        <p>La tarjeta de resultados aparecerá automáticamente para mostrar la salida de la operación. Aquí verás:</p>
+                        <ul><li>La expresión original que ingresaste.</li><li>La operación que se realizó.</li><li>El resultado final, ya sea un valor, una nueva expresión, o la gráfica generada.</li><li>En caso de errores, se mostrará un mensaje descriptivo para ayudarte a corregir la entrada.</li></ul>
+                        <p>Usa el botón "Copiar resultado" para copiar fácilmente la salida al portapapeles o el botón "Borrar" para limpiar todos los campos y la tarjeta de resultados.</p>
                     </div>
                 </div>
             </div>
@@ -122,7 +124,6 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            // --- Elementos del DOM ---
             const form = document.getElementById('calcForm');
             const operationSelect = document.getElementById('operation_select');
             const resultCard = document.getElementById('resultCard');
@@ -134,33 +135,79 @@
             const mainContent = document.querySelector('.main-content');
             const instructionsPanel = document.getElementById('instructionsPanel');
             const toggleInstructionsBtn = document.getElementById('toggleInstructionsBtn');
+            const calculatorPageLayout = document.querySelector('.calculator-page-layout');
 
-            // --- Lógica para mostrar/ocultar campos del formulario ---
             function actualizarCamposSegunOperacion() {
                 const selectedOperation = operationSelect.value;
-                form.querySelectorAll('[class*="operation-"]').forEach(div => div.style.display = 'none');
-                const divToShow = form.querySelector(`.operation-${selectedOperation}`);
-                if (divToShow) divToShow.style.display = 'flex';
+                form.querySelectorAll('.form-row[class*="operation-"]').forEach(div => div.style.display = 'none');
+                
+                const divToShow = form.querySelector(`.operation-${selectedOperation}-fields`);
+                if (divToShow) {
+                    divToShow.style.display = 'flex'; 
+                }
+
+                form.querySelectorAll('.form-row[class*="operation-"] input').forEach(input => {
+                    input.removeAttribute('required');
+                });
+
+                if (selectedOperation === 'evaluar') {
+                    document.getElementById('x_val').setAttribute('required', 'true');
+                    document.getElementById('y_val').setAttribute('required', 'true');
+                } else if (selectedOperation === 'derivar') {
+                    document.getElementById('derivar_var').setAttribute('required', 'true');
+                    document.getElementById('derivar_orden').setAttribute('required', 'true');
+                } else if (selectedOperation === 'limite') {
+                    document.getElementById('limite_var').setAttribute('required', 'true');
+                    document.getElementById('limite_punto').setAttribute('required', 'true');
+                } else if (selectedOperation === 'resolver') {
+                    document.getElementById('resolver_var').setAttribute('required', 'true');
+                } else if (selectedOperation === 'graficar') {
+                    document.getElementById('rango_x_min').setAttribute('required', 'true');
+                    document.getElementById('rango_x_max').setAttribute('required', 'true');
+                    document.getElementById('rango_y_min').setAttribute('required', 'true');
+                    document.getElementById('rango_y_max').setAttribute('required', 'true');
+                    document.getElementById('puntos').setAttribute('required', 'true');
+                }
             }
+
             if (operationSelect) {
                 operationSelect.addEventListener('change', actualizarCamposSegunOperacion);
+                actualizarCamposSegunOperacion(); 
             }
 
-            // --- Lógica para mostrar resultado al cargar ---
             const hasResultOrError = "{{ resultado|yesno:'true,false' }}" === "true" || "{{ error|yesno:'true,false' }}" === "true" || "{{ grafica_base64|yesno:'true,false' }}" === "true";
             if (resultCard && hasResultOrError) {
-                setTimeout(() => {
-                    resultCard.style.display = 'block';
-                    resultCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }, 100);
+                resultCard.style.display = 'block';
+                if (!"{{ error|yesno:'true,false' }}" === "true") {
+                    setTimeout(() => {
+                        resultCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }, 100);
+                }
+            } else if (resultCard) {
+                resultCard.style.display = 'none';
             }
 
-            // --- Botones de Copiar y Borrar ---
             if (copyBtn) {
                 copyBtn.addEventListener('click', function () {
                     const resultOutputElement = document.getElementById('resultOutput');
                     if (resultOutputElement) {
-                        navigator.clipboard.writeText(resultOutputElement.innerText.trim()).then(() => {
+                        let textToCopy = '';
+                        if (operationSelect.value === 'graficar' && "{{ grafica_base64|yesno:'true,false' }}" === "true") {
+                            textToCopy = "La gráfica se ha generado y está disponible visualmente en la calculadora.";
+                        } else {
+                            const resultLines = Array.from(resultOutputElement.querySelectorAll('.result-line'));
+                            if (resultLines.length > 0) {
+                                textToCopy = resultLines.map(line => {
+                                    const label = line.querySelector('.result-label')?.textContent.replace(':', '').trim();
+                                    const value = line.querySelector('.result-value')?.textContent.trim();
+                                    return `${label}: ${value}`;
+                                }).join('\n');
+                            } else {
+                                textToCopy = resultOutputElement.innerText.trim();
+                            }
+                        }
+                        
+                        navigator.clipboard.writeText(textToCopy).then(() => {
                             const originalIcon = this.innerHTML;
                             this.innerHTML = '<i class="bi bi-check-lg"></i>';
                             setTimeout(() => { this.innerHTML = originalIcon; }, 2000);
@@ -168,25 +215,45 @@
                     }
                 });
             }
+
             if (clearBtn) {
                 clearBtn.addEventListener('click', () => {
                     form.reset();
-                    form.querySelectorAll('input[type="text"], input[type="number"]').forEach(input => input.value = '');
-                    actualizarCamposSegunOperacion();
-                    if (resultCard) resultCard.style.display = 'none';
+                    form.querySelectorAll('input, select').forEach(el => {
+                        if (el.type !== 'submit' && el.type !== 'button' && el.tagName !== 'SELECT') {
+                            el.value = '';
+                        }
+                    });
+                    operationSelect.value = '';
+                    actualizarCamposSegunOperacion(); 
+                    
+                    if (resultCard) {
+                        resultCard.style.display = 'none';
+                        const resultOutputDiv = document.getElementById('resultOutput');
+                        if (resultOutputDiv) {
+                            resultOutputDiv.innerHTML = '<p class="placeholder">El resultado aparecerá aquí después de calcular.</p>';
+                        }
+                    }
                 });
             }
 
-            // --- Lógica de la Barra Lateral (Sidebar) y Panel de Instrucciones ---
             function setSidebarState(isOpen) {
                 if (isOpen) {
                     sidebar.classList.add('active');
                     hamburgerBtn.style.display = 'none';
                     if (closeSidebarBtn) closeSidebarBtn.style.display = 'block';
-                    mainContent.style.marginLeft = '260px';
+                    if (window.innerWidth > 991.98) { 
+                        mainContent.style.marginLeft = '260px';
+                    } else { 
+                        mainContent.style.marginLeft = '0'; 
+                    }
                 } else {
                     sidebar.classList.remove('active');
-                    hamburgerBtn.style.display = 'block';
+                    if (window.innerWidth <= 991.98) { 
+                        hamburgerBtn.style.display = 'block';
+                    } else {
+                        hamburgerBtn.style.display = 'none'; 
+                    }
                     if (closeSidebarBtn) closeSidebarBtn.style.display = 'none';
                     mainContent.style.marginLeft = '0';
                 }
@@ -194,18 +261,16 @@
 
             function toggleInstructions() {
                 instructionsPanel.classList.toggle('hidden');
-                updateToggleInstructionsBtnContent();
-            }
-            
-            function updateToggleInstructionsBtnContent() {
-                if (!toggleInstructionsBtn) return;
-                if (instructionsPanel.classList.contains('hidden')) {
-                    toggleInstructionsBtn.innerHTML = 'Guía de Uso <i class="bi bi-chevron-down"></i>';
+                const isHidden = instructionsPanel.classList.contains('hidden');
+                toggleInstructionsBtn.innerHTML = isHidden ? 'Guía de Uso <i class="bi bi-chevron-down"></i>' : 'Ocultar Guía <i class="bi bi-chevron-up"></i>';
+
+                if (window.innerWidth > 991.98) {
+                    calculatorPageLayout.style.gridTemplateColumns = isHidden ? '1fr auto' : '1fr 350px';
                 } else {
-                    toggleInstructionsBtn.innerHTML = 'Ocultar Guía <i class="bi bi-chevron-up"></i>';
+                    calculatorPageLayout.style.gridTemplateColumns = '1fr'; 
                 }
             }
-            
+
             function handleInitialLoadAndResize() {
                 if (window.innerWidth > 991.98) setSidebarState(true); 
                 else setSidebarState(false);
@@ -215,12 +280,10 @@
                 actualizarCamposSegunOperacion();
             }
 
-            // --- Event Listeners ---
             hamburgerBtn.addEventListener('click', () => setSidebarState(!sidebar.classList.contains('active')));
             if (closeSidebarBtn) closeSidebarBtn.addEventListener('click', () => setSidebarState(false));
             if (toggleInstructionsBtn) toggleInstructionsBtn.addEventListener('click', toggleInstructions);
             
-            // --- Ejecutar al inicio y en redimensión ---
             handleInitialLoadAndResize();
             window.addEventListener('resize', handleInitialLoadAndResize);
         });

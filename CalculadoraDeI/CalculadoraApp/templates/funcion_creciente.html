@@ -7,73 +7,9 @@
     <title>Calculadora de Función Creciente</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" />
-    <link href="{% static 'css/navbar.css' %}" rel="stylesheet" /> 
-    <link href="{% static 'css/creciente.css' %}" rel="stylesheet" /> 
-    <style>
-        /* Oculta los campos de operación que no están seleccionados */
-        .operation-evaluar,
-        .operation-derivar,
-        .operation-encontrar_crecimiento,
-        .operation-graficar {
-            display: none;
-        }
-
-        /* 1. Asegura que el panel de instrucciones esté oculto por defecto */
-        .hidden {
-            display: none !important;
-        }
-
-        /* 2. Prepara la tarjeta para posicionar el botón flotante */
-        .calculator-card {
-            position: relative; /* Para que el botón se posicione dentro de esta tarjeta */
-            padding-top: 2.5rem; /* Espacio para que el contenido no choque con el botón */
-        }
-
-        /* 3. Estilos para el botón de la Guía de Uso */
-        .toggle-instructions-btn {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            z-index: 10;
-            background-color: #3b82f6;
-            color: white;
-            border-radius: 8px;
-            border: none;
-            padding: 6px 12px;
-            font-size: 0.9rem;
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
-
-        .toggle-instructions-btn:hover {
-            background-color: #2563eb;
-        }
-
-        /* --- Estilos para la Guía Lateral (Solo en Escritorio) --- */
-        @media (min-width: 992px) {
-            /* Activa Flexbox cuando la guía está abierta */
-            .calculator-page-layout.guide-is-open {
-                display: flex;
-                align-items: flex-start; /* Alinea los elementos arriba */
-                gap: 24px; /* Espacio entre la calculadora y la guía */
-            }
-
-            /* Define el tamaño de la columna de la calculadora */
-            .calculator-page-layout.guide-is-open .centered-calculator {
-                flex: 1 1 60%; /* No se encoge, toma el 60% del espacio */
-                max-width: 60%;
-            }
-
-            /* Define el tamaño y comportamiento de la guía */
-            .calculator-page-layout.guide-is-open .calculator-instructions {
-                flex: 1 1 40%; /* Toma el 40% restante */
-                max-width: 40%;
-                margin-top: 0;
-                position: sticky; /* Hace que la guía se quede fija al hacer scroll */
-                top: 20px;       /* Distancia desde la parte superior */
-            }
-        }
-    </style>
+    <link href="{% static 'css/navbar.css' %}" rel="stylesheet" />
+    <link href="{% static 'css/creciente.css' %}" rel="stylesheet" />
+    <link href="{% static 'css/guia_creciente.css' %}" rel="stylesheet" /> 
 </head>
 <body>
     <div class="app-container">
@@ -105,11 +41,11 @@
             <div class="calculator-page-layout">
                 <div class="centered-calculator">
                     <div class="calculator-card">
-                        
+
                         <button type="button" id="toggleInstructionsBtn" class="toggle-instructions-btn" title="Mostrar guía">
                             Guía de Uso <i class="bi bi-chevron-down"></i>
                         </button>
-                        
+
                         <div class="calculator-header">
                             <h1>Calculadora de Función Creciente</h1>
                             <p class="subtitle">Analiza funciones, encuentra intervalos de crecimiento y más.</p>
@@ -128,7 +64,7 @@
                                         <option value="" {% if not operation_select %}selected{% endif %}>Selecciona una operación</option>
                                         <option value="evaluar" {% if operation_select == "evaluar" %}selected{% endif %}>Evaluar en un punto</option>
                                         <option value="derivar" {% if operation_select == "derivar" %}selected{% endif %}>Calcular Derivada</option>
-                                        <option value="encontrar_crecimiento" {% if operation_select == "encontrar_crecimiento" %}selected{% endif %}>Encontrar Intervalos Crecientes</option> 
+                                        <option value="encontrar_crecimiento" {% if operation_select == "encontrar_crecimiento" %}selected{% endif %}>Encontrar Intervalos Crecientes</option>
                                         <option value="graficar" {% if operation_select == "graficar" %}selected{% endif %}>Graficar Función y Derivada</option>
                                     </select>
                                 </div>
@@ -162,7 +98,7 @@
                                     <input type="number" id="puntos" name="puntos" min="50" max="1000" placeholder="Ej: 200" value="{{ puntos_input|default_if_none:'' }}">
                                 </div>
                             </div>
-                            
+
                             <div class="calculator-main-actions">
                                 <button type="submit" class="calculate-btn"><i class="bi bi-calculator"></i> Calcular</button>
                                 <button type="button" id="clearBtn" class="calculate-btn btn-secondary" style="background: var(--calc-color-mantle); margin-top: 1rem;"> <i class="bi bi-eraser-fill"></i>Borrar</button>
@@ -189,7 +125,7 @@
                         <ul>
                             <li><strong>Evaluar en un punto:</strong> Sustituye la <code>x</code> por el valor que indiques.</li>
                             <li><strong>Calcular Derivada:</strong> Calcula la derivada de la función. Puedes especificar el orden (1 para primera derivada, 2 para segunda, etc.).</li>
-                            <li><strong>Encontrar Intervalos Crecientes:</strong> Calcula la primera derivada y encuentra los intervalos donde es positiva ($f'(x) > 0$).</li>
+                            <li><strong>Encontrar Intervalos Crecientes:</strong> Calcula la primera derivada y encuentra los intervalos donde es positiva (f'(x) > 0).</li>
                             <li><strong>Graficar Función y Derivada:</strong> Dibuja la función original y su primera derivada en el rango que definas.</li>
                         </ul>
                         <h3>3. Resultados</h3>
@@ -203,7 +139,6 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            // --- Elementos del DOM ---
             const form = document.getElementById('calcForm');
             const pageLayout = document.querySelector('.calculator-page-layout');
             const select = document.getElementById('operation_select');
@@ -216,7 +151,7 @@
             const mainContent = document.querySelector('.main-content');
             const instructionsPanel = document.getElementById('instructionsPanel');
             const toggleInstructionsBtn = document.getElementById('toggleInstructionsBtn');
-            
+
             const campos = {
                 evaluar: document.querySelector('.operation-evaluar'),
                 derivar: document.querySelector('.operation-derivar'),
@@ -224,7 +159,6 @@
                 graficar: document.querySelector('.operation-graficar')
             };
 
-            // --- Lógica para mostrar/ocultar campos del formulario ---
             function actualizarCampos() {
                 Object.values(campos).forEach(campo => {
                     if (campo) campo.style.display = 'none';
@@ -235,13 +169,12 @@
                 }
             }
 
-            // --- Lógica de la Guía de Usuario ---
             function toggleInstructions() {
                 instructionsPanel.classList.toggle('hidden');
-                pageLayout.classList.toggle('guide-is-open');
+                pageLayout.classList.toggle('guide-is-open'); 
                 updateToggleInstructionsBtnContent();
             }
-            
+
             function updateToggleInstructionsBtnContent() {
                 if (!toggleInstructionsBtn) return;
                 if (instructionsPanel.classList.contains('hidden')) {
@@ -251,7 +184,6 @@
                 }
             }
 
-            // --- Lógica para mostrar resultado al cargar ---
             const hasResultOrError = "{{ resultado|yesno:'true,false' }}" === "true" || "{{ error|yesno:'true,false' }}" === "true" || "{{ grafica_base64|yesno:'true,false' }}" === "true";
             if (resultCard && hasResultOrError) {
                 setTimeout(() => {
@@ -260,7 +192,6 @@
                 }, 100);
             }
 
-            // --- Botones de Copiar y Borrar ---
             if (copyBtn) {
                 copyBtn.addEventListener('click', function () {
                     const resultOutputElement = document.getElementById('resultOutput');
@@ -283,7 +214,6 @@
                 });
             }
 
-            // --- Lógica de la Barra Lateral (Sidebar) ---
             function setSidebarState(isOpen) {
                 if (isOpen) {
                     sidebar.classList.add('active');
@@ -299,21 +229,29 @@
             }
 
             function handleInitialLoadAndResize() {
-                if (window.innerWidth > 991.98) setSidebarState(true);  
-                else setSidebarState(false);
+                if (window.innerWidth > 991.98) {
+                    setSidebarState(true);
+                    if (!instructionsPanel.classList.contains('hidden')) {
+                        pageLayout.classList.add('guide-is-open');
+                    } else {
+                        pageLayout.classList.remove('guide-is-open');
+                    }
+                } else {
+                    setSidebarState(false);
+                    instructionsPanel.classList.add('hidden');
+                    pageLayout.classList.remove('guide-is-open');
+                }
+                actualizarCampos();
+                updateToggleInstructionsBtnContent(); 
             }
 
-            // --- Event Listeners ---
             select.addEventListener('change', actualizarCampos);
             hamburgerBtn.addEventListener('click', () => setSidebarState(!sidebar.classList.contains('active')));
             if (closeSidebarBtn) closeSidebarBtn.addEventListener('click', () => setSidebarState(false));
             if (toggleInstructionsBtn) toggleInstructionsBtn.addEventListener('click', toggleInstructions);
-            
-            // --- Ejecutar al inicio y en redimensión ---
-            handleInitialLoadAndResize();
-            window.addEventListener('resize', handleInitialLoadAndResize);
-            actualizarCampos();
-            updateToggleInstructionsBtnContent();
+
+            handleInitialLoadAndResize(); 
+            window.addEventListener('resize', handleInitialLoadAndResize); 
         });
     </script>
 </body>

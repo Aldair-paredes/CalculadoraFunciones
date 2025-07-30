@@ -9,6 +9,120 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" />
     <link href="{% static 'css/navbar.css' %}" rel="stylesheet" />
     <link href="{% static 'css/explicita.css' %}" rel="stylesheet" />
+<style>
+        .function-fields {
+            display: none;
+        }
+        .function-fields.active {
+            display: block;
+        }
+        .hidden {
+            display: none !important;
+        }
+        .calculator-card {
+            position: relative;
+            padding-top: 2.5rem;
+        }
+        .toggle-instructions-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            z-index: 10;
+            background-color: #5f7a95;
+            color: white;
+            border-radius: 8px;
+            border: none;
+            padding: 6px 12px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .toggle-instructions-btn:hover {
+            background-color: #4a637d; 
+        }
+
+        .calculator-page-layout {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            grid-template-rows: auto;
+            gap: 2rem;
+            align-items: start; 
+        }
+
+        .calculator-instructions {
+            background-color: var(--calc-card-bg);
+            border-radius: 18px;
+            box-shadow: var(--calc-card-shadow);
+            padding: 1.5rem;
+            width: 350px; 
+            box-sizing: border-box;
+        }
+
+        .instructions-header {
+            margin-bottom: 1rem;
+            color: #5f7a95; 
+            border-bottom: 2px solid var(--calc-color-mantle); 
+            padding-bottom: 0.5rem;
+        }
+
+        .instructions-header h2 {
+            font-size: 1.5rem;
+            margin: 0;
+        }
+
+        .instructions-content {
+            color: var(--calc-color-mantle); 
+            font-size: 0.95rem;
+            line-height: 1.6;
+            max-height: 600px; 
+            overflow-y: auto;
+            padding-right: 0.5rem; 
+        }
+
+        .instructions-content h3 {
+            color: var(--calc-color-dark-font); 
+            font-size: 1.1rem;
+            margin-top: 1.5rem;
+            margin-bottom: 0.8rem;
+            font-weight: bold;
+        }
+
+        .instructions-content ul {
+            padding-left: 1.2rem;
+            margin-bottom: 1rem;
+        }
+
+        .instructions-content li {
+            margin-bottom: 0.6rem;
+        }
+
+        .instructions-content strong {
+            color: var(--calc-color-manatee); 
+            font-weight: 600;
+        }
+
+        @media (max-width: 991.98px) {
+            .calculator-page-layout {
+                grid-template-columns: 1fr; 
+            }
+            .calculator-instructions {
+                display: none;
+                width: 100%;
+            }
+            .main-content {
+                padding-right: 1.5rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .toggle-instructions-btn {
+                top: 10px;
+                right: 10px;
+                font-size: 0.8rem;
+                padding: 4px 8px;
+            }
+        }
+    </style>
 </head>
 <body>
     <div class="app-container">
@@ -40,7 +154,7 @@
             <div class="calculator-page-layout">
                 <div class="centered-calculator">
                     <div class="calculator-card">
-                        <button type="button" id="toggleInstructionsBtn" class="btn btn-info toggle-instructions-btn" title="Mostrar guía">
+                        <button type="button" id="toggleInstructionsBtn" class="toggle-instructions-btn" title="Mostrar guía">
                             Guía de Uso <i class="bi bi-chevron-down"></i>
                         </button>
 
