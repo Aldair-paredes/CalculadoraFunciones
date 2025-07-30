@@ -12,14 +12,11 @@ from .algebraica import (
 )
 from sympy import symbols, Eq, sympify, sqrt, simplify, solve
 
-<<<<<<< HEAD
-=======
 import numpy as np
 import matplotlib.pyplot as plt
 import io
 import urllib.parse
 import base64
->>>>>>> Leo
 
 # Variables globales para SymPy
 x, y, z = symbols('x y z')
@@ -621,7 +618,6 @@ def handle_radical_function(data):
     
     return result
 
-<<<<<<< HEAD
 def calculadora_biyectiva(request):
     result = None
     error = None
@@ -1192,7 +1188,6 @@ def calculadora_view(request):
             return render(request, 'tu_template.html', context)
 
     return render(request, 'tu_template.html')
-=======
 def graficador_funciones(request):
     graph_url = None
     error = None
@@ -1301,4 +1296,3 @@ def graficador_funciones(request):
     })
 
 
->>>>>>> Leo
