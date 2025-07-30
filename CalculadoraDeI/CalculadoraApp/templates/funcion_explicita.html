@@ -32,7 +32,7 @@
                     <a class="nav-link active" href="{% url 'temas' %}"><i class="bi bi-journal-text me-2"></i>Temas</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#"><i class="bi bi-person-lines-fill me-2"></i>Cuestionario</a>
+                    <a class="nav-link" href="{% url 'preguntas:quiz_view' %}"><i class="bi bi-person-lines-fill me-2"></i>Cuestionario</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'teorias' %}"><i class="bi bi-book-fill me-2"></i>Teorías</a>
@@ -101,7 +101,7 @@
 
                             <div class="calculator-main-actions">
                                 <button type="submit" class="calculate-btn"><i class="bi bi-calculator"></i> Calcular</button>
-                                <button type="button" id="clearBtn" class="btn btn-secondary clear-btn">Borrar función</button>
+                                <button type="button" id="clearBtn" class="calculate-btn btn-secondary" style="background: var(--calc-color-mantle); margin-top: 1rem;"> <i class="bi bi-eraser-fill"></i>Borrar función</button>
                             </div>
                         </form>
                     </div>
