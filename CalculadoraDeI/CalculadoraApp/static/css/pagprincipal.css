@@ -50,6 +50,7 @@ body {
 .hero p {
     color: var(--dark-font);
     font-size: 1.15rem;
+    margin-bottom: 50px; /* Aumenta aún más el espacio debajo del subtítulo */
 }
 
 .search-box {
@@ -61,6 +62,7 @@ body {
     max-width: 500px;
     width: 100%;
     margin: auto;
+    margin-top: 60px; /* Aumenta aún más el espacio encima del buscador */
 }
 
 .search-box .form-control {
@@ -86,7 +88,7 @@ body {
 }
 
 .scroll-buffer {
-    height: 200px;
+    height: 50px; /* Reducido de 100px a 50px para subir más la sección de tecnologías */
 }
 
 @media (max-width: 991.98px) {
@@ -100,21 +102,30 @@ body {
     .hero h1 {
         font-size: 2.5rem;
     }
+    .hero p {
+        margin-bottom: 30px; /* Ajuste para pantallas más pequeñas */
+    }
+    .search-box {
+        margin-top: 40px; /* Ajuste para pantallas más pequeñas */
+    }
+    .scroll-buffer {
+        height: 20px; /* Ajuste para pantallas más pequeñas */
+    }
 }
 
 .custom-btn-outline {
-    background-color: var(--white)!important;         
-    border: 2px solid var(--mantle)!important;     
-    color: var(--mantle)!important;               
+    background-color: var(--white)!important; 
+    border: 2px solid var(--mantle)!important; 
+    color: var(--mantle)!important; 
     padding: 12px 25px!important;
-    border-radius: 30px!important;                
+    border-radius: 30px!important; 
     font-weight: 600!important;
     transition: all 0.3s ease!important;
     text-decoration: none!important;
 }
 
 .custom-btn-outline:hover {
-    background-color: var(--mantle)!important;     
-    color: var(--white)!important;                 
-    transform: scale(1.05)!important;               
+    background-color: var(--mantle)!important; 
+    color: var(--white)!important; 
+    transform: scale(1.05)!important; 
 }

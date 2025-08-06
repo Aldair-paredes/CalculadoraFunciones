@@ -6,11 +6,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Página principal - Calculadora de Cálculo</title>
 
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
     <link href="{% static 'css/pagprincipal.css' %}" rel="stylesheet" />
     <link href="{% static 'css/navbar.css' %}" rel="stylesheet" />
     <link href="{% static 'css/tecnologias.css' %}" rel="stylesheet" />
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"rel="stylesheet"/>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"rel="stylesheet"/>
 </head>
 <body>
     <div class="app-container">
@@ -26,9 +26,15 @@
                 <img src="{% static 'img/WOLF.png' %}" alt="Logo UNID" />
                 <span>UNID</span>
             </a>
-{% if user.is_authenticated %}
-  <p>Bienvenido, {{ user.username }} ({{ user.perfil.rol }})</p>
-{% endif %}
+            {% if user.is_authenticated %}
+                <div class="user-info-sidebar">
+                    <i class="bi bi-person-circle me-2"></i>
+                    <span class="sidebar-user-text">{{ user.username }} ({{ user.perfil.rol }})</span>
+                </div>
+            {% else %}
+                <p>Bienvenido, Invitado.</p>
+                {# O un enlace para iniciar sesión/registrarse #}
+            {% endif %}
 
 
 
@@ -43,7 +49,7 @@
                     <a class="nav-link" href="{% url 'preguntas:quiz_view' %}"><i class="bi bi-person-lines-fill me-2"></i>Cuestionario</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{% url 'teorias' %}"><i class="bi bi-book-fill me-2"></i>Teoría</a>
+                    <a class="nav-link" href="{% url 'teorias' %}"><i class="bi bi-book-fill me-2"></i>Teorías</a>
                 </li>
             </ul>
             <div class="btn-group mt-auto w-100">
@@ -70,13 +76,19 @@
                         <p class="text-muted">
                             Facilita tu aprendizaje resolviendo tus ejercicios con nuestra calculadora.
                         </p>
-                        <div class="d-flex align-items-center search-box mt-4 mx-auto">
+                        <form id="searchForm" class="d-flex align-items-center search-box mt-4 mx-auto">
                             <input
-                              type="text"
-                              class="form-control border-0"
-                              placeholder="Busca el tema..."
+                                type="text"
+                                id="searchInput"
+                                name="search_query"
+                                class="form-control border-0"
+                                placeholder="Busca el tema..."
                             />
-                            <div class="search-icon">🔍</div>
+                            <button type="submit" class="search-icon" aria-label="Buscar">🔍</button>
+                        </form>
+                        {# Contenedor para los resultados de la búsqueda #}
+                        <div id="searchResults" class="mt-3 text-start">
+                            {# Los resultados se insertarán aquí dinámicamente #}
                         </div>
                         <div class="d-flex gap-4 mt-4 flex-wrap justify-content-center">
                             <a href="{% url 'tema_funciones' %}" class="btn custom-btn-outline">Funciones</a>
@@ -172,6 +184,90 @@
             handleResizeAndInitialLoad();
 
             window.addEventListener('resize', handleResizeAndInitialLoad);
+
+            // --- Lógica del Buscador ---
+            const searchForm = document.getElementById('searchForm');
+            const searchInput = document.getElementById('searchInput');
+            const searchResultsDiv = document.getElementById('searchResults');
+
+            const availableTopics = [
+                { name: "Inicio", url: "{% url 'pagprincipal' %}" },
+                { name: "Función Explícitas", url: "{% url 'calculadora_explicita' %}" },
+                { name: "Función Implícita", url: "{% url 'funcion_implicita' %}" },
+                { name: "Temas", url: "{% url 'temas' %}" },
+                { name: "Tema Funciones", url: "{% url 'tema_funciones' %}" },
+                { name: "Función Trascendente", url: "{% url 'calculadora_transcendente' %}" },
+                { name: "Función Biyectiva", url: "{% url 'calculadora_biyectiva' %}" },
+                { name: "Función Algebraica", url: "{% url 'calculadora_algebraica' %}" },
+                { name: "Función Suprayectiva", url: "{% url 'graficador_funciones' %}" },
+                { name: "Función Inyectivas", url: "{% url 'inyectiva' %}" },
+                { name: "Función Decreciente", url: "{% url 'decreciente' %}" },
+                { name: "Función Creciente", url: "{% url 'funcion_creciente' %}" },
+                { name: "Continuidad", url: "{% url 'continuidad' %}" },
+                { name: "Teoría Implícita", url: "{% url 'teoria_implicita' %}" },
+                { name: "Teorías", url: "{% url 'teorias' %}" },
+                { name: "Teoría Explícita", url: "{% url 'teoria_explicita' %}" },
+                { name: "Teoría Algebraica", url: "{% url 'teoria_algebraica' %}" },
+                { name: "Teoría Trascendente", url: "{% url 'teoria_trascendente' %}" },
+                { name: "Teoría Creciente", url: "{% url 'teoria_creciente' %}" },
+                { name: "Teoría Decreciente", url: "{% url 'teoria_decreciente' %}" },
+                { name: "Teoría Inyectiva", url: "{% url 'teoria_inyectiva' %}" },
+                { name: "Teoría Biyectiva", url: "{% url 'teoria_biyectiva' %}" },
+                { name: "Teoría Suprayectiva", url: "{% url 'teoria_suprayectiva' %}" },
+                { name: "Teoría Continuidad", url: "{% url 'teoria_continuidad' %}" },
+            ];
+
+            searchForm.addEventListener('submit', function(event) {
+                event.preventDefault(); 
+                performSearch();
+            });
+
+            document.querySelector('.search-icon').addEventListener('click', function() {
+                performSearch();
+            });
+
+            function performSearch() {
+                const query = searchInput.value.toLowerCase().trim();
+                searchResultsDiv.innerHTML = ''; 
+
+                if (query.length === 0) {
+                    return; 
+                }
+
+                const filteredTopics = availableTopics.filter(topic => 
+                    topic.name.toLowerCase().includes(query)
+                );
+
+                if (filteredTopics.length > 0) {
+                    const ul = document.createElement('ul');
+                    ul.classList.add('list-group', 'mt-2'); 
+                    filteredTopics.forEach(topic => {
+                        const li = document.createElement('li');
+                        li.classList.add('list-group-item', 'list-group-item-action', 'border-0', 'rounded-lg', 'mb-1');
+                        li.style.backgroundColor = 'rgba(0, 123, 255, 0.1)'; 
+                        li.style.color = '#007bff'; 
+                        li.style.fontWeight = 'bold';
+                        li.style.cursor = 'pointer';
+                        li.style.transition = 'background-color 0.2s ease, transform 0.2s ease';
+                        li.innerHTML = `<a href="${topic.url}" class="text-decoration-none text-primary d-block">${topic.name}</a>`;
+                        
+                        // Efecto hover
+                        li.addEventListener('mouseenter', () => {
+                            li.style.backgroundColor = 'rgba(0, 123, 255, 0.2)';
+                            li.style.transform = 'scale(1.02)';
+                        });
+                        li.addEventListener('mouseleave', () => {
+                            li.style.backgroundColor = 'rgba(0, 123, 255, 0.1)';
+                            li.style.transform = 'scale(1)';
+                        });
+
+                        ul.appendChild(li);
+                    });
+                    searchResultsDiv.appendChild(ul);
+                } else {
+                    searchResultsDiv.innerHTML = '<p class="text-muted mt-2">No se encontraron resultados.</p>';
+                }
+            }
         });
     </script>
 </body>

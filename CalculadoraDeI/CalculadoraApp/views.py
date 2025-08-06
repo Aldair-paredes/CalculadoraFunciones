@@ -1,4 +1,6 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
+from django.contrib.auth import authenticate, login, logout
+from .models import Perfil
 from django.http import HttpRequest
 from collections.abc import Iterable
 from .funcion.implicita import FuncionImplicita
@@ -40,18 +42,48 @@ def pagprincipal(request):
 def temas (request):
     return render(request, 'temas.html')
 
+def teoria_implicita (request):
+    return render(request, 'teoria_implicita.html')
+
+def teoria_explicita (request):
+    return render(request, 'teoria_explicita.html')
+
+def teoria_algebraica (request):
+    return render(request, 'teoria_algebraica.html')
+
+def teoria_trascendente (request):
+    return render(request, 'teoria_trascendente.html')
+
+def teoria_creciente (request):
+    return render(request, 'teoria_creciente.html')
+
+def teoria_decreciente (request):
+    return render(request, 'teoria_decreciente.html')
+
+def teoria_inyectiva (request):
+    return render(request, 'teoria_inyectiva.html')
+
+def teoria_biyectiva (request):
+    return render(request, 'teoria_biyectiva.html')
+
+def teoria_suprayectiva (request):
+    return render(request, 'teoria_suprayectiva.html')
+
+def teoria_continuidad (request):
+    return render(request, 'teoria_continuidad.html')
+
 def tema_funciones (request):
     return render(request, 'tema_funciones.html')
 
 from django.shortcuts import render
 
-from .explicita import _limpiar_y_preparar_funcion_str, calcular_funcion_explicita
+from .explicita import _limpiar_y_preparar_funcion_str as explicita_limpiar_y_preparar_funcion_str, calcular_funcion_explicita
 
 from sympy import symbols, sympify, pi, E, Abs, sqrt, exp, log, sin, cos, tan, cot, sec, csc, \
                     asin, acos, atan, acot, asec, acsc, \
                     sinh, cosh, tanh, coth, sech, csch, \
                     asinh, acosh, atanh, acoth, asech, acsch, \
-                    Add, Mul, Pow, S, Integer, Float 
+                    Add, Mul, Pow, S, Integer, Float, limit, Symbol, oo
 try:
     from sympy import log10
 except ImportError:
@@ -126,8 +158,10 @@ def _validate_and_parse_function(function_input, variable_input, safe_local_dict
     return funcion_expr, error
 
 #explicita
+from sympy.parsing.sympy_parser import parse_expr, T, standard_transformations, implicit_multiplication
 
 def calculadora_explicita(request):
+
     result = None
     error = None
     function_input = ""
@@ -135,6 +169,7 @@ def calculadora_explicita(request):
     variable_input = ""
     limit_point_input = ""
     evaluate_values_input = ""
+    graph_image_data = None 
     
     if request.method == 'POST':
         function_input = request.POST.get('function_input', '').strip()
@@ -149,48 +184,21 @@ def calculadora_explicita(request):
             error = "Por favor, selecciona una operación."
         else:
             try:
-                funcion_para_parsear = _limpiar_y_preparar_funcion_str(function_input)
 
-                safe_local_dict = {**ALLOWED_SYMPY_FUNCTIONS, **ALLOWED_SYMPY_CONSTANTS}
+                funcion_limpia = _limpiar_y_preparar_funcion_str(function_input)
                 
-                for sym_name in ['x', 'y', 'z', 't']:
-                    safe_local_dict[sym_name] = symbols(sym_name)
 
-                safe_local_dict['Add'] = Add
-                safe_local_dict['Mul'] = Mul
-                safe_local_dict['Pow'] = Pow
-                safe_local_dict['Sub'] = type(symbols('a') - symbols('b'))
-                safe_local_dict['Div'] = type(symbols('a') / symbols('b'))
-                safe_local_dict['Integer'] = Integer
-                safe_local_dict['Float'] = Float
-                safe_local_dict['S'] = S
+                safe_local_dict = {'pi': pi, 'E': E, 'oo': oo, 'Abs': Abs}
+                transformations = (standard_transformations + (implicit_multiplication,))
+                funcion_expr = parse_expr(funcion_limpia, local_dict=safe_local_dict, transformations=transformations, evaluate=True)
 
-                if variable_input:
-                    vars_in_input = [v.strip() for v in variable_input.split(',') if v.strip()]
-                    for var_name in vars_in_input:
-                        safe_local_dict[var_name] = symbols(var_name)
-
-                funcion_expr = parse_expr(funcion_para_parsear, local_dict=safe_local_dict, global_dict={}, evaluate=False)
-
-                parsed_free_symbols = funcion_expr.free_symbols
-                explicitly_allowed_symbols_objects = set(safe_local_dict.values())
-                
-                unexpected_symbols = [
-                    s for s in parsed_free_symbols 
-                    if s not in explicitly_allowed_symbols_objects and s not in (pi, E)
-                ]
-
-                if unexpected_symbols:
-                    error = f"La función contiene símbolos no reconocidos o no permitidos: {', '.join(str(s) for s in unexpected_symbols)}. " \
-                            f"Revisa tu guía de uso para las variables y funciones soportadas."
-                
                 requires_variable = ['derivar', 'integrar', 'limite', 'resolver']
                 if operation_select in requires_variable and not variable_input:
                     error = "La variable es requerida para la operación seleccionada."
                 elif operation_select in requires_variable and variable_input:
                     var_sym = symbols(variable_input)
                     if operation_select != 'resolver' and var_sym not in funcion_expr.free_symbols:
-                        if not any(v in funcion_para_parsear.replace('**', '').replace(' ', '') for v in [str(var_sym)]):
+                        if not any(v in function_input.replace('**', '').replace(' ', '') for v in [str(var_sym)]):
                             error = f"La variable '{variable_input}' no se encuentra en la función. Revisa tu guía de uso."
                 
                 if operation_select == 'limite' and not limit_point_input:
@@ -211,15 +219,79 @@ def calculadora_explicita(request):
                                 break
                 
                 if not error:
-                    kwargs_para_funcion = {
-                        'variable_derivacion': variable_input,
-                        'variable_integracion': variable_input,
-                        'variable_limite': limit_point_input,
-                        'variable_resolver': variable_input,
-                        'punto_limite': limit_point_input,
-                        'valores_evaluacion_str': evaluate_values_input
-                    }
-                    result, error = calcular_funcion_explicita(funcion_expr, operation_select, **kwargs_para_funcion)
+                    # Lógica para manejar las operaciones...
+                    if operation_select == 'limite':
+                        try:
+                            x_sym = Symbol(variable_input) 
+                            
+                            limit_point_val = limit_point_input
+                            if limit_point_val.lower() in ['oo', 'infinito']:
+                                limit_point_sympy = oo
+                            elif limit_point_val.lower() in ['-oo', '-infinito']:
+                                limit_point_sympy = -oo
+                            else:
+                                try:
+                                    limit_point_sympy = sympify(limit_point_val)
+                                except (SyntaxError, TypeError, ValueError):
+                                    raise ValueError("Punto del límite inválido. Usa un número, 'oo' o 'infinito'.")
+
+                            calculated_limit = limit(funcion_expr, x_sym, limit_point_sympy)
+                            result = str(calculated_limit)
+
+                            # --- Generación de la gráfica con Matplotlib ---
+                            plt.figure(figsize=(8, 6))
+                            
+                            if isinstance(limit_point_sympy, (int, float, Integer, Float)) and not limit_point_sympy.is_infinite:
+                                x_numeric_limit = float(limit_point_sympy)
+                                x_vals = np.linspace(x_numeric_limit - 5, x_numeric_limit + 5, 400)
+                            else:
+                                x_vals = np.linspace(-10, 10, 400) 
+                            
+                            y_vals = []
+                            for val in x_vals:
+                                try:
+                                    y_vals.append(funcion_expr.subs(x_sym, val))
+                                except Exception:
+                                    y_vals.append(np.nan)
+                            
+                            y_vals = np.array(y_vals, dtype=float)
+
+                            plt.plot(x_vals, y_vals, label=f'$f({variable_input}) = {function_input}$', color='#1f77b4')
+                            
+                            if isinstance(limit_point_sympy, (int, float, Integer, Float)) and not limit_point_sympy.is_infinite:
+                                plt.axvline(x_numeric_limit, color='red', linestyle='--', label=f'Límite en ${variable_input}={limit_point_input}$') 
+                            
+                            plt.title(f'Gráfica de $f({variable_input}) = {function_input}$', fontsize=14)
+                            plt.xlabel(f'${variable_input}$', fontsize=12)
+                            plt.ylabel('$f(x)$', fontsize=12)
+                            plt.grid(True, linestyle=':', alpha=0.7)
+                            plt.legend()
+                            plt.tight_layout()
+
+                            buffer = io.BytesIO()
+                            plt.savefig(buffer, format='png', bbox_inches='tight', transparent=True)
+                            buffer.seek(0)
+                            image_png = buffer.getvalue()
+                            buffer.close()
+                            graph_image_data = base64.b64encode(image_png).decode('utf-8')
+                            graph_image_data = f"data:image/png;base64,{graph_image_data}"
+
+                            plt.close()
+
+                        except Exception as e:
+                            error = f"Error al calcular el límite o generar la gráfica: {e}"
+                            result = None 
+                            graph_image_data = None
+                    else:
+                        kwargs_para_funcion = {
+                            'variable_derivacion': variable_input,
+                            'variable_integracion': variable_input,
+                            'variable_limite': limit_point_input,
+                            'variable_resolver': variable_input,
+                            'punto_limite': limit_point_input,
+                            'valores_evaluacion_str': evaluate_values_input
+                        }
+                        result, error = calcular_funcion_explicita(funcion_expr, operation_select, **kwargs_para_funcion)
 
             except (SyntaxError, TypeError, ValueError, NameError) as e:
                 error = f"La función no cumple con las consideraciones de la guía de uso. Detalles: {e}. " \
@@ -235,10 +307,9 @@ def calculadora_explicita(request):
         'evaluate_values_input': evaluate_values_input,
         'result': result,
         'error': error,
+        'graph_image': graph_image_data, 
     }
     return render(request, 'funcion_explicita.html', context)
-
-
 
 
 def funcion_implicita_view(request: HttpRequest):
@@ -401,68 +472,89 @@ def funcion_implicita_view(request: HttpRequest):
     return render(request, 'funcion_implicita.html', context) 
 
 
+from sympy import symbols, sympify, Symbol, oo, pi, E, Abs
+from sympy.parsing.sympy_parser import parse_expr, T, standard_transformations, implicit_multiplication
+
+from .transcendente import calcular_funcion_transcendente
+
+from django.shortcuts import render
+from django.http import HttpRequest
 
 def calculadora_transcendente(request):
+    """
+    Vista de ejemplo para una calculadora de funciones trascendentes.
+    Procesa las peticiones POST de un formulario.
+    """
     result = None
     error = None
+    graph_image = None 
     function_input = ""
     operation_select = ""
     variable_input = ""
     limit_point_input = ""
     evaluate_values_input = ""
+    integrate_bounds_input = "" 
     
+
     if request.method == 'POST':
+
         function_input = request.POST.get('function_input', '').strip()
         operation_select = request.POST.get('operation_select', '').strip()
         variable_input = request.POST.get('variable_input', '').strip()
         limit_point_input = request.POST.get('limit_point_input', '').strip()
         evaluate_values_input = request.POST.get('evaluate_values_input', '').strip()
+        integrate_bounds_input = request.POST.get('integrate_bounds_input', '').strip() 
+
 
         if not function_input:
             error = "La función no puede estar vacía."
         elif not operation_select:
             error = "Por favor, selecciona una operación."
-        else:
-            safe_local_dict = _get_safe_local_dict()
-            funcion_expr, error = _validate_and_parse_function(function_input, variable_input, safe_local_dict, transcendente_limpiar_y_preparar_funcion_str)
+        
 
-            if not error and funcion_expr: 
-                requires_variable = ['derivar', 'integrar', 'limite', 'resolver']
-                if operation_select in requires_variable and not variable_input:
-                    error = "La variable es requerida para la operación seleccionada."
-                elif operation_select in requires_variable and variable_input:
-                    var_sym = symbols(variable_input)
-                    if operation_select != 'resolver' and var_sym not in funcion_expr.free_symbols:
-                        if not any(v in function_input.replace('**', '').replace(' ', '') for v in [str(var_sym)]):
-                            error = f"La variable '{variable_input}' no se encuentra en la función. Revisa tu guía de uso."
-                
-                if operation_select == 'limite' and not limit_point_input:
-                    error = "El punto del límite es requerido para la operación de límite."
-                
-                if operation_select == 'evaluar':
-                    if not evaluate_values_input:
-                        error = "Los valores para evaluar son requeridos para la operación de evaluación (ej: x=2, y=3)."
-                    else:
-                        parts = evaluate_values_input.split(',')
-                        for part in parts:
-                            if '=' not in part or len(part.split('=')) != 2:
-                                error = "Formato de valores para evaluar incorrecto. Usa 'variable=valor' separado por comas."
-                                break
-                            var_name = part.split('=')[0].strip()
-                            if not var_name.isalnum():
-                                error = "Nombres de variables inválidos en los valores para evaluar. Usa solo letras y números."
-                                break
-                
-                if not error:
-                    kwargs_para_funcion = {
-                        'variable_derivacion': variable_input,
-                        'variable_integracion': variable_input,
-                        'variable_limite': limit_point_input,
-                        'variable_resolver': variable_input,
-                        'punto_limite': limit_point_input,
-                        'valores_evaluacion_str': evaluate_values_input
-                    }
-                    result, error = calcular_funcion_transcendente(funcion_expr, operation_select, **kwargs_para_funcion)
+        requires_variable = ['derivar', 'integrar', 'limite', 'resolver']
+        if operation_select in requires_variable and not variable_input:
+            error = "La variable es requerida para la operación seleccionada."
+        
+        if operation_select == 'limite' and not limit_point_input:
+            error = "El punto del límite es requerido para la operación de límite."
+        
+        if operation_select == 'evaluar' and not evaluate_values_input:
+            error = "Los valores para evaluar son requeridos (ej: x=2, y=3)."
+        
+        if operation_select == 'integrar' and integrate_bounds_input:
+            bounds_parts = integrate_bounds_input.split(',')
+            if len(bounds_parts) != 2:
+                error = "Los límites de integración deben ser dos valores separados por una coma (ej: 0, 1)."
+            else:
+                try:
+
+                    float(bounds_parts[0].strip())
+                    float(bounds_parts[1].strip())
+                except ValueError:
+                    error = "Los límites de integración deben ser valores numéricos."
+
+
+
+        if not error:
+
+            kwargs_para_funcion = {
+                'variable_derivacion': variable_input,
+                'variable_integracion': variable_input,
+                'variable_limite': variable_input, 
+                'punto_limite': limit_point_input,
+                'variable_resolver': variable_input,
+                'valores_evaluacion_str': evaluate_values_input,
+                'integrate_bounds_input': integrate_bounds_input, 
+            }
+            
+
+            result, error, graph_image = calcular_funcion_transcendente(
+                function_input, 
+                operation_select, 
+                **kwargs_para_funcion
+            )
+
 
     context = {
         'function_input': function_input,
@@ -470,10 +562,16 @@ def calculadora_transcendente(request):
         'variable_input': variable_input,
         'limit_point_input': limit_point_input,
         'evaluate_values_input': evaluate_values_input,
+        'integrate_bounds_input': integrate_bounds_input, 
         'result': result,
         'error': error,
+        'graph_image': graph_image, 
     }
+    
     return render(request, 'transcendente.html', context)
+
+
+
 
 def calculadora_algebraica(request):
     result = None
@@ -618,6 +716,139 @@ def handle_radical_function(data):
     
     return result
 
+import io
+import base64
+import matplotlib.pyplot as plt
+import re
+from sympy import sympify, symbols, oo, limit, S, Eq
+from sympy.parsing.sympy_parser import parse_expr
+from django.shortcuts import render
+from .biyectiva import calcular_funcion_biyectiva, _limpiar_y_preparar_funcion_str, _get_safe_local_dict
+
+# Es importante que todas las funciones que se utilizan estén definidas o importadas.
+# Ahora el código es funcional con las importaciones agregadas.
+
+def _validate_and_parse_function(function_input, variable_input, is_equation=False):
+    """
+    Valida y parsea la función y la variable de entrada usando sympy.
+    Ahora recibe un flag `is_equation` para manejar ecuaciones de forma diferente.
+    """
+    safe_local_dict = _get_safe_local_dict()
+    try:
+        cleaned_function = _limpiar_y_preparar_funcion_str(function_input)
+
+        if is_equation:
+            # Si es una ecuación, la parseamos sin limpiar el signo '='
+            if '=' not in cleaned_function:
+                return None, "La operación 'resolver' requiere una ecuación con '='."
+            left, right = cleaned_function.split('=')
+            funcion_expr = sympify(f'({left}) - ({right})', locals=safe_local_dict)
+        else:
+            # Para el resto de las operaciones, limpiamos la función normalmente
+            funcion_expr = sympify(cleaned_function, locals=safe_local_dict)
+
+        if variable_input:
+            var_sym = symbols(variable_input)
+            if not funcion_expr.is_constant() and var_sym not in funcion_expr.free_symbols:
+                return None, f"La variable '{variable_input}' no se encuentra en la función."
+
+        return funcion_expr, None
+    except (SyntaxError, TypeError, ValueError) as e:
+        return None, f"Error de sintaxis o función no válida: {e}. Revisa tu guía de uso."
+    except Exception as e:
+        return None, f"Error inesperado al procesar la función: {e}. Asegúrate de que la función es válida."
+
+def _generate_limit_graph(function_expr, variable_sym, limit_point):
+    """
+    Genera una gráfica de la función alrededor de un punto límite.
+    """
+    try:
+        # Aquí se usa una función lambda para la evaluación numérica.
+        f_numeric = lambda val: float((function_expr.subs(variable_sym, val)))
+        
+        # Lógica para manejar límites al infinito
+        if limit_point == oo or limit_point == -oo:
+            x_range = [i / 10.0 for i in range(10, 100) if i != 0]
+            if limit_point == -oo:
+                x_range = [-x for x in x_range]
+            
+            x_vals_plot = []
+            y_vals_plot = []
+            for x_val in x_range:
+                try:
+                    y_val = f_numeric(x_val)
+                    if -500 < y_val < 500:
+                        x_vals_plot.append(x_val)
+                        y_vals_plot.append(y_val)
+                except (ZeroDivisionError, ValueError):
+                    continue
+            
+        else: # Lógica para límites finitos
+            limit_point_float = float(limit_point)
+            x_vals = [limit_point_float + i * 0.01 for i in range(-500, 501) if i != 0]
+            
+            x_vals_plot = []
+            y_vals_plot = []
+            for x_val in x_vals:
+                try:
+                    y_val = f_numeric(x_val)
+                    if -500 < y_val < 500:
+                        x_vals_plot.append(x_val)
+                        y_vals_plot.append(y_val)
+                except (ZeroDivisionError, ValueError):
+                    continue
+
+        if not x_vals_plot:
+            return None, "No se pudieron generar puntos válidos para la gráfica."
+
+        # Configuración y generación del gráfico
+        plt.figure(figsize=(8, 6))
+        plt.plot(x_vals_plot, y_vals_plot, label=f'f({variable_sym})', color='blue')
+        
+        if limit_point != oo and limit_point != -oo:
+            plt.axvline(x=limit_point_float, color='red', linestyle='--', label=f'x = {limit_point}')
+            try:
+                limit_value = limit(function_expr, variable_sym, limit_point)
+                # Modificación aquí para manejar límites infinitos antes de convertirlos a float
+                if limit_value == oo:
+                    plt.axhline(y=500, color='green', linestyle=':', label='Límite = +∞')
+                elif limit_value == -oo:
+                    plt.axhline(y=-500, color='green', linestyle=':', label='Límite = -∞')
+                else:
+                    limit_value_float = float(limit_value)
+                    if -500 < limit_value_float < 500:
+                        plt.axhline(y=limit_value_float, color='green', linestyle=':', label=f'Límite = {limit_value_float:.2f}')
+                        plt.plot(limit_point_float, limit_value_float, 'go', markersize=8)
+            except Exception:
+                pass
+
+        plt.title(f'Gráfica de f({variable_sym}) = {function_expr} alrededor de {variable_sym} = {limit_point}')
+        plt.xlabel(str(variable_sym))
+        plt.ylabel('f(x)')
+        plt.grid(True)
+        plt.legend()
+        plt.tight_layout()
+
+        # Guarda la imagen en un buffer de memoria
+        buffer = io.BytesIO()
+        plt.savefig(buffer, format='png')
+        buffer.seek(0)
+        plt.close()
+
+        image_png = buffer.getvalue()
+        graph = base64.b64encode(image_png)
+        graph_str = graph.decode('utf-8')
+        
+        return graph_str, None
+    except Exception as e:
+        return None, f"Error al generar la gráfica: {e}"
+
+
+from .biyectiva import calcular_funcion_biyectiva
+
+from django.shortcuts import render
+from django.http import HttpRequest
+
 def calculadora_biyectiva(request):
     result = None
     error = None
@@ -626,6 +857,7 @@ def calculadora_biyectiva(request):
     variable_input = ""
     limit_point_input = ""
     evaluate_values_input = ""
+    graph_image = None
     
     if request.method == 'POST':
         function_input = request.POST.get('function_input', '').strip()
@@ -638,48 +870,50 @@ def calculadora_biyectiva(request):
             error = "La función no puede estar vacía."
         elif not operation_select:
             error = "Por favor, selecciona una operación."
-        else:
-            safe_local_dict = _get_safe_local_dict()
-            funcion_expr, error = _validate_and_parse_function(function_input, variable_input, safe_local_dict, biyectiva_limpiar_y_preparar_funcion_str)
+        
+        if not error:
+            requires_variable = ['derivar', 'limite', 'resolver']
+            if operation_select in requires_variable and not variable_input:
+                error = "La variable es requerida para la operación seleccionada."
+            
+            if operation_select == 'limite' and not limit_point_input:
+                error = "El punto del límite es requerido para la operación de límite."
+            
+            if operation_select == 'evaluar':
+                if not evaluate_values_input:
+                    error = "Los valores para evaluar son requeridos para la operación de evaluación (ej: x=2, y=3)."
+                else:
+                    parts = evaluate_values_input.split(',')
+                    for part in parts:
+                        if '=' not in part or len(part.split('=')) != 2:
+                            error = "Formato de valores para evaluar incorrecto. Usa 'variable=valor' separado por comas."
+                            break
+                        var_name = part.split('=')[0].strip()
+                        if not var_name.isalnum():
+                            error = "Nombres de variables inválidos en los valores para evaluar. Usa solo letras y números."
+                            break
 
-            if not error and funcion_expr: 
-                requires_variable = ['derivar', 'integrar', 'limite', 'resolver']
-                if operation_select in requires_variable and not variable_input:
-                    error = "La variable es requerida para la operación seleccionada."
-                elif operation_select in requires_variable and variable_input:
-                    var_sym = symbols(variable_input)
-                    if operation_select != 'resolver' and var_sym not in funcion_expr.free_symbols:
-                        if not any(v in function_input.replace('**', '').replace(' ', '') for v in [str(var_sym)]):
-                            error = f"La variable '{variable_input}' no se encuentra en la función. Revisa tu guía de uso."
-                
-                if operation_select == 'limite' and not limit_point_input:
-                    error = "El punto del límite es requerido para la operación de límite."
-                
-                if operation_select == 'evaluar':
-                    if not evaluate_values_input:
-                        error = "Los valores para evaluar son requeridos para la operación de evaluación (ej: x=2, y=3)."
-                    else:
-                        parts = evaluate_values_input.split(',')
-                        for part in parts:
-                            if '=' not in part or len(part.split('=')) != 2:
-                                error = "Formato de valores para evaluar incorrecto. Usa 'variable=valor' separado por comas."
-                                break
-                            var_name = part.split('=')[0].strip()
-                            if not var_name.isalnum():
-                                error = "Nombres de variables inválidos en los valores para evaluar. Usa solo letras y números."
-                                break
-                
-                if not error:
-                    kwargs_para_funcion = {
-                        'variable_derivacion': variable_input,
-                        'variable_integracion': variable_input,
-                        'variable_limite': limit_point_input,
-                        'variable_resolver': variable_input,
-                        'punto_limite': limit_point_input,
-                        'valores_evaluacion_str': evaluate_values_input
-                    }
-                    result, error = calcular_funcion_biyectiva(funcion_expr, operation_select, **kwargs_para_funcion)
-
+        if not error:
+            kwargs_para_funcion = {
+                'variable_derivacion': variable_input,
+                'variable_integracion': variable_input,
+                'variable_limite': variable_input,
+                'variable_resolver': variable_input,
+                'punto_limite': limit_point_input,
+                'valores_evaluacion_str': evaluate_values_input
+            }
+            
+            result, calc_error, graph_data = calcular_funcion_biyectiva(
+                function_input, 
+                operation_select, 
+                **kwargs_para_funcion
+            )
+            
+            if calc_error:
+                error = calc_error
+            if graph_data:
+                graph_image = graph_data
+                    
     context = {
         'function_input': function_input,
         'operation_select': operation_select,
@@ -688,8 +922,10 @@ def calculadora_biyectiva(request):
         'evaluate_values_input': evaluate_values_input,
         'result': result,
         'error': error,
+        'graph_image': graph_image,
     }
     return render(request, 'biyectiva.html', context)
+
 
 
 def creciente_view(request):
@@ -825,7 +1061,6 @@ def creciente_view(request):
     return render(request, 'funcion_creciente.html', context)
 
 
-def calculadora_continuidad(request):
     function_input = ""
     punto_continuidad_input = ""
     rango_x_min_input = ""
@@ -869,6 +1104,7 @@ def calculadora_continuidad(request):
         'error': error,
     }
     return render(request, 'biyectiva.html', context)
+
 #Decreciente Agustin
 import sympy as sp
 import numpy as np
@@ -1114,10 +1350,16 @@ from .models import Perfil
 # Página principal
 def pagprincipal(request):
     contexto = {}
+    contexto['usuario'] = "Invitado"
+    contexto['usuario'] = "No autenticado"
     if request.user.is_authenticated:
-        perfil = Perfil.objects.get(user=request.user)
+        Perfil_instancia, created = Perfil.objects.get_or_create(user=request.user)
+        if created and not Perfil_instancia.rol:
+            Perfil_instancia.rol = "Estudiante"
+            Perfil_instancia.save()
         contexto['usuario'] = request.user.username
-        contexto['rol'] = perfil.rol
+        contexto['rol'] = Perfil_instancia.rol
+
     return render(request, 'pagprincipal.html', contexto)
 
 # Vista de registro
@@ -1139,7 +1381,9 @@ def login_view(request):
     if request.method == 'POST':
         form = LoginForm(request.POST)
         if form.is_valid():
-            usuario = authenticate(username=form.cleaned_data['username'], password=form.cleaned_data['password'])
+            username = form.cleaned_data['username']
+            password = form.cleaned_data['password']
+            usuario = authenticate(request, username=username, password=password)
             if usuario is not None:
                 login(request, usuario)
                 return redirect('pagprincipal')
@@ -1257,11 +1501,9 @@ def graficador_funciones(request):
                 x_valores = np.linspace(x_min, x_max, 400)
                 y_valores = func(x_valores)
 
-                # --- Generar la gráfica con Matplotlib ---
                 plt.figure(figsize=(10, 6))
-                plt.plot(x_valores, y_valores, label=function_expression, color='#007bff') # Usamos el color de Bootstrap primary
+                plt.plot(x_valores, y_valores, label=function_expression, color='#007bff') 
 
-                # Añadir ejes en el origen si están dentro del rango
                 if x_min <= 0 <= x_max:
                     plt.axvline(0, color='grey', linestyle='--', linewidth=0.7)
                 if min(y_valores) <= 0 <= max(y_valores):
@@ -1296,3 +1538,39 @@ def graficador_funciones(request):
     })
 
 
+def continuidad_calculadora(request):
+    context = {}
+
+    if request.method == 'POST':
+        expresion_input = request.POST.get('expresion')
+        punto_a_input = request.POST.get('punto_a')
+        operation_select = request.POST.get('operation_select')
+        rango_x_min_input = request.POST.get('rango_x_min')
+        rango_x_max_input = request.POST.get('rango_x_max')
+
+        context = {
+            'expresion_input': expresion_input,
+            'punto_a_input': punto_a_input,
+            'operation_select': operation_select,
+            'rango_x_min_input': rango_x_min_input,
+            'rango_x_max_input': rango_x_max_input,
+        }
+
+        if operation_select == 'verificar':
+            es_continua, resultado_mensaje = verificar_continuidad_en_punto(expresion_input, punto_a_input)
+            context['resultado'] = resultado_mensaje
+            context['es_continua'] = es_continua 
+            context['error'] = None 
+
+        elif operation_select == 'graficar':
+        
+            grafica_base64, graph_error = graficar_funcion_continuidad(expresion_input, punto_a_input, rango_x_min_input, rango_x_max_input)
+            context['grafica_base64'] = grafica_base64
+            context['error'] = graph_error 
+            context['resultado'] = None 
+            context['es_continua'] = None 
+
+        else:
+            context['error'] = "Operación no válida seleccionada."
+
+    return render(request, 'continuidad.html', context)

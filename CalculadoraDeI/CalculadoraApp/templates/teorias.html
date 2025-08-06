@@ -34,13 +34,7 @@
                     <a class="nav-link" href="{% url 'temas' %}"><i class="bi bi-journal-text me-2"></i>Temas</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#"><i class="bi bi-person-lines-fill me-2"></i>Cuestionario</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#"><i class="bi bi-people-fill me-2"></i>Grupo</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#"><i class="bi bi-chat-dots-fill me-2"></i>Testimonios</a>
+                    <a class="nav-link" href="{% url 'preguntas:quiz_view'%}"><i class="bi bi-person-lines-fill me-2"></i>Cuestionario</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link active" href="{% url 'teorias' %}"><i class="bi bi-book-fill me-2"></i>Teorías</a>
@@ -60,23 +54,23 @@
             <div class="temas-container">
                 <h1>Teorías de Funciones y Continuidad</h1>
                 <p class="explanation-text">
-                    Esta sección está dedicada a proporcionar una base teórica sólida sobre los conceptos fundamentales del cálculo diferencial e integral. Aquí encontrarás explicaciones detalladas, definiciones y ejemplos para cada tipo de función y concepto clave, ayudándote a comprender mejor los principios matemáticos detrás de las operaciones que realizas en nuestra calculadora. 
+                    Esta sección está dedicada a proporcionar una base teórica sólida sobre los conceptos fundamentales del cálculo diferencial e integral. Aquí encontrarás, definiciones y ejemplos para cada tipo de función y concepto clave, ayudándote a comprender mejor los principios matemáticos detrás de las operaciones que realizas en nuestra calculadora. 
                 </p>
                 
                 <div class="temas-grid">
-                    <a href="#" class="tema-btn">Implícita</a>
-                    <a href="#" class="tema-btn">Explícita</a>
-                    <a href="#" class="tema-btn">Algebraica</a>
+                    <a href="{% url 'teoria_implicita' %}" class="tema-btn">Implícita</a>
+                    <a href="{% url 'teoria_explicita' %}" class="tema-btn">Explícita</a>
+                    <a href="{% url 'teoria_algebraica' %}" class="tema-btn">Algebraica</a>
                     
-                    <a href="#" class="tema-btn">Trascendente</a>
-                    <a href="#" class="tema-btn">Creciente</a>
-                    <a href="#" class="tema-btn">Decreciente</a>
+                    <a href="{% url 'teoria_trascendente' %}" class="tema-btn">Trascendente</a>
+                    <a href="{% url 'teoria_creciente' %}" class="tema-btn">Creciente</a>
+                    <a href="{% url 'teoria_decreciente' %}" class="tema-btn">Decreciente</a>
                     
-                    <a href="#" class="tema-btn">Inyectiva</a>
-                    <a href="#" class="tema-btn">Biyectiva</a>
-                    <a href="#" class="tema-btn">Suprayectiva</a>
+                    <a href="{% url 'teoria_inyectiva' %}" class="tema-btn">Inyectiva</a>
+                    <a href="{% url 'teoria_biyectiva' %}" class="tema-btn">Biyectiva</a>
+                    <a href="{% url 'teoria_suprayectiva' %}" class="tema-btn">Suprayectiva</a>
 
-                    <a href="#" class="tema-btn">Continuidad</a>
+                    <a href="{% url 'teoria_continuidad' %}" class="tema-btn">Continuidad</a>
                 </div>
             </div>
         </main>

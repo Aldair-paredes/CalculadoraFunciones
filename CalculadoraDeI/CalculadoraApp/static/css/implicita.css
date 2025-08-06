@@ -2,28 +2,27 @@
             text-align: center;
             margin-top: 20px;
             padding: 15px;
-            background-color: var(--calc-terminal-body-bg); /* Usar color de fondo del terminal */
-            border-radius: 12px; /* Usar un radio de borde consistente */
-            box-shadow: var(--calc-card-shadow); /* Usar sombra de tarjeta */
+            background-color: var(--calc-terminal-body-bg); 
+            border-radius: 12px; 
+            box-shadow: var(--calc-card-shadow); 
         }
         .graph-container h4 {
-            color: var(--calc-terminal-label-color); /* Usar color de etiqueta del terminal */
+            color: var(--calc-terminal-label-color); 
             margin-bottom: 15px;
             font-size: 1.2rem;
         }
         .graph-container img {
             max-width: 100%;
             height: auto;
-            border-radius: 8px; /* Ligeramente más pequeño para la imagen */
+            border-radius: 8px; 
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
         }
         .graph-container p.text-muted {
-            color: #abb2bf; /* Color de texto del terminal */
+            color: #abb2bf; 
             font-size: 0.9rem;
             margin-top: 10px;
         }
 
-        /* Tus estilos CSS existentes (pegados de tu entrada) */
         :root {
             --calc-color-dark-font: #343a40; 
             --calc-color-light-bg: #ffffff; 
@@ -184,7 +183,7 @@
 
         input[type="text"],
         select,
-        input[type="number"] { /* Añadido input[type="number"] */
+        input[type="number"] { 
             width: 100%;
             padding: 1.1rem 1.3rem;
             border: 1px solid var(--calc-input-border);
@@ -198,7 +197,7 @@
 
         input[type="text"]:focus,
         select:focus,
-        input[type="number"]:focus { /* Añadido input[type="number"] */
+        input[type="number"]:focus { 
             outline: none;
             border-color: var(--calc-input-focus-border);
             box-shadow: 0 0 0 5px var(--calc-input-focus-shadow), inset 0 2px 5px rgba(0,0,0,0.07);
@@ -206,7 +205,7 @@
         }
 
         input[type="text"]::placeholder,
-        input[type="number"]::placeholder { /* Añadido input[type="number"] */
+        input[type="number"]::placeholder { 
             color: #90a4ae;
             opacity: 0.8;
         }
@@ -443,7 +442,7 @@
             .form-group {
                 min-width: 200px;
             }
-            input[type="text"], select, input[type="number"] { /* Añadido input[type="number"] */
+            input[type="text"], select, input[type="number"] { 
                 padding: 1rem 1.1rem;
                 font-size: 1rem;
                 border-radius: 10px;
@@ -532,7 +531,7 @@
                 font-size: 1.1rem;
             }
 
-            input[type="text"], select, input[type="number"] { /* Añadido input[type="number"] */
+            input[type="text"], select, input[type="number"] { 
                 padding: 0.9rem 1rem;
                 font-size: 0.95rem;
                 border-radius: 8px;
@@ -589,7 +588,7 @@
         @media (max-width: 480px) {
             .main-content {
                 padding: 1.5rem 0.8rem;
-                padding-top: 50px; /* Ajuste para móviles muy pequeños */
+                padding-top: 50px; 
             }
             .calculator-card, .result-card {
                 padding: 1.5rem 1rem;
@@ -605,7 +604,7 @@
             .subtitle {
                 font-size: 0.85rem;
             }
-            input[type="text"], select, input[type="number"] { /* Añadido input[type="number"] */
+            input[type="text"], select, input[type="number"] { 
                 padding: 0.8rem 0.9rem;
                 font-size: 0.85rem;
                 border-radius: 6px;

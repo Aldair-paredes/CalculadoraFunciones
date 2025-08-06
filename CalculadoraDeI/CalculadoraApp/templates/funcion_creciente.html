@@ -5,18 +5,11 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Calculadora de Función Creciente</title>
-    <link href="{% static 'css/navbar.css' %}" rel="stylesheet" /> 
-    <link href="{% static 'css/creciente.css' %}" rel="stylesheet" /> 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" />
-    <style>
-        .operation-evaluar,
-        .operation-derivar,
-        .operation-encontrar_crecimiento,
-        .operation-graficar {
-            display: none;
-        }
-    </style>
+    <link href="{% static 'css/navbar.css' %}" rel="stylesheet" />
+    <link href="{% static 'css/creciente.css' %}" rel="stylesheet" />
+    <link href="{% static 'css/guia_creciente.css' %}" rel="stylesheet" /> 
 </head>
 <body>
     <div class="app-container">
@@ -35,125 +28,110 @@
             <ul class="navbar-nav w-100">
                 <li class="nav-item"><a class="nav-link" href="{% url 'pagprincipal' %}"><i class="bi bi-house-door-fill me-2"></i>Inicio</a></li>
                 <li class="nav-item"><a class="nav-link active" href="{% url 'temas' %}"><i class="bi bi-journal-text me-2"></i>Temas</a></li>
-             <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-person-lines-fill me-2"></i>Cuestionario</a></li>
-                <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-people-fill me-2"></i>Grupo</a></li>
-                <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-chat-dots-fill me-2"></i>Testimonios</a></li>
-                <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-file-earmark-text-fill me-2"></i>Documentos</a></li>
+                <li class="nav-item"><a class="nav-link" href="{% url 'preguntas:quiz_view' %}"><i class="bi bi-person-lines-fill me-2"></i>Cuestionario</a></li>
+                <li class="nav-item"><a class="nav-link" href="{% url 'teorias' %}"><i class="bi bi-file-earmark-text-fill me-2"></i>Teorías</a></li>
             </ul>
+            <div class="btn-group mt-auto w-100">
+                <a href="{% url 'login' %}" class="btn btn-primary d-flex align-items-center justify-content-center"><i class="bi bi-box-arrow-in-right me-2"></i>Iniciar sesión</a>
+                <a href="{% url 'registro' %}" class="btn btn-light d-flex align-items-center justify-content-center"><i class="bi bi-person-plus-fill me-2"></i>Registrarse</a>
+            </div>
         </nav>
 
         <main class="main-content">
-            <div class="centered-calculator">
-                <div class="calculator-card">
-                    <div class="calculator-header">
-                        <h1>Calculadora de Función Creciente</h1>
-                        <p class="subtitle">Operaciones disponibles: derivadas, encuentra intervalos de crecimiento y grafica funciones.</p>
-                    </div>
+            <div class="calculator-page-layout">
+                <div class="centered-calculator">
+                    <div class="calculator-card">
 
-                    <form method="post" id="calcForm" class="calculator-form">
-                        {% csrf_token %}
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="expresion"><i class="bi bi-function"></i> Expresión f(x):</label>
-                                <input type="text" id="expresion" name="expresion" placeholder="Ej: x**3 - 3*x" required value="{{ expresion_input|default_if_none:'' }}">
-                            </div>
-                            <div class="form-group">
-                                <label for="operation_select"><i class="bi bi-gear"></i> Operación:</label>
-                                <select id="operation_select" name="operation_select" required>
-                                    <option value="" {% if not operation_select %}selected{% endif %}>Selecciona una operación</option>
-                                    <option value="evaluar" {% if operation_select == "evaluar" %}selected{% endif %}>Evaluar en un punto</option>
-                                    <option value="derivar" {% if operation_select == "derivar" %}selected{% endif %}>Calcular Derivada</option>
-                                    <option value="encontrar_crecimiento" {% if operation_select == "encontrar_crecimiento" %}selected{% endif %}>Encontrar Intervalos Crecientes</option> {# Valor del select, usado en JS #}
-                                    <option value="graficar" {% if operation_select == "graficar" %}selected{% endif %}>Graficar Función y Derivada</option>
-                                </select>
-                            </div>
+                        <button type="button" id="toggleInstructionsBtn" class="toggle-instructions-btn" title="Mostrar guía">
+                            Guía de Uso <i class="bi bi-chevron-down"></i>
+                        </button>
+
+                        <div class="calculator-header">
+                            <h1>Calculadora de Función Creciente</h1>
+                            <p class="subtitle">Analiza funciones, encuentra intervalos de crecimiento y más.</p>
                         </div>
 
-                        <div class="form-row operation-evaluar">
-                            <div class="form-group">
-                                <label for="x_eval"><i class="bi bi-x"></i> Valor de x:</label>
-                                <input type="text" id="x_eval" name="x_eval" placeholder="Ej: 2" value="{{ x_eval_input|default_if_none:'' }}">
-                            </div>
-                        </div>
-
-                        <div class="form-row operation-derivar">
-                            <div class="form-group">
-                                <label for="derivar_orden"><i class="bi bi-sort-numeric-up"></i> Orden de la derivada:</label>
-                                <input type="number" id="derivar_orden" name="derivar_orden" min="1" placeholder="Ej: 1" value="{{ derivar_orden_input|default_if_none:'' }}">
-                            </div>
-                        </div>
-
-                        <div class="form-row operation-graficar">
-                            <div class="form-group">
-                                <label for="rango_x_min"><i class="bi bi-arrow-left-right"></i> Rango X (Min):</label>
-                                <input type="text" id="rango_x_min" name="rango_x_min" placeholder="Ej: -5" value="{{ rango_x_min_input|default_if_none:'' }}">
-                            </div>
-                            <div class="form-group">
-                                <label for="rango_x_max"><i class="bi bi-arrow-left-right"></i> Rango X (Max):</label>
-                                <input type="text" id="rango_x_max" name="rango_x_max" placeholder="Ej: 5" value="{{ rango_x_max_input|default_if_none:'' }}">
-                            </div>
-                            <div class="form-group">
-                                <label for="puntos"><i class="bi bi-grid-fill"></i> Puntos:</label>
-                                <input type="number" id="puntos" name="puntos" min="100" max="2000" placeholder="Ej: 500" value="{{ puntos_input|default_if_none:'' }}">
-                            </div>
-                        </div>
-                        
-                        <button type="submit" class="calculate-btn"><i class="bi bi-calculator"></i> Calcular</button>
-                        <button type="button" id="clearBtn" class="btn btn-secondary" >Borrar</button>
-                    </form>
-                </div>
-
-                {% if resultado or error or grafica_base64 %}
-                <div class="result-card" id="resultCard" style="display: block;">
-                    <div class="result-header">
-                        <div class="terminal-controls">
-                            <span class="control-dot red"></span>
-                            <span class="control-dot yellow"></span>
-                            <span class="control-dot green"></span>
-                        </div>
-                        <h3>Resultado</h3>
-                        <button class="copy-btn" title="Copiar resultado"><i class="bi bi-clipboard"></i></button>
-                    </div>
-                    <div class="result-content">
-                        <pre id="resultOutput">
-                            {% if grafica_base64 %}
-                                <div class="result-line"><span class="result-label">Expresión:</span><span class="result-value">{{ expresion_input }}</span></div>
-                                <div class="result-line"><span class="result-label">Operación:</span><span class="result-value">Graficar</span></div>
-                                <div class="graph-container">
-                                    <h4>Gráfica de la Función y su Derivada</h4>
-                                    <img src="data:image/png;base64,{{ grafica_base64 }}" alt="Gráfica de la función creciente">
-                                    <p class="text-muted mt-2">La gráfica muestra la función y su primera derivada.</p>
+                        <form method="post" id="calcForm" class="calculator-form">
+                            {% csrf_token %}
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="expresion"><i class="bi bi-function"></i> Expresión f(x):</label>
+                                    <input type="text" id="expresion" name="expresion" placeholder="Ej: x**3 - 3*x" required value="{{ expresion_input|default_if_none:'' }}">
                                 </div>
-                            {% elif resultado %}
-                                <div class="result-line"><span class="result-label">Expresión:</span><span class="result-value">{{ expresion_input }}</span></div>
-                                <div class="result-line"><span class="result-label">Operación:</span><span class="result-value">{{ operation_display}}</span></div>
-                                {% for clave, valor in resultado.items %}
-                                    <div class="result-line"><span class="result-label">{{ clave|title }}:</span><span class="result-value success">{{ valor }}</span></div>
-                                {% endfor %}
-                            {% elif error %}
-                                <div class="result-line"><span class="result-label">Expresión:</span><span class="result-value">{{ expresion_input }}</span></div>
-                                <div class="result-line"><span class="result-label">Operación:</span><span class="result-value">{{ operation_display }}</span></div>
-                                <div class="result-line"><span class="result-label">Error:</span><span class="result-value error">{{ error }}</span></div>
-                            {% endif %}
-                        </pre>
+                                <div class="form-group">
+                                    <label for="operation_select"><i class="bi bi-gear"></i> Operación:</label>
+                                    <select id="operation_select" name="operation_select" required>
+                                        <option value="" {% if not operation_select %}selected{% endif %}>Selecciona una operación</option>
+                                        <option value="evaluar" {% if operation_select == "evaluar" %}selected{% endif %}>Evaluar en un punto</option>
+                                        <option value="derivar" {% if operation_select == "derivar" %}selected{% endif %}>Calcular Derivada</option>
+                                        <option value="encontrar_crecimiento" {% if operation_select == "encontrar_crecimiento" %}selected{% endif %}>Encontrar Intervalos Crecientes</option>
+                                        <option value="graficar" {% if operation_select == "graficar" %}selected{% endif %}>Graficar Función y Derivada</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="form-row operation-evaluar">
+                                <div class="form-group">
+                                    <label for="x_eval"><i class="bi bi-x"></i> Valor de x:</label>
+                                    <input type="text" id="x_eval" name="x_eval" placeholder="Ej: 2" value="{{ x_eval_input|default_if_none:'' }}">
+                                </div>
+                            </div>
+
+                            <div class="form-row operation-derivar">
+                                <div class="form-group">
+                                    <label for="derivar_orden"><i class="bi bi-sort-numeric-up"></i> Orden de la derivada:</label>
+                                    <input type="number" id="derivar_orden" name="derivar_orden" min="1" placeholder="Ej: 1" value="{{ derivar_orden_input|default_if_none:'' }}">
+                                </div>
+                            </div>
+
+                            <div class="form-row operation-graficar">
+                                <div class="form-group">
+                                    <label for="rango_x_min"><i class="bi bi-arrow-left"></i> X Min:</label>
+                                    <input type="text" id="rango_x_min" name="rango_x_min" placeholder="Ej: -5" value="{{ rango_x_min_input|default_if_none:'' }}">
+                                </div>
+                                <div class="form-group">
+                                    <label for="rango_x_max"><i class="bi bi-arrow-right"></i> X Max:</label>
+                                    <input type="text" id="rango_x_max" name="rango_x_max" placeholder="Ej: 5" value="{{ rango_x_max_input|default_if_none:'' }}">
+                                </div>
+                                <div class="form-group">
+                                    <label for="puntos"><i class="bi bi-dot"></i> Puntos:</label>
+                                    <input type="number" id="puntos" name="puntos" min="50" max="1000" placeholder="Ej: 200" value="{{ puntos_input|default_if_none:'' }}">
+                                </div>
+                            </div>
+
+                            <div class="calculator-main-actions">
+                                <button type="submit" class="calculate-btn"><i class="bi bi-calculator"></i> Calcular</button>
+                                <button type="button" id="clearBtn" class="calculate-btn btn-secondary" style="background: var(--calc-color-mantle); margin-top: 1rem;"> <i class="bi bi-eraser-fill"></i>Borrar</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    {% if resultado or error or grafica_base64 %}<div class="result-card" id="resultCard" style="display: block;"><div class="result-header"><div class="terminal-controls"><span class="control-dot red"></span><span class="control-dot yellow"></span><span class="control-dot green"></span></div><h3>Resultado</h3><button class="copy-btn" title="Copiar resultado"><i class="bi bi-clipboard"></i></button></div><div class="result-content"><div id="resultOutput">{% if error %}<div class="result-line"><span class="result-label">Error:</span><span class="result-value error">{{ error }}</span></div>{% else %}{% if operation_select == 'graficar' and grafica_base64 %}<div class="result-line"><span class="result-label">Expresión:</span><span class="result-value">{{ expresion_input }}</span></div><div class="text-center mt-3"><h5 class="text-white-50">Gráfica:</h5><img src="data:image/png;base64,{{ grafica_base64 }}" alt="Gráfica de la función {{ expresion_input }}" class="img-fluid border rounded"></div>{% elif resultado %}<div class="result-line"><span class="result-label">Expresión:</span><span class="result-value">{{ expresion_input }}</span></div><div class="result-line"><span class="result-label">Operación:</span><span class="result-value">{{ operation_select }}</span></div><hr><div class="result-line"><span class="result-label">Resultado:</span><span class="result-value">{{ resultado }}</span></div>{% endif %}{% endif %}</div></div></div>{% else %}<div class="result-card" id="resultCard" style="display: none;"></div>{% endif %}
+
+                </div>
+
+                <div class="calculator-instructions hidden" id="instructionsPanel">
+                    <div class="instructions-content">
+                        <h2>Guía de Uso de la Calculadora de Función Creciente</h2>
+                        <p>Esta herramienta te ayuda a analizar el comportamiento de funciones de una variable.</p>
+                        <h3>1. Campo "Expresión f(x)"</h3>
+                        <ul>
+                            <li><strong>Qué poner:</strong> La función que quieres analizar. Usa <code>x</code> como variable.</li>
+                            <li><strong>Ejemplos:</strong> <code>x**3 - 3*x</code>, <code>sin(x)</code>, <code>log(x**2 + 1)</code>.</li>
+                            <li><strong>Sintaxis:</strong> <code>**</code> para potencias, <code>*</code> para multiplicar, y funciones como <code>sin()</code>, <code>cos()</code>, <code>log()</code>, <code>exp()</code>.</li>
+                        </ul>
+                        <h3>2. Campo "Operación"</h3>
+                        <p>Selecciona la operación. Cada una habilita campos adicionales si son necesarios:</p>
+                        <ul>
+                            <li><strong>Evaluar en un punto:</strong> Sustituye la <code>x</code> por el valor que indiques.</li>
+                            <li><strong>Calcular Derivada:</strong> Calcula la derivada de la función. Puedes especificar el orden (1 para primera derivada, 2 para segunda, etc.).</li>
+                            <li><strong>Encontrar Intervalos Crecientes:</strong> Calcula la primera derivada y encuentra los intervalos donde es positiva (f'(x) > 0).</li>
+                            <li><strong>Graficar Función y Derivada:</strong> Dibuja la función original y su primera derivada en el rango que definas.</li>
+                        </ul>
+                        <h3>3. Resultados</h3>
+                        <p>La tarjeta de resultados mostrará la salida de la operación seleccionada, ya sea un valor, un intervalo o una gráfica.</p>
                     </div>
                 </div>
-                {% else %}
-                <div class="result-card" id="resultCard" style="display: none;">
-                    <div class="result-header">
-                        <div class="terminal-controls">
-                            <span class="control-dot red"></span>
-                            <span class="control-dot yellow"></span>
-                            <span class="control-dot green"></span>
-                        </div>
-                        <h3>Resultado</h3>
-                        <button class="copy-btn" title="Copiar resultado"><i class="bi bi-clipboard"></i></button>
-                    </div>
-                    <div class="result-content">
-                        <p class="placeholder">El resultado aparecerá aquí después de calcular.</p>
-                    </div>
-                </div>
-                {% endif %}
             </div>
         </main>
     </div>
@@ -161,7 +139,19 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
+            const form = document.getElementById('calcForm');
+            const pageLayout = document.querySelector('.calculator-page-layout');
             const select = document.getElementById('operation_select');
+            const resultCard = document.getElementById('resultCard');
+            const clearBtn = document.getElementById('clearBtn');
+            const copyBtn = document.querySelector('.copy-btn');
+            const hamburgerBtn = document.querySelector('.hamburger-menu');
+            const closeSidebarBtn = document.querySelector('.close-sidebar-btn');
+            const sidebar = document.getElementById('sidebarNav');
+            const mainContent = document.querySelector('.main-content');
+            const instructionsPanel = document.getElementById('instructionsPanel');
+            const toggleInstructionsBtn = document.getElementById('toggleInstructionsBtn');
+
             const campos = {
                 evaluar: document.querySelector('.operation-evaluar'),
                 derivar: document.querySelector('.operation-derivar'),
@@ -170,107 +160,98 @@
             };
 
             function actualizarCampos() {
-                for (let key in campos) {
-                    if (campos[key]) {
-                        campos[key].style.display = 'none';
-                    }
-                }
+                Object.values(campos).forEach(campo => {
+                    if (campo) campo.style.display = 'none';
+                });
                 const op = select.value;
                 if (op && campos[op]) {
                     campos[op].style.display = 'flex';
                 }
             }
 
-            select.addEventListener('change', actualizarCampos);
-            actualizarCampos();
+            function toggleInstructions() {
+                instructionsPanel.classList.toggle('hidden');
+                pageLayout.classList.toggle('guide-is-open'); 
+                updateToggleInstructionsBtnContent();
+            }
 
-            const resultCard = document.getElementById('resultCard');
-            const hasResultOrErrorOrGraph = "{{ resultado|yesno:'true,false' }}" === "true" || "{{ error|yesno:'true,false' }}" === "true" || "{{ grafica_base64|yesno:'true,false' }}" === "true";
-            if (resultCard && hasResultOrErrorOrGraph) {
+            function updateToggleInstructionsBtnContent() {
+                if (!toggleInstructionsBtn) return;
+                if (instructionsPanel.classList.contains('hidden')) {
+                    toggleInstructionsBtn.innerHTML = 'Guía de Uso <i class="bi bi-chevron-down"></i>';
+                } else {
+                    toggleInstructionsBtn.innerHTML = 'Ocultar Guía <i class="bi bi-chevron-up"></i>';
+                }
+            }
+
+            const hasResultOrError = "{{ resultado|yesno:'true,false' }}" === "true" || "{{ error|yesno:'true,false' }}" === "true" || "{{ grafica_base64|yesno:'true,false' }}" === "true";
+            if (resultCard && hasResultOrError) {
                 setTimeout(() => {
                     resultCard.style.display = 'block';
                     resultCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 }, 100);
-            } else if (resultCard && !hasResultOrErrorOrGraph) {
-                resultCard.style.display = 'none';
             }
 
-            document.getElementById('clearBtn').addEventListener('click', () => {
-                document.getElementById('calcForm').reset();
-                document.getElementById('expresion').value = '';
-                document.getElementById('x_eval').value = '';
-                document.getElementById('derivar_orden').value = '';
-                document.getElementById('rango_x_min').value = '';
-                document.getElementById('rango_x_max').value = '';
-                document.getElementById('puntos').value = '';
-
-                if (resultCard) {
-                    resultCard.style.display = 'none';
-                    document.getElementById('resultOutput').innerHTML = '<p class="placeholder">El resultado aparecerá aquí después de calcular.</p>';
-                }
-                actualizarCampos();
-            });
-
-            const copyBtn = document.querySelector('.copy-btn');
             if (copyBtn) {
                 copyBtn.addEventListener('click', function () {
                     const resultOutputElement = document.getElementById('resultOutput');
                     if (resultOutputElement) {
-                        const selectedOperation = select.value;
-                        if (selectedOperation === 'graficar') {
-                            navigator.clipboard.writeText("La gráfica se ha generado y está disponible visualmente en la calculadora.");
-                        } else {
-                            const resultText = Array.from(resultOutputElement.querySelectorAll('.result-line'))
-                                .map(line => {
-                                    const labelElement = line.querySelector('.result-label');
-                                    const valueElement = line.querySelector('.result-value');
-                                    let label = labelElement ? labelElement.textContent.replace(':', '').trim() : '';
-                                    let value = valueElement ? valueElement.textContent.trim() : '';
-                                    return `${label}: ${value}`;
-                                }).join('\n');
-
-                            navigator.clipboard.writeText(resultText);
-                        }
-                        
-                        const originalIcon = this.innerHTML;
-                        this.innerHTML = '<i class="bi bi-check"></i>';
-                        setTimeout(() => {
-                            this.innerHTML = originalIcon;
-                        }, 2000);
+                        navigator.clipboard.writeText(resultOutputElement.innerText.trim()).then(() => {
+                            const originalIcon = this.innerHTML;
+                            this.innerHTML = '<i class="bi bi-check-lg"></i>';
+                            setTimeout(() => { this.innerHTML = originalIcon; }, 2000);
+                        });
                     }
                 });
             }
 
-            const sidebar = document.getElementById('sidebarNav');
-            const main = document.querySelector('.main-content');
-            const hamburger = document.querySelector('.hamburger-menu');
-            const closeBtn = document.querySelector('.close-sidebar-btn');
-
-            function toggleSidebar(open) {
-                if (!sidebar || !main || !hamburger) {
-                    console.error("Error: No se encontraron todos los elementos necesarios para el navbar.");
-                    return;
-                }
-                sidebar.classList.toggle('active', open);
-                hamburger.style.display = open ? 'none' : 'block';
-                if (closeBtn) {
-                    closeBtn.style.display = open ? 'block' : 'none';
-                }
-                main.style.marginLeft = open ? '260px' : '0';
-            }
-
-            hamburger.addEventListener('click', () => toggleSidebar(true));
-            if (closeBtn) {
-                closeBtn.addEventListener('click', () => toggleSidebar(false));
-            }
-            toggleSidebar(false);
-            window.addEventListener('load', () => {
-                const selectedOperation = "{{ operation_select|default_if_none:'' }}";
-                if (selectedOperation) {
-                    select.value = selectedOperation;
+            if (clearBtn) {
+                clearBtn.addEventListener('click', () => {
+                    form.reset();
+                    form.querySelectorAll('input[type="text"], input[type="number"]').forEach(input => input.value = '');
                     actualizarCampos();
+                    if (resultCard) resultCard.style.display = 'none';
+                });
+            }
+
+            function setSidebarState(isOpen) {
+                if (isOpen) {
+                    sidebar.classList.add('active');
+                    hamburgerBtn.style.display = 'none';
+                    if (closeSidebarBtn) closeSidebarBtn.style.display = 'block';
+                    mainContent.style.marginLeft = '260px';
+                } else {
+                    sidebar.classList.remove('active');
+                    hamburgerBtn.style.display = 'block';
+                    if (closeSidebarBtn) closeSidebarBtn.style.display = 'none';
+                    mainContent.style.marginLeft = '0';
                 }
-            });
+            }
+
+            function handleInitialLoadAndResize() {
+                if (window.innerWidth > 991.98) {
+                    setSidebarState(true);
+                    if (!instructionsPanel.classList.contains('hidden')) {
+                        pageLayout.classList.add('guide-is-open');
+                    } else {
+                        pageLayout.classList.remove('guide-is-open');
+                    }
+                } else {
+                    setSidebarState(false);
+                    instructionsPanel.classList.add('hidden');
+                    pageLayout.classList.remove('guide-is-open');
+                }
+                actualizarCampos();
+                updateToggleInstructionsBtnContent(); 
+            }
+
+            select.addEventListener('change', actualizarCampos);
+            hamburgerBtn.addEventListener('click', () => setSidebarState(!sidebar.classList.contains('active')));
+            if (closeSidebarBtn) closeSidebarBtn.addEventListener('click', () => setSidebarState(false));
+            if (toggleInstructionsBtn) toggleInstructionsBtn.addEventListener('click', toggleInstructions);
+
+            handleInitialLoadAndResize(); 
+            window.addEventListener('resize', handleInitialLoadAndResize); 
         });
     </script>
 </body>

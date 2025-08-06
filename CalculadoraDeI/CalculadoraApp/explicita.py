@@ -1,6 +1,7 @@
 from sympy import symbols, sympify, diff, integrate, limit, solve, Abs, oo, pi, E
+from sympy.parsing.sympy_parser import parse_expr, T, standard_transformations, implicit_multiplication
 import re
-from sympy.parsing.sympy_parser import parse_expr 
+import sys
 
 x, y, z, t = symbols('x y z t') 
 
@@ -20,11 +21,17 @@ def _limpiar_y_preparar_funcion_str(funcion_str):
     return funcion_limpia
 
 
-def calcular_funcion_explicita(funcion_expr, operacion, **kwargs):
+def procesar_entrada(funcion_str, operacion, **kwargs):
     resultado = None
     error_message = None
-    
+
     try:
+        funcion_limpia = _limpiar_y_preparar_funcion_str(funcion_str)
+        local_dict = {'pi': pi, 'E': E, 'oo': oo, 'Abs': Abs}
+        transformations = (standard_transformations + (implicit_multiplication,))
+
+        funcion_expr = parse_expr(funcion_limpia, local_dict=local_dict, transformations=transformations, evaluate=True)
+
         if operacion == 'derivar':
             variable_derivacion = kwargs.get('variable_derivacion')
             if not variable_derivacion:
@@ -60,7 +67,7 @@ def calcular_funcion_explicita(funcion_expr, operacion, **kwargs):
                 raise ValueError(f"Faltan valores para las variables: {', '.join(missing_vars)}.")
 
             resultado_sustituido = funcion_expr.subs(sustituciones) 
-
+            
             if resultado_sustituido.is_number:
                 try:
                     resultado = float(resultado_sustituido)
@@ -117,8 +124,13 @@ def calcular_funcion_explicita(funcion_expr, operacion, **kwargs):
             error_message = "Operación no soportada. Las operaciones válidas son: 'derivar', 'integrar', 'evaluar', 'limite', 'simplificar', 'resolver'."
 
     except (SyntaxError, TypeError, ValueError, NameError) as e:
-        error_message = f"Error interno en la operación matemática: {e}. Por favor, contacta al soporte si este error persiste."
+        error_message = f"Error de sintaxis o de operación: {e}"
+        sys.stderr.write(f"Error: {e}\n")
     except Exception as e:
-        error_message = f"Ha ocurrido un error inesperado al calcular: {e}."
-            
+        error_message = f"Ha ocurrido un error inesperado al calcular: {e}"
+        sys.stderr.write(f"Error inesperado: {e}\n")
+        
     return resultado, error_message
+    
+def calcular_funcion_explicita(funcion_expr, operacion, **kwargs):
+    return procesar_entrada(str(funcion_expr), operacion, **kwargs)

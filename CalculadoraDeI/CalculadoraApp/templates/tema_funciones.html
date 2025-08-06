@@ -37,12 +37,6 @@
                     <a class="nav-link" href="#"><i class="bi bi-person-lines-fill me-2"></i>Cuestionario</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#"><i class="bi bi-people-fill me-2"></i>Grupo</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#"><i class="bi bi-chat-dots-fill me-2"></i>Testimonios</a>
-                </li>
-                <li class="nav-item">
                     <a class="nav-link" href="{% url 'teorias' %}"><i class="bi bi-book-fill me-2"></i>Teorías</a>
                 </li>
             </ul>
@@ -67,9 +61,9 @@
                     <a href="{% url 'calculadora_transcendente' %}" class="tema-btn">Transcendente</a>
                     <a href="{% url 'decreciente' %}" class="tema-btn">Decreciente</a>
                     <a href="{% url 'funcion_creciente' %}" class="tema-btn">Creciente</a>
-                    
-                    <a href="#" class="tema-btn">Inyectiva</a>
-                    <a href="#" class="tema-btn">Biyectiva</a>
+                    <a href="{% url 'inyectiva' %}" class="tema-btn">Inyectiva</a>
+                    <a href="{% url 'calculadora_biyectiva' %}" class="tema-btn">Biyectiva</a>
+                
                     <a href="{% url 'graficador_funciones' %}" class="tema-btn">Suprayectiva</a>
                 </div>
             </div>

@@ -9,6 +9,144 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" />
     <link href="{% static 'css/navbar.css' %}" rel="stylesheet" />
     <link href="{% static 'css/explicita.css' %}" rel="stylesheet" />
+<style>
+    .function-fields {
+        display: none;
+    }
+    .function-fields.active {
+        display: block;
+    }
+    .hidden {
+        display: none !important;
+    }
+    .calculator-card {
+        position: relative;
+        padding-top: 2.5rem;
+    }
+    .toggle-instructions-btn {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        z-index: 10;
+        background-color: #5f7a95;
+        color: white;
+        border-radius: 8px;
+        border: none;
+        padding: 6px 12px;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: background-color 0.2s;
+    }
+    .toggle-instructions-btn:hover {
+        background-color: #4a637d; 
+    }
+
+    .calculator-page-layout {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        grid-template-rows: auto;
+        gap: 2rem;
+        align-items: start; 
+    }
+
+    .calculator-instructions {
+        background-color: var(--calc-card-bg);
+        border-radius: 18px;
+        box-shadow: var(--calc-card-shadow);
+        padding: 1.5rem;
+        width: 350px; 
+        box-sizing: border-box;
+    }
+
+    .instructions-header {
+        margin-bottom: 1rem;
+        color: #5f7a95; 
+        border-bottom: 2px solid var(--calc-color-mantle); 
+        padding-bottom: 0.5rem;
+    }
+
+    .instructions-header h2 {
+        font-size: 1.5rem;
+        margin: 0;
+    }
+
+    .instructions-content {
+        color: var(--calc-color-mantle); 
+        font-size: 0.95rem;
+        line-height: 1.6;
+        max-height: 600px; 
+        overflow-y: auto;
+        padding-right: 0.5rem; 
+    }
+
+    .instructions-content h3 {
+        color: var(--calc-color-dark-font); 
+        font-size: 1.1rem;
+        margin-top: 1.5rem;
+        margin-bottom: 0.8rem;
+        font-weight: bold;
+    }
+
+    .instructions-content ul {
+        padding-left: 1.2rem;
+        margin-bottom: 1rem;
+    }
+
+    .instructions-content li {
+        margin-bottom: 0.6rem;
+    }
+
+    .instructions-content strong {
+        color: var(--calc-color-manatee); 
+        font-weight: 600;
+    }
+
+    /* Estilos para la gráfica */
+    .graph-container {
+        margin-top: 1.5rem;
+        padding: 1.5rem; /* Ajustado para que tenga padding similar al result-card */
+        background-color: var(--calc-card-bg); /* Mismo fondo que la tarjeta de la calculadora */
+        border-radius: 18px;
+        box-shadow: var(--calc-card-shadow);
+        text-align: center;
+        display: none; /* Por defecto oculto, se mostrará con JS */
+    }
+
+    .graph-container h4 {
+        color: var(--calc-color-dark-font);
+        margin-bottom: 1rem;
+        font-size: 1.2rem;
+    }
+
+    .graph-container img {
+        max-width: 100%;
+        height: auto;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    @media (max-width: 991.98px) {
+        .calculator-page-layout {
+            grid-template-columns: 1fr; 
+        }
+        .calculator-instructions {
+            display: none;
+            width: 100%;
+        }
+        .main-content {
+            padding-right: 1.5rem;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .toggle-instructions-btn {
+            top: 10px;
+            right: 10px;
+            font-size: 0.8rem;
+            padding: 4px 8px;
+        }
+    }
+</style>
 </head>
 <body>
     <div class="app-container">
@@ -32,7 +170,7 @@
                     <a class="nav-link active" href="{% url 'temas' %}"><i class="bi bi-journal-text me-2"></i>Temas</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#"><i class="bi bi-person-lines-fill me-2"></i>Cuestionario</a>
+                    <a class="nav-link" href="{% url 'preguntas:quiz_view' %}"><i class="bi bi-person-lines-fill me-2"></i>Cuestionario</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'teorias' %}"><i class="bi bi-book-fill me-2"></i>Teorías</a>
@@ -52,13 +190,13 @@
             <div class="calculator-page-layout">
                 <div class="centered-calculator">
                     <div class="calculator-card">
-                        <button type="button" id="toggleInstructionsBtn" class="btn btn-info toggle-instructions-btn" title="Mostrar guía">
+                        <button type="button" id="toggleInstructionsBtn" class="toggle-instructions-btn" title="Mostrar guía">
                             Guía de Uso <i class="bi bi-chevron-down"></i>
                         </button>
 
                         <div class="calculator-header">
                             <h1>Calculadora de Funciones Biyectivas</h1>
-                            <p class="subtitle">Operaciones disponibles: derivar, evaluar, límite, simplificar, resolver.</p>
+                            <p class="subtitle">Operaciones disponibles: derivar, integrar, evaluar, límite, simplificar, resolver.</p>
                         </div>
 
                         <form action="" method="post" class="calculator-form" id="calcForm">
@@ -67,12 +205,12 @@
                                 <div class="form-group">
                                     <label for="functionInput"><i class="bi bi-function"></i> Función</label>
                                     <input type="text" id="functionInput" name="function_input" placeholder="Escribe tu función" required
-                                        value="{{ function_input|default_if_none:'' }}">
+                                         value="{{ function_input|default_if_none:'' }}">
                                 </div>
                                 <div class="form-group operation-variable">
                                     <label for="variableInput"><i class="bi bi-x-diamond"></i> Variable</label>
                                     <input type="text" id="variableInput" name="variable_input" placeholder="Ej: x, y"
-                                        value="{{ variable_input|default_if_none:'' }}">
+                                         value="{{ variable_input|default_if_none:'' }}">
                                 </div>
                             </div>
                             <div class="form-row">
@@ -81,31 +219,38 @@
                                     <select id="operationSelect" name="operation_select" required>
                                         <option value="" {% if not operation_select %}selected{% endif %}>Selecciona una operación</option>
                                         <option value="derivar" {% if operation_select == "derivar" %}selected{% endif %}>Derivar</option>
+                                        <option value="integrar" {% if operation_select == "integrar" %}selected{% endif %}>Integrar</option>
                                         <option value="evaluar" {% if operation_select == "evaluar" %}selected{% endif %}>Evaluar</option>
                                         <option value="limite" {% if operation_select == "limite" %}selected{% endif %}>Límite</option>
                                         <option value="simplificar" {% if operation_select == "simplificar" %}selected{% endif %}>Simplificar</option>
                                         <option value="resolver" {% if operation_select == "resolver" %}selected{% endif %}>Resolver</option>
                                     </select>
                                 </div>
-                                <div class="form-group operation-limit">
+                                <div class="form-group operation-limit hidden">
                                     <label for="limitPointInput"><i class="bi bi-infinity"></i> Punto del Límite</label>
                                     <input type="text" id="limitPointInput" name="limit_point_input" placeholder="Ej: 0, 5, oo, infinito"
-                                        value="{{ limit_point_input|default_if_none:'' }}">
+                                         value="{{ limit_point_input|default_if_none:'' }}">
                                 </div>
                             </div>
-                            <div class="form-group full-width operation-evaluar">
+                            <div class="form-group full-width operation-evaluar hidden">
                                 <label for="evaluateValuesInput"><i class="bi bi-123"></i> Valores para evaluar</label>
                                 <input type="text" id="evaluateValuesInput" name="evaluate_values_input" placeholder="Ej: x=2, y=3"
-                                    value="{{ evaluate_values_input|default_if_none:'' }}">
+                                     value="{{ evaluate_values_input|default_if_none:'' }}">
+                            </div>
+                             <div class="form-group full-width operation-integrar hidden">
+                                <label for="integrateBoundsInput"><i class="bi bi-arrows-expand"></i> Límites de integración</label>
+                                <input type="text" id="integrateBoundsInput" name="integrate_bounds_input" placeholder="Ej: 0, 1 (vacío para integral indefinida)"
+                                     value="{{ integrate_bounds_input|default_if_none:'' }}">
                             </div>
 
                             <div class="calculator-main-actions">
                                 <button type="submit" class="calculate-btn"><i class="bi bi-calculator"></i> Calcular</button>
-                                <button type="button" id="clearBtn" class="btn btn-secondary clear-btn">Borrar función</button>
+                                <button type="button" id="clearBtn" class="calculate-btn btn-secondary" style="background: var(--calc-color-mantle); margin-top: 1rem;"> <i class="bi bi-eraser-fill"></i>Borrar función</button>
                             </div>
                         </form>
                     </div>
 
+                    {# El cuadro de resultados ahora solo depende de 'result' o 'error' #}
                     {% if result or error %}
                     <div class="result-card" id="resultCard" style="display: block;">
                         <div class="result-header">
@@ -134,12 +279,23 @@
                     {% else %}
                     <div class="result-card" id="resultCard" style="display: none;"></div>
                     {% endif %}
-                </div>
+
+                    {# El contenedor de la gráfica ahora es un elemento separado #}
+                    {% if graph_image %}
+                    <div class="graph-container" id="graphContainer" style="display: block;">
+                        <h4>Gráfica del Límite</h4>
+                        <img src="{{ graph_image|safe }}" alt="Gráfica de la función y su límite">
+                    </div>
+                    {% else %}
+                    <div class="graph-container" id="graphContainer" style="display: none;"></div>
+                    {% endif %}
+
+                </div> {# Fin de centered-calculator #}
 
                 <div class="calculator-instructions hidden" id="instructionsPanel">
                     <div class="instructions-content">
                         <h2>Guía de Uso de la Calculadora</h2>
-                        <p>Aquí te explicamos cómo utilizar esta calculadora de funciones biyectivas.</p>
+                        <p>Aquí te explicamos cómo utilizar esta calculadora de **funciones biyectivas**.</p>
                         
                         <h3>1. Campo "Función"</h3>
                         <ul>
@@ -184,6 +340,12 @@
                             <li><strong>Qué poner:</strong> Pares de variable=valor separados por comas.</li>
                             <li><strong>Ejemplos:</strong> <code>x=2</code>, <code>x=1, y=3</code>.</li>
                         </ul>
+                         <h3>6. Campo "Límites de integración" (para operación "Integrar")</h3>
+                        <ul>
+                            <li><strong>Qué poner:</strong> El límite inferior y superior de la integral, separados por una coma.</li>
+                            <li><strong>Ejemplos:</strong> <code>0, 1</code>.</li>
+                             <li><strong>Consideraciones:</strong> Si dejas este campo vacío, se calculará una integral indefinida.</li>
+                        </ul>
 
                         <p>¡Experimenta con diferentes funciones y operaciones para dominar el cálculo!</p>
                     </div>
@@ -200,25 +362,48 @@
             const centeredCalculator = document.querySelector('.centered-calculator');
             const calculatorPageLayout = document.querySelector('.calculator-page-layout');
             const resultCard = document.getElementById('resultCard');
+            const graphContainer = document.getElementById('graphContainer'); // Obtener el nuevo contenedor de la gráfica
+
+            // Actualizado para que resultCard dependa solo de result o error
             const hasResultOrError = "{{ result|yesno:'true,false' }}" === "true" || "{{ error|yesno:'true,false' }}" === "true";
+            const hasGraphImage = "{{ graph_image|yesno:'true,false' }}" === "true"; // Nueva variable para la gráfica
 
             if (resultCard && hasResultOrError) {
                 setTimeout(() => {
                     resultCard.style.display = 'block';
                     resultCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 }, 100);
+            } else if (resultCard) { // Asegurarse de que resultCard esté oculto si no hay resultado/error
+                resultCard.style.display = 'none';
             }
+
+            if (graphContainer && hasGraphImage) {
+                setTimeout(() => {
+                    graphContainer.style.display = 'block';
+                    // Si solo hay gráfica y no resultado, scrollear a la gráfica
+                    if (!hasResultOrError) {
+                        graphContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                }, 100);
+            } else if (graphContainer) { // Asegurarse de que graphContainer esté oculto si no hay gráfica
+                graphContainer.style.display = 'none';
+            }
+
 
             function actualizarCamposSegunOperacion() {
                 const operacion = document.getElementById('operationSelect').value;
                 const campoVariable = document.querySelector('.operation-variable');
                 const campoLimite = document.querySelector('.operation-limit');
                 const campoEvaluar = document.querySelector('.operation-evaluar');
+                const campoIntegrar = document.querySelector('.operation-integrar');
 
+                // Ocultar todos los campos primero
                 campoVariable.style.display = 'none';
                 campoLimite.style.display = 'none';
                 campoEvaluar.style.display = 'none';
+                campoIntegrar.style.display = 'none';
 
+                // Mostrar campos según la operación seleccionada
                 if (operacion === 'derivar' || operacion === 'simplificar' || operacion === 'resolver') {
                     campoVariable.style.display = 'block';
                 } else if (operacion === 'limite') {
@@ -226,6 +411,9 @@
                     campoLimite.style.display = 'block';
                 } else if (operacion === 'evaluar') {
                     campoEvaluar.style.display = 'block';
+                } else if (operacion === 'integrar') {
+                    campoVariable.style.display = 'block';
+                    campoIntegrar.style.display = 'block';
                 }
             }
 
@@ -274,6 +462,14 @@
                             resultOutput.textContent = '';
                         }
                     }
+                    // Oculta y limpia la imagen de la gráfica al borrar
+                    if (graphContainer) {
+                        graphContainer.style.display = 'none';
+                        const graphImageElement = graphContainer.querySelector('img');
+                        if (graphImageElement) {
+                            graphImageElement.src = ''; // Limpiar la fuente de la imagen
+                        }
+                    }
                 });
             }
 
@@ -315,44 +511,52 @@
                 closeSidebarBtn.addEventListener('click', toggleSidebar);
             }
 
+            // Modificación de handleResizeAndInitialLoad para el nuevo comportamiento del panel
             function handleResizeAndInitialLoad() {
                 const isSmallScreen = window.innerWidth <= 991.98;
                 
+                // El panel de instrucciones siempre inicia oculto por defecto
                 instructionsPanel.classList.add('hidden'); 
 
+                // Establecer el estado inicial de la barra lateral
                 if (window.innerWidth > 991.98) {
                     setSidebarState(true); 
                 } else {
                     setSidebarState(false); 
                 }
                 
+                // Actualizar el texto y el icono del botón toggleInstructionsBtn
                 updateToggleInstructionsBtnContent();
             }
 
+            // Nueva función para actualizar el contenido del botón de la guía
             function updateToggleInstructionsBtnContent() {
                 const isSmallScreen = window.innerWidth <= 991.98;
                 if (instructionsPanel.classList.contains('hidden')) {
-                    toggleInstructionsBtn.innerHTML = 'Guía de Uso <i class="bi bi-chevron-down"></i>';
+                    toggleInstructionsBtn.innerHTML = 'Guía de Uso <i class="bi bi-chevron-down"></i>'; // Flecha hacia abajo para expandir (en cualquier tamaño)
                     toggleInstructionsBtn.title = 'Mostrar guía';
                 } else {
                     if (isSmallScreen) {
-                        toggleInstructionsBtn.innerHTML = '<i class="bi bi-chevron-up"></i>';
+                        toggleInstructionsBtn.innerHTML = '<i class="bi bi-chevron-up"></i>'; // Flecha hacia arriba para colapsar (en pantalla pequeña)
                         toggleInstructionsBtn.title = 'Ocultar guía';
                     } else {
-                        toggleInstructionsBtn.innerHTML = '<i class="bi bi-chevron-right"></i>';
+                        toggleInstructionsBtn.innerHTML = '<i class="bi bi-chevron-right"></i>'; // Flecha hacia la derecha para ocultar (en pantalla grande)
                         toggleInstructionsBtn.title = 'Ocultar guía';
                     }
                 }
             }
 
-            handleResizeAndInitialLoad();
-            window.addEventListener('resize', handleResizeAndInitialLoad);
+            handleResizeAndInitialLoad(); // Llamada inicial
+            window.addEventListener('resize', handleResizeAndInitialLoad); // Escuchar cambios de tamaño
 
             function toggleInstructions() {
+                // Alterna la clase 'hidden' en el panel principal
                 instructionsPanel.classList.toggle('hidden');
 
+                // Llama a la función para actualizar el contenido del botón
                 updateToggleInstructionsBtnContent();
 
+                // Ajusta el layout de la página de la calculadora
                 if (instructionsPanel.classList.contains('hidden')) {
                     calculatorPageLayout.style.justifyContent = 'center';
                     centeredCalculator.style.flex = '1 1 1000px'; 

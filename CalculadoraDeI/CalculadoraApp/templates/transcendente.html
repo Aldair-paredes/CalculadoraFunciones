@@ -9,6 +9,141 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" />
     <link href="{% static 'css/navbar.css' %}" rel="stylesheet" />
     <link href="{% static 'css/explicita.css' %}" rel="stylesheet" />
+<style>
+    .function-fields {
+        display: none;
+    }
+    .function-fields.active {
+        display: block;
+    }
+    .hidden {
+        display: none !important;
+    }
+    .calculator-card {
+        position: relative;
+        padding-top: 2.5rem;
+    }
+    .toggle-instructions-btn {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        z-index: 10;
+        background-color: #5f7a95;
+        color: white;
+        border-radius: 8px;
+        border: none;
+        padding: 6px 12px;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: background-color 0.2s;
+    }
+    .toggle-instructions-btn:hover {
+        background-color: #4a637d; 
+    }
+
+    .calculator-page-layout {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        grid-template-rows: auto;
+        gap: 2rem;
+        align-items: start; 
+    }
+
+    .calculator-instructions {
+        background-color: var(--calc-card-bg);
+        border-radius: 18px;
+        box-shadow: var(--calc-card-shadow);
+        padding: 1.5rem;
+        width: 350px; 
+        box-sizing: border-box;
+    }
+
+    .instructions-header {
+        margin-bottom: 1rem;
+        color: #5f7a95; 
+        border-bottom: 2px solid var(--calc-color-mantle); 
+        padding-bottom: 0.5rem;
+    }
+
+    .instructions-header h2 {
+        font-size: 1.5rem;
+        margin: 0;
+    }
+
+    .instructions-content {
+        color: var(--calc-color-mantle); 
+        font-size: 0.95rem;
+        line-height: 1.6;
+        max-height: 600px; 
+        overflow-y: auto;
+        padding-right: 0.5rem; 
+    }
+
+    .instructions-content h3 {
+        color: var(--calc-color-dark-font); 
+        font-size: 1.1rem;
+        margin-top: 1.5rem;
+        margin-bottom: 0.8rem;
+        font-weight: bold;
+    }
+
+    .instructions-content ul {
+        padding-left: 1.2rem;
+        margin-bottom: 1rem;
+    }
+
+    .instructions-content li {
+        margin-bottom: 0.6rem;
+    }
+
+    .instructions-content strong {
+        color: var(--calc-color-manatee); 
+        font-weight: 600;
+    }
+
+    /* Estilos para la gráfica */
+    .graph-container {
+        margin-top: 1.5rem;
+        padding-top: 1rem;
+        border-top: 1px solid var(--calc-color-mantle);
+        text-align: center;
+    }
+
+    .graph-container h4 {
+        color: var(--calc-color-dark-font);
+        margin-bottom: 1rem;
+        font-size: 1.2rem;
+    }
+
+    .graph-container img {
+        max-width: 100%;
+        height: auto;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    @media (max-width: 991.98px) {
+        .calculator-page-layout {
+            grid-template-columns: 1fr; 
+        }
+        .calculator-instructions {
+            display: none;
+            width: 100%;
+        }
+        .main-content {
+            padding-right: 1.5rem;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .toggle-instructions-btn {
+            top: 10px;
+            right: 10px;
+            font-size: 0.8rem;
+            padding: 4px 8px;
+        }
+    }
+</style>
 </head>
 <body>
     <div class="app-container">
@@ -27,9 +162,7 @@
             <ul class="navbar-nav w-100">
                 <li class="nav-item"><a class="nav-link" href="{% url 'pagprincipal' %}"><i class="bi bi-house-door-fill me-2"></i>Inicio</a></li>
                 <li class="nav-item"><a class="nav-link active" href="{% url 'temas' %}"><i class="bi bi-journal-text me-2"></i>Temas</a></li>
-                <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-person-lines-fill me-2"></i>Cuestionario</a></li>
-                <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-people-fill me-2"></i>Grupo</a></li>
-                <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-chat-dots-fill me-2"></i>Testimonios</a></li>
+                <li class="nav-item"><a class="nav-link" href="{% url 'preguntas:quiz_view'%}"><i class="bi bi-person-lines-fill me-2"></i>Cuestionario</a></li>
                 <li class="nav-item"><a class="nav-link" href="{% url 'teorias' %}"><i class="bi bi-book-fill me-2"></i>Teorías</a></li>
             </ul>
             <div class="btn-group mt-auto w-100">
@@ -42,7 +175,7 @@
             <div class="calculator-page-layout">
                 <div class="centered-calculator">
                     <div class="calculator-card">
-                        <button type="button" id="toggleInstructionsBtn" class="btn btn-info toggle-instructions-btn" title="Mostrar guía">
+                        <button type="button" id="toggleInstructionsBtn" class="toggle-instructions-btn" title="Mostrar guía">
                             Guía de Uso <i class="bi bi-chevron-down"></i>
                         </button>
 
@@ -91,12 +224,12 @@
 
                             <div class="calculator-main-actions">
                                 <button type="submit" class="calculate-btn"><i class="bi bi-calculator"></i> Calcular</button>
-                                <button type="button" id="clearBtn" class="btn btn-secondary clear-btn">Borrar función</button>
+                                <button type="button" id="clearBtn" class="calculate-btn btn-secondary" style="background: var(--calc-color-mantle); margin-top: 1rem;"> <i class="bi bi-eraser-fill"></i>Borrar función</button>
                             </div>
                         </form>
                     </div>
 
-                    {% if result or error %}
+                    {% if result or error or graph_image %}
                     <div class="result-card" id="resultCard" style="display: block;">
                         <div class="result-header">
                             <div class="terminal-controls">
@@ -120,6 +253,12 @@
                                 {% endif %}
                             </pre>
                         </div>
+                        {% if graph_image %}
+                        <div class="graph-container">
+                            <h4>Gráfica del Límite</h4>
+                            <img src="{{ graph_image }}" alt="Gráfica de la función y su límite">
+                        </div>
+                        {% endif %}
                     </div>
                     {% else %}
                     <div class="result-card" id="resultCard" style="display: none;"></div>
@@ -174,7 +313,7 @@
                             <li><strong>Qué poner:</strong> Pares de variable=valor separados por comas.</li>
                             <li><strong>Ejemplos:</strong> <code>x=2</code>, <code>x=1, y=3</code>.</li>
                         </ul>
-                        
+
                         <p>¡Experimenta con diferentes funciones y operaciones para dominar el cálculo!</p>
                     </div>
                 </div>
@@ -190,9 +329,9 @@
             const centeredCalculator = document.querySelector('.centered-calculator');
             const calculatorPageLayout = document.querySelector('.calculator-page-layout');
             const resultCard = document.getElementById('resultCard');
-            const hasResultOrError = "{{ result|yesno:'true,false' }}" === "true" || "{{ error|yesno:'true,false' }}" === "true";
+            const hasResultOrErrorOrGraph = "{{ result|yesno:'true,false' }}" === "true" || "{{ error|yesno:'true,false' }}" === "true" || "{{ graph_image|yesno:'true,false' }}" === "true";
 
-            if (resultCard && hasResultOrError) {
+            if (resultCard && hasResultOrErrorOrGraph) {
                 setTimeout(() => {
                     resultCard.style.display = 'block';
                     resultCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -263,6 +402,10 @@
                         if(resultOutput) {
                             resultOutput.textContent = '';
                         }
+                        const graphContainer = document.querySelector('.graph-container');
+                        if (graphContainer) {
+                            graphContainer.remove(); 
+                        }
                     }
                 });
             }
@@ -322,21 +465,21 @@
             function updateToggleInstructionsBtnContent() {
                 const isSmallScreen = window.innerWidth <= 991.98;
                 if (instructionsPanel.classList.contains('hidden')) {
-                    toggleInstructionsBtn.innerHTML = 'Guía de Uso <i class="bi bi-chevron-down"></i>';
+                    toggleInstructionsBtn.innerHTML = 'Guía de Uso <i class="bi bi-chevron-down"></i>'; 
                     toggleInstructionsBtn.title = 'Mostrar guía';
                 } else {
                     if (isSmallScreen) {
-                        toggleInstructionsBtn.innerHTML = '<i class="bi bi-chevron-up"></i>';
+                        toggleInstructionsBtn.innerHTML = '<i class="bi bi-chevron-up"></i>'; 
                         toggleInstructionsBtn.title = 'Ocultar guía';
                     } else {
-                        toggleInstructionsBtn.innerHTML = '<i class="bi bi-chevron-right"></i>';
+                        toggleInstructionsBtn.innerHTML = '<i class="bi bi-chevron-right"></i>'; 
                         toggleInstructionsBtn.title = 'Ocultar guía';
                     }
                 }
             }
 
-            handleResizeAndInitialLoad();
-            window.addEventListener('resize', handleResizeAndInitialLoad);
+            handleResizeAndInitialLoad(); 
+            window.addEventListener('resize', handleResizeAndInitialLoad); 
 
             function toggleInstructions() {
                 instructionsPanel.classList.toggle('hidden');
